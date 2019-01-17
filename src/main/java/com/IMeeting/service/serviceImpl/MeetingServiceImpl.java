@@ -199,6 +199,8 @@ public class MeetingServiceImpl implements MeetingService {
             e.printStackTrace();
         }
         long over=begin+reserveParameter.getLastTime()*60*1000;
+        Integer userId=(Integer) request.getSession().getAttribute("userId");
+        Userinfo userinfo=userinfoService.getUserinfo(userId);
         List<Meeting>meetings=meetingRepository.findIntersectMeeting(begin,over);
         if (meetings.size()==0) {
             Meeting meeting = new Meeting();
@@ -208,7 +210,8 @@ public class MeetingServiceImpl implements MeetingService {
             meeting.setMeetroomId(reserveParameter.getMeetRoomId());
             meeting.setOver(over);
             meeting.setStatus(1);
-            meeting.setUserId((Integer) request.getSession().getAttribute("userId"));
+            meeting.setTenantId(meeting.getTenantId());
+            meeting.setUserId(userId);
             meeting.setMeetDate(reserveParameter.getReserveDate());
             meeting.setPrepareTime(reserveParameter.getPrepareTime());
             try {
@@ -249,6 +252,9 @@ public class MeetingServiceImpl implements MeetingService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        Integer userId=(Integer) request.getSession().getAttribute("userId");
+        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        meeting.setTenantId(userinfo.getTenantId());
         meeting.setBegin(begin);
         meeting.setContent(reserveParameter.getContent());
         meeting.setMeetroomId(reserveParameter.getMeetRoomId());
@@ -295,6 +301,9 @@ public class MeetingServiceImpl implements MeetingService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        Integer userId=(Integer) request.getSession().getAttribute("userId");
+        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        meeting.setTenantId(userinfo.getTenantId());
         meeting.setBegin(begin);
         meeting.setContent(coordinateParameter.getContent());
         meeting.setMeetroomId(coordinateParameter.getMeetRoomId());
@@ -359,20 +368,23 @@ public class MeetingServiceImpl implements MeetingService {
     }
     //输出结果为本月预定的会议，默认在日历下方显示今天预定的会议，未处理的请求调用记录，显示有未处理的请求调用记录，要保存起来，点击查看详情的时候要显示
     @Override
-    public ServerResult showReserveMeeting(HttpServletRequest request) {
+    public ServerResult showMyReserve(HttpServletRequest request) {
         Integer userId= (Integer) request.getSession().getAttribute("userId");
         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String yearMonth=sdf.format(new java.util.Date()).substring(0,7);
-        System.out.println(yearMonth);
-        List<Meeting> meetings=meetingRepository.selectByUserIdAndDate(userId,yearMonth+"%");
-        List<List>coordinateList=new ArrayList<>();
-        for (int i=0;i<meetings.size();i++){
-            Integer meetingId=meetings.get(i).getId();
-            List<CoordinateInfo>coordinateInfos=coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId,0);
-            coordinateList.add(coordinateInfos);
+        List<Meeting> groupMeet=meetingRepository.groupBymeetDate(userId,yearMonth+"%");
+        List<MyReserveCount>myReserveCounts=new ArrayList<>();
+        MyReserveCount count;
+        for (int i=0;i<groupMeet.size();i++){
+            count=new MyReserveCount();
+            String meetDate=groupMeet.get(i).getMeetDate();
+            count.setMeetDate(meetDate);
+            count.setCount(meetingRepository.countMyReserve(userId,meetDate));
+            myReserveCounts.add(count);
+
         }
         String today=sdf.format(new java.util.Date()).substring(0,10);
-        List<Meeting> todayMeeting=meetingRepository.selectByUserIdAndDate(userId,today);
+        List<Meeting> todayMeeting=meetingRepository.findMyReserve(userId,today);
         List<ReserverRecord>todayMeetingResult=new ArrayList<>();
         ReserverRecord reserverRecord;
         for (int i=0;i<todayMeeting.size();i++){
@@ -388,15 +400,58 @@ public class MeetingServiceImpl implements MeetingService {
             reserverRecord.setPeopleName(userinfo.getName());
             reserverRecord.setPhone(userinfo.getPhone());
             reserverRecord.setPrepareTime(meeting.getPrepareTime());
+            String status="";
+            switch (meeting.getStatus()){
+                case 6:
+                    status="预约失败";
+                    break;
+                case 1:
+                    status="预约成功";
+                    break;
+                case 2:
+                    status="预约中";
+                    break;
+                case 3:
+                    status="会议进行中";
+                    break;
+                case 4:
+                    status="会议结束";
+                    break;
+                case 5:
+                    status="取消会议";
+                    break;
+                case 7:
+                    status="调用失败";
+                    break;
+            }
+            reserverRecord.setStatus(status);
             todayMeetingResult.add(reserverRecord);
         }
         ServerResult serverResult=new ServerResult();
-        Map<String,Object> result=new HashMap();
-        result.put("thisMonthReserve",meetings);
-        result.put("notDealCoordinate",coordinateList);
-        result.put("todayMeeting",todayMeetingResult);
-        serverResult.setData(result);
+        List<Object> result=new ArrayList<>();
+        result.add(myReserveCounts);
+        result.add(todayMeetingResult);
         serverResult.setStatus(true);
+        serverResult.setData(result);
+        return serverResult;
+    }
+    //传入参数为显示的月份,格式如2019-01，格式必须保持一致
+    @Override
+    public ServerResult specifiedMyReserve(HttpServletRequest request,String yearMonth) {
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        List<Meeting> groupMeet=meetingRepository.groupBymeetDate(userId,yearMonth+"%");
+        List<MyReserveCount>myReserveCounts=new ArrayList<>();
+        MyReserveCount count;
+        for (int i=0;i<groupMeet.size();i++){
+            count=new MyReserveCount();
+            String meetDate=groupMeet.get(i).getMeetDate();
+            count.setMeetDate(meetDate);
+            count.setCount(meetingRepository.countMyReserve(userId,meetDate));
+            myReserveCounts.add(count);
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
+        serverResult.setData(myReserveCounts);
         return serverResult;
     }
 

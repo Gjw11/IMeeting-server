@@ -17,6 +17,15 @@ public class ReserverRecord {
     private String phone;
     private String createTime;
     private int prepareTime;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public int getPrepareTime() {
         return prepareTime;

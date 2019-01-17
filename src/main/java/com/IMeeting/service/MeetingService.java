@@ -23,7 +23,8 @@ public interface MeetingService {
     ServerResult reserveMeeting(ReserveParameter reserveParameter,HttpServletRequest request);
     ServerResult robMeeting(ReserveParameter reserveParameter,HttpServletRequest request);
     ServerResult coordinateMeeting(CoordinateParameter coordinateParameter,HttpServletRequest request);
-    ServerResult cancelMeeting(Integer meentingId);
+    ServerResult cancelMeeting(Integer meetingId);
     Meeting findByMeetingId(Integer meetingId);
-    ServerResult showReserveMeeting(HttpServletRequest request);
+    ServerResult showMyReserve(HttpServletRequest request);
+    ServerResult specifiedMyReserve(HttpServletRequest request,String yearMonth);
 }

@@ -1,6 +1,7 @@
 package com.IMeeting.resposirity;
 
 import com.IMeeting.entity.Meeting;
+import com.IMeeting.entity.MyReserveCount;
 import com.IMeeting.entity.ServerResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,10 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "select m from Meeting m where m.begin<?2 and m.over>?1")
     List<Meeting>findIntersectMeeting(long beginTime,long overTime);
-    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 order by meetDate")
-    List<Meeting>selectByUserIdAndDate(Integer userId,String yearMonth);
+    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 group by meetDate")
+    List<Meeting> groupBymeetDate(Integer userId, String yearMonth);
+    @Query(value = "select count (m) from Meeting m where m.userId=?1 and m.meetDate=?2")
+    Long countMyReserve(Integer userId, String meetDate);
+    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate=?2 order by status ,begin")
+    List<Meeting>findMyReserve(Integer userId,String meetDate);
 }

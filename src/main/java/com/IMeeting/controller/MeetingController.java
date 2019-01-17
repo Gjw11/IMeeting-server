@@ -91,7 +91,13 @@ public class MeetingController {
     //显示用户当月预定情况
     @RequestMapping("/showMyReserve")
     public ServerResult showMyReserve(HttpServletRequest request){
-        ServerResult serverResult=meetingService.showReserveMeeting(request);
+        ServerResult serverResult=meetingService.showMyReserve(request);
+        return serverResult;
+    }
+    //查找某个月用户会议预定情况
+    @RequestMapping("/specifiedMyReserve")
+    public ServerResult specifiedMyReserve(HttpServletRequest request,@RequestParam("yearMonth")String yearMonth){
+        ServerResult serverResult=meetingService.specifiedMyReserve(request,yearMonth);
         return serverResult;
     }
 }
