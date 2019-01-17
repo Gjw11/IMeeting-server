@@ -88,6 +88,7 @@ public class MeetingController {
         ServerResult serverResult=meetingService.cancelMeeting(meetingId);
         return serverResult;
     }
+    //显示用户当月预定情况
     @RequestMapping("/showMyReserve")
     public ServerResult showMyReserve(HttpServletRequest request){
         ServerResult serverResult=meetingService.showReserveMeeting(request);

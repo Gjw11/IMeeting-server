@@ -20,7 +20,7 @@ import java.util.List;
 @Repository
 public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     List<Meeting> findAll(Specification<Meeting> specification);
-    List<Meeting> findByMeetroomIdAndMeetDateAndStatus(Integer meetRoomId, String meetDate,Integer status);
+    List<Meeting> findByMeetroomIdAndMeetDateAndStatusOrderByBegin(Integer meetRoomId, String meetDate,Integer status);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=?2 where m.id=?1")
@@ -30,6 +30,6 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "select m from Meeting m where m.begin<?2 and m.over>?1")
     List<Meeting>findIntersectMeeting(long beginTime,long overTime);
-    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 order by begin")
-    List<Meeting>selectByUserIdAndDate(Integer userId,String yearMontn);
+    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 order by meetDate")
+    List<Meeting>selectByUserIdAndDate(Integer userId,String yearMonth);
 }

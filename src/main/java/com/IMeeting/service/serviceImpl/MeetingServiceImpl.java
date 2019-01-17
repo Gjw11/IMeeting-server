@@ -127,7 +127,7 @@ public class MeetingServiceImpl implements MeetingService {
         for (int i=0;i<meetrooms.size();i++){
             Integer meetroomId=meetrooms.get(i).getId();
             List<MeetroomEquip> meetroomEquips=selectOneMeetroomEquip(meetroomId);
-            List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatus(meetrooms.get(i).getId(),now,1);
+            List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(meetrooms.get(i).getId(),now,1);
             todayMeeting.put(meetroomId,meetings);
             meetroomEquipResult.add(meetroomEquips);
         }
@@ -149,7 +149,7 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public ServerResult getOneRoomReserver(String reserverDate, Integer roomId) {
         ServerResult serverResult=new ServerResult();
-        List<Meeting> meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatus(roomId,reserverDate,1);
+        List<Meeting> meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(roomId,reserverDate,1);
         List<ReserverRecord> reserverRecords=new ArrayList<>();
         for (int j=0;j<meetings.size();j++){
             ReserverRecord reserverRecord=new ReserverRecord();
@@ -179,7 +179,7 @@ public class MeetingServiceImpl implements MeetingService {
         ServerResult serverResult=new ServerResult();
         Map<Integer,List> Meetings=new HashMap<>();
         for (int i=0;i<oneDayReservation.getMeetRooms().size();i++){
-            List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatus(oneDayReservation.getMeetRooms().get(i),
+            List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(oneDayReservation.getMeetRooms().get(i),
                     oneDayReservation.getDayReservation(),1);
             Meetings.put(oneDayReservation.getMeetRooms().get(i),meetings);
         }
