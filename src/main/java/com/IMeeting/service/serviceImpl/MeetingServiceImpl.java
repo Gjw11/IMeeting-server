@@ -210,12 +210,13 @@ public class MeetingServiceImpl implements MeetingService {
             meeting.setMeetroomId(reserveParameter.getMeetRoomId());
             meeting.setOver(over);
             meeting.setStatus(1);
-            meeting.setTenantId(meeting.getTenantId());
+            meeting.setTopic(reserveParameter.getTopic());
+            meeting.setTenantId(userinfo.getTenantId());
             meeting.setUserId(userId);
             meeting.setMeetDate(reserveParameter.getReserveDate());
             meeting.setPrepareTime(reserveParameter.getPrepareTime());
             try {
-                meeting.setCreateTime(sdf.parse(String.valueOf(new java.util.Date())).getTime());
+                meeting.setCreateTime(sdf.parse(sdf.format(new java.util.Date())).getTime());
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -256,6 +257,7 @@ public class MeetingServiceImpl implements MeetingService {
         Userinfo userinfo=userinfoService.getUserinfo(userId);
         meeting.setTenantId(userinfo.getTenantId());
         meeting.setBegin(begin);
+        meeting.setTopic(reserveParameter.getTopic());
         meeting.setContent(reserveParameter.getContent());
         meeting.setMeetroomId(reserveParameter.getMeetRoomId());
         meeting.setOver(begin+reserveParameter.getLastTime()*60*1000);
@@ -264,7 +266,7 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setMeetDate(reserveParameter.getReserveDate());
         meeting.setPrepareTime(reserveParameter.getPrepareTime());
         try {
-            meeting.setCreateTime(sdf.parse(String.valueOf(new java.util.Date())).getTime());
+            meeting.setCreateTime(sdf.parse(sdf.format(new java.util.Date())).getTime());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -305,6 +307,7 @@ public class MeetingServiceImpl implements MeetingService {
         Userinfo userinfo=userinfoService.getUserinfo(userId);
         meeting.setTenantId(userinfo.getTenantId());
         meeting.setBegin(begin);
+        meeting.setTopic(coordinateParameter.getTopic());
         meeting.setContent(coordinateParameter.getContent());
         meeting.setMeetroomId(coordinateParameter.getMeetRoomId());
         meeting.setOver(begin+coordinateParameter.getLastTime()*60*1000);
@@ -313,7 +316,7 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setMeetDate(coordinateParameter.getReserveDate());
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
         try {
-            meeting.setCreateTime(sdf.parse(String.valueOf(new java.util.Date())).getTime());
+            meeting.setCreateTime(sdf.parse(sdf.format(new java.util.Date())).getTime());
         } catch (ParseException e) {
             e.printStackTrace();
         }
