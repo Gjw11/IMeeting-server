@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Date;
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public interface MeetingService {
     ServerResult toReserveIndex(HttpServletRequest request);
     ServerResult getOneRoomReserver(String reserverDate,Integer roomId);
     ServerResult getOneDayReserve(OneDayReservation oneDayReservation);
-    ServerResult reserveMeeting(ReserveParameter reserveParameter,HttpServletRequest request);
+    ServerResult reserveMeeting(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception;
     ServerResult robMeeting(ReserveParameter reserveParameter,HttpServletRequest request);
     ServerResult coordinateMeeting(CoordinateParameter coordinateParameter,HttpServletRequest request);
     ServerResult cancelMeeting(Integer meetingId);

@@ -5,6 +5,7 @@ import com.IMeeting.resposirity.*;
 import com.IMeeting.service.MeetingService;
 
 import com.IMeeting.service.UserinfoService;
+import com.IMeeting.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -189,56 +190,72 @@ public class MeetingServiceImpl implements MeetingService {
     }
     //传入参数为会议主题、会议内容、会议室id、会议室日期、开始时间、持续时间、准备时间、参会人员(不包括发起人自己)、外来人员（集合形式）名字、电话（可省略)
     @Override
-    public ServerResult reserveMeeting(ReserveParameter reserveParameter,HttpServletRequest request) {
+    public ServerResult reserveMeeting(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception {
         ServerResult serverResult = new ServerResult();
         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf1= new SimpleDateFormat("HH:mm");
         long begin= 0;
-        try {
-            begin = (sdf.parse(reserveParameter.getReserveDate()+" "+reserveParameter.getBeginTime())).getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
+        long nowTime=0;
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        Userinfo userinfo = userinfoService.getUserinfo(userId);
+        Integer tenantId=userinfo.getTenantId();
+        MeetroomParameter meetroomParameter=meetroomParameterRepository.findByTenantId(tenantId);
+        String beginTime=meetroomParameter.getBegin();
+        String overTime=meetroomParameter.getOver();
+        String reserveBeginTime=reserveParameter.getBeginTime();
+        begin = (sdf.parse(reserveParameter.getReserveDate()+" "+reserveBeginTime)).getTime();
+        nowTime=sdf.parse(sdf.format(new java.util.Date())).getTime();
+        long over = begin + reserveParameter.getLastTime() * 60 * 1000;
+        String reserveOverTime=sdf1.format(new Date(over));
+        TimeUtil timeUtil=new TimeUtil();
+        int bol1=2,bol2=2;
+        bol1=timeUtil.DateCompare(reserveBeginTime,beginTime,"HH:mm");
+        bol2=timeUtil.DateCompare(reserveOverTime,overTime,"HH:mm");
+        if (bol1==-1){
+            serverResult.setMessage("预定时间不能早于"+beginTime);
+        }else if(bol2==1){
+            serverResult.setMessage("结束时间不能晚于"+overTime);
         }
-        long over=begin+reserveParameter.getLastTime()*60*1000;
-        Integer userId=(Integer) request.getSession().getAttribute("userId");
-        Userinfo userinfo=userinfoService.getUserinfo(userId);
-        List<Meeting>meetings=meetingRepository.findIntersectMeeting(begin,over);
-        if (meetings.size()==0) {
-            Meeting meeting = new Meeting();
-            meeting.setMeetDate(reserveParameter.getReserveDate());
-            meeting.setBegin(begin);
-            meeting.setContent(reserveParameter.getContent());
-            meeting.setMeetroomId(reserveParameter.getMeetRoomId());
-            meeting.setOver(over);
-            meeting.setStatus(1);
-            meeting.setTopic(reserveParameter.getTopic());
-            meeting.setTenantId(userinfo.getTenantId());
-            meeting.setUserId(userId);
-            meeting.setMeetDate(reserveParameter.getReserveDate());
-            meeting.setPrepareTime(reserveParameter.getPrepareTime());
-            try {
-                meeting.setCreateTime(sdf.parse(sdf.format(new java.util.Date())).getTime());
-            } catch (ParseException e) {
-                e.printStackTrace();
+        else if (begin<nowTime){
+            serverResult.setMessage("预定会议时间不能在当前时间之前");
+        }else {
+            List<Meeting> meetings = meetingRepository.findIntersectMeeting(begin, over);
+            if (meetings.size() == 0) {
+                Meeting meeting = new Meeting();
+                meeting.setMeetDate(reserveParameter.getReserveDate());
+                meeting.setBegin(begin);
+                meeting.setContent(reserveParameter.getContent());
+                meeting.setMeetroomId(reserveParameter.getMeetRoomId());
+                meeting.setOver(over);
+                meeting.setStatus(1);
+                meeting.setTopic(reserveParameter.getTopic());
+                meeting.setTenantId(tenantId);
+                meeting.setUserId(userId);
+                meeting.setMeetDate(reserveParameter.getReserveDate());
+                meeting.setPrepareTime(reserveParameter.getPrepareTime());
+                meeting.setCreateTime(nowTime);
+                meetingRepository.saveAndFlush(meeting);
+                Integer meetringId = meeting.getId();
+                List<Integer> list = reserveParameter.getJoinPeopleId();
+                for (int i = 0; i < list.size(); i++) {
+                    JoinPerson joinPerson = new JoinPerson();
+                    joinPerson.setMeetingId(meetringId);
+                    joinPerson.setUserId(list.get(i));
+                    joinPersonRepository.saveAndFlush(joinPerson);
+                }
+                List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
+                for (int i = 0; i < outsideJoinPersons.size(); i++) {
+                    OutsideJoinPerson outsideJoinPerson = new OutsideJoinPerson();
+                    outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
+                    outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
+                    outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
+                }
+                serverResult.setMessage("会议预定成功");
+                serverResult.setStatus(true);
+            } else {
+                serverResult.setMessage("预定时间段有冲突");
             }
-            meetingRepository.saveAndFlush(meeting);
-            Integer meetringId = meeting.getId();
-            List<Integer> list = reserveParameter.getJoinPeopleId();
-            for (int i = 0; i < list.size(); i++) {
-                JoinPerson joinPerson = new JoinPerson();
-                joinPerson.setMeetingId(meetringId);
-                joinPerson.setUserId(list.get(i));
-                joinPersonRepository.saveAndFlush(joinPerson);
-            }
-            List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
-            for (int i = 0; i < outsideJoinPersons.size(); i++) {
-                OutsideJoinPerson outsideJoinPerson = new OutsideJoinPerson();
-                outsideJoinPerson.setName(outsideJoinPerson.getName());
-                outsideJoinPerson.setPhone(outsideJoinPerson.getPhone());
-                outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
-            }
-            serverResult.setStatus(true);
-        }else
-            serverResult.setStatus(false);
+        }
         return serverResult;
     }
     //传入参数和预定会议一样,时间、会议室无法选择，只能是那一段
@@ -282,8 +299,8 @@ public class MeetingServiceImpl implements MeetingService {
         List<OutsideJoinPerson> outsideJoinPersons=reserveParameter.getOutsideJoinPersons();
         for (int i=0;i<outsideJoinPersons.size();i++){
             OutsideJoinPerson outsideJoinPerson=new OutsideJoinPerson();
-            outsideJoinPerson.setName(outsideJoinPerson.getName());
-            outsideJoinPerson.setPhone(outsideJoinPerson.getPhone());
+            outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
+            outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
             outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
 
         }
@@ -338,8 +355,8 @@ public class MeetingServiceImpl implements MeetingService {
         List<OutsideJoinPerson> outsideJoinPersons=coordinateParameter.getOutsideJoinPersons();
         for (int i=0;i<outsideJoinPersons.size();i++){
             OutsideJoinPerson outsideJoinPerson=new OutsideJoinPerson();
-            outsideJoinPerson.setName(outsideJoinPerson.getName());
-            outsideJoinPerson.setPhone(outsideJoinPerson.getPhone());
+            outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
+            outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
             outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
         }
         ServerResult serverResult=new ServerResult();
