@@ -474,6 +474,12 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setData(myReserveCounts);
         return serverResult;
     }
+    //显示一个我预定的会议室的细节
+    @Override
+    public ServerResult OneReserveDetail(Integer meetingId) {
+        
+        return null;
+    }
 
 //    @Override
 //    public List<Meeting> selectBydate(Date date, Integer meetroomId) {

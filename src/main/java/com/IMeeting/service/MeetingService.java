@@ -28,4 +28,5 @@ public interface MeetingService {
     Meeting findByMeetingId(Integer meetingId);
     ServerResult showMyReserve(HttpServletRequest request);
     ServerResult specifiedMyReserve(HttpServletRequest request,String yearMonth);
+    ServerResult OneReserveDetail(Integer meetingId);
 }

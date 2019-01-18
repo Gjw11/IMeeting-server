@@ -66,7 +66,7 @@ public class MeetingController {
     }
     //预定会议
     @RequestMapping("/reserveMeeting")
-    public ServerResult reserveMeeting(@RequestBody ReserveParameter reserveParameter, HttpServletRequest request){
+    public ServerResult reserveMeeting(@RequestBody ReserveParameter reserveParameter, HttpServletRequest request) throws Exception {
         ServerResult serverResult=meetingService.reserveMeeting(reserveParameter,request);
         return serverResult;
     }
