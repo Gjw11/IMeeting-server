@@ -124,12 +124,12 @@ public class MeetingServiceImpl implements MeetingService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String now = sdf.format(new java.util.Date());//当前时间
         List<Object> meetroomEquipResult=new ArrayList<>();
-        Map<Integer,List> todayMeeting=new HashMap<>();
+        List<List> todayMeeting=new ArrayList<>();
         for (int i=0;i<meetrooms.size();i++){
             Integer meetroomId=meetrooms.get(i).getId();
             List<MeetroomEquip> meetroomEquips=selectOneMeetroomEquip(meetroomId);
             List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(meetrooms.get(i).getId(),now,1);
-            todayMeeting.put(meetroomId,meetings);
+            todayMeeting.add(meetings);
             meetroomEquipResult.add(meetroomEquips);
         }
         List<Equip>equips=selectEquips(tenantId);//获取该租户的设备功能集合,需要前端存储
@@ -477,7 +477,7 @@ public class MeetingServiceImpl implements MeetingService {
     //显示一个我预定的会议室的细节
     @Override
     public ServerResult OneReserveDetail(Integer meetingId) {
-        
+
         return null;
     }
 
