@@ -1,5 +1,4 @@
 package com.IMeeting.entity;
-
 import java.util.List;
 
 /**

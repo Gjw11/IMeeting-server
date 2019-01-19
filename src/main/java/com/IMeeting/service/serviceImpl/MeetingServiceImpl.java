@@ -178,11 +178,11 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public ServerResult getOneDayReserve(OneDayReservation oneDayReservation) {
         ServerResult serverResult=new ServerResult();
-        Map<Integer,List> Meetings=new HashMap<>();
+        List<List> Meetings=new ArrayList<>();
         for (int i=0;i<oneDayReservation.getMeetRooms().size();i++){
             List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(oneDayReservation.getMeetRooms().get(i),
                     oneDayReservation.getDayReservation(),1);
-            Meetings.put(oneDayReservation.getMeetRooms().get(i),meetings);
+            Meetings.add(meetings);
         }
         serverResult.setData(Meetings);
         serverResult.setStatus(true);
