@@ -100,4 +100,16 @@ public class MeetingController {
         ServerResult serverResult=meetingService.specifiedMyReserve(request,yearMonth);
         return serverResult;
     }
+    //显示用户某一天所有预定情况
+    @RequestMapping("/showOneDayReserve")
+    public ServerResult showMyReserve(@RequestParam("reserveDate")String reserveDate, HttpServletRequest request){
+        ServerResult serverResult=meetingService.OneDayMyReserve(reserveDate,request);
+        return serverResult;
+    }
+    //显示某个预定会议的细节
+    @RequestMapping("/showOneReserveDetail")
+    public ServerResult showOneReserveDetail(@RequestParam("meetingId")Integer meetingId){
+        ServerResult serverResult=meetingService.OneReserveDetail(meetingId);
+        return serverResult;
+    }
 }

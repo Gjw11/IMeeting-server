@@ -17,14 +17,22 @@ public class ReserveParameter {
     private List<Integer>joinPeopleId;
     private String status;
     private String meetroom;
+    private String overTime;
     private List<OutsideJoinPerson>outsideJoinPersons;
-
     public List<OutsideJoinPerson> getOutsideJoinPersons() {
         return outsideJoinPersons;
     }
 
     public void setOutsideJoinPersons(List<OutsideJoinPerson> outsideJoinPersons) {
         this.outsideJoinPersons = outsideJoinPersons;
+    }
+
+    public String getOverTime() {
+        return overTime;
+    }
+
+    public void setOverTime(String overTime) {
+        this.overTime = overTime;
     }
 
     public String getStatus() {
