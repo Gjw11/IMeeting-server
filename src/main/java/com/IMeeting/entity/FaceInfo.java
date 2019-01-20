@@ -14,7 +14,7 @@ public class FaceInfo {
     private Integer userId;
     private String faceAddress;
     private String faceDetail;
-    private Integer isChecked;
+    private Integer status;
     private Integer tenantId;
 
     public Integer getId() {
@@ -49,12 +49,12 @@ public class FaceInfo {
         this.faceDetail = faceDetail;
     }
 
-    public Integer getIsChecked() {
-        return isChecked;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setIsChecked(Integer isChecked) {
-        this.isChecked = isChecked;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Integer getTenantId() {

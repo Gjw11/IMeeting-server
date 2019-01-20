@@ -474,11 +474,68 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setData(myReserveCounts);
         return serverResult;
     }
-    //显示一个我预定的会议室的细节
+    //显示一个我预定的会议室的细节,如果是未开始的可以修改会议时间和会议室编号
     @Override
     public ServerResult OneReserveDetail(Integer meetingId) {
+        Meeting meeting=findByMeetingId(meetingId);
+        SimpleDateFormat sdf= new SimpleDateFormat("HH:mm");
+        ReserveParameter reserveParameter=new ReserveParameter();
+        reserveParameter.setTopic(meeting.getTopic());
 
         return null;
+    }
+    //显示某一天我的预定记录,格式如2019-01-20
+    @Override
+    public ServerResult OneDayMyReserve(String yearMonth,HttpServletRequest request) {
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        List<Meeting> todayMeeting=meetingRepository.findMyReserve(userId,yearMonth);
+        List<ReserverRecord>oneDayMeetingResult=new ArrayList<>();
+        ReserverRecord reserverRecord;
+        for (int i=0;i<todayMeeting.size();i++){
+            Meeting meeting=todayMeeting.get(i);
+            reserverRecord =new ReserverRecord();
+            reserverRecord.setId(meeting.getId());
+            reserverRecord.setBegin(sdf.format(new java.util.Date(meeting.getBegin())));
+            reserverRecord.setOver(sdf.format(new java.util.Date(meeting.getOver())));
+            reserverRecord.setContent(meeting.getContent());
+            reserverRecord.setTopic(meeting.getTopic());
+            reserverRecord.setMeetDate(meeting.getMeetDate());
+            Userinfo userinfo=userinfoService.getUserinfo(meeting.getUserId());
+            reserverRecord.setPeopleName(userinfo.getName());
+            reserverRecord.setPhone(userinfo.getPhone());
+            reserverRecord.setPrepareTime(meeting.getPrepareTime());
+            String status="";
+            switch (meeting.getStatus()){
+                case 6:
+                    status="预约失败";
+                    break;
+                case 1:
+                    status="预约成功";
+                    break;
+                case 2:
+                    status="预约中";
+                    break;
+                case 3:
+                    status="会议进行中";
+                    break;
+                case 4:
+                    status="会议结束";
+                    break;
+                case 5:
+                    status="取消会议";
+                    break;
+                case 7:
+                    status="调用失败";
+                    break;
+            }
+            reserverRecord.setStatus(status);
+            oneDayMeetingResult.add(reserverRecord);
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(oneDayMeetingResult);
+        serverResult.setStatus(true);
+        return serverResult;
     }
 
 //    @Override

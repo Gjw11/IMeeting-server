@@ -57,7 +57,7 @@ public class FaceController {
         FaceInfo faceInfo=new FaceInfo();
         faceInfo.setTenantId((Integer) request.getSession().getAttribute("tenantId"));
         faceInfo.setFaceDetail(faceDetail);
-        faceInfo.setIsChecked(0);
+        faceInfo.setStatus(0);
         faceInfo.setUserId((Integer) request.getSession().getAttribute("userId"));
         faceInfo.setFaceAddress(getUrl(fileupload));
         FaceInfo bol=faceInfoRepository.saveAndFlush(faceInfo);
@@ -66,5 +66,30 @@ public class FaceController {
             serverResult.setStatus(true);
         return serverResult;
     }
-
+    //查询该用户数据库中是否有人脸数据记录，如果有及相应状态
+    //查询结构返回code -1表示没有人脸数据 0表示未审核 1表示已通过 2表示未通过
+    @RequestMapping("/selectStatus")
+    public ServerResult insertPicture(HttpServletRequest request){
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        FaceInfo faceInfo=faceInfoRepository.findByUserId(userId);
+        ServerResult serverResult=new ServerResult();
+        if (faceInfo==null)
+            serverResult.setCode(-1);//没有该用户人脸数据
+        else{
+            Integer status=faceInfo.getStatus();
+            serverResult.setCode(status);
+        }
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //修改人脸数据
+    @RequestMapping("/update")
+    public ServerResult updatePicture(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("faceDetail") String faceDetail, HttpServletRequest request) throws OSSException, ClientException, IOException {
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        int bol=faceInfoRepository.updateFaceInfo(userId,0,getUrl(fileupload),faceDetail);
+        ServerResult serverResult=new ServerResult();
+        if (bol!=0)
+            serverResult.setStatus(true);
+        return serverResult;
+    }
 }
