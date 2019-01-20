@@ -610,31 +610,56 @@ public class MeetingServiceImpl implements MeetingService {
             return meetroom.get();
         return null;
     }
+    //拒绝调用会议
+    @Override
+    public ServerResult disagreeCoordinate(Integer coordinateId) {
+        CoordinateInfo coordinateInfo=findByCoordinateId(coordinateId);
+        int bol1=0,bol2=0;
+        if (coordinateInfo!=null){
+            bol1=coordinateInfoRepository.updateCoordinateStatus(coordinateId,2);
+            bol2=meetingRepository.updateStatus(coordinateInfo.getMeetingId(),0);
+        }
+        ServerResult serverResult=new ServerResult();
+        if (bol1!=0&&bol2!=0)
+            serverResult.setStatus(true);
+        return serverResult;
+    }
+    //同意调用会议
+    @Override
+    public ServerResult agreeCoordinate(Integer coordinateId) {
+        CoordinateInfo coordinateInfo=findByCoordinateId(coordinateId);
+        if (coordinateInfo!=null){
+            Integer meetingId=coordinateInfo.getMeetingId();
+            Meeting meeting=findByMeetingId(meetingId);
+            long beginTime=meeting.getBegin();
+            long overTime=meeting.getOver();
+            meetingRepository.updateStatus(meetingId,1);
+            Meeting beforeMeeting=findByMeetingId(coordinateInfo.getBeforeMeetingId());
+            long beforeBeginTime=beforeMeeting.getBegin();
+            long beforeOverTime=beforeMeeting.getOver();
+            if (beforeBeginTime==beginTime){
+                meetingRepository.updateBegin(beforeMeeting.getId(),overTime);
+            }else if(overTime==beforeOverTime){
+                meetingRepository.updateOver(beforeMeeting.getId(),beginTime);
+            }
+            coordinateInfoRepository.updateCoordinateStatus(coordinateId,1);
+            List<CoordinateInfo> coordinateInfos=coordinateInfoRepository.findByBeforeMeetingIdAndStatus(coordinateInfo.getBeforeMeetingId(),0);
+            for (int i=0;i<coordinateInfos.size();i++){
+                CoordinateInfo coordinateInfo1=coordinateInfos.get(i);
+                coordinateInfoRepository.updateCoordinateStatus(coordinateInfo1.getId(),2);
+                meetingRepository.updateStatus(coordinateInfo1.getMeetingId(),0);
+            }
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
+        return serverResult;
+    }
 
-//    @Override
-//    public List<Meeting> selectBydate(Date date, Integer meetroomId) {
-//        List<Meeting> resultList = null;
-//        Specification<Meeting> querySpecifi = new Specification<Meeting>() {
-//            @Override
-//            public Predicate toPredicate(Root<Meeting> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-//                List<Predicate> predicates = new ArrayList<>();
-//                if (StringUtils.(meetroomId)) {
-//                    //大于或等于传入时间
-//                    predicates.add(cb.greaterThanOrEqualTo(root.get("commitTime").as(String.class), stime));
-//                }
-//                if (StringUtils.isNotBlank(etime)) {
-//                    //小于或等于传入时间
-//                    predicates.add(cb.lessThanOrEqualTo(root.get("commitTime").as(String.class), etime));
-//                }
-//                if (StringUtils.isNotBlank(serach)) {
-//                    //模糊查找
-//                    predicates.add(cb.like(root.get("name").as(String.class), "%" + serach + "%"));
-//                }
-//                // and到一起的话所有条件就是且关系，or就是或关系
-//                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-//            }
-//        };
-//        resultList = this.meetingRepository.findAll(querySpecifi);
-//        return resultList;
-//    }
+    @Override
+    public CoordinateInfo findByCoordinateId(Integer coordinateId) {
+        Optional<CoordinateInfo> coordinateInfo = coordinateInfoRepository.findById(coordinateId);
+        if (coordinateInfo.isPresent())
+            return coordinateInfo.get();
+        return null;
+    }
 }

@@ -31,4 +31,7 @@ public interface MeetingService {
     ServerResult OneReserveDetail(Integer meetingId);
     ServerResult OneDayMyReserve(String yearMonth,HttpServletRequest request);
     Meetroom finByMeetRoomId(Integer meetRoomId);
+    ServerResult disagreeCoordinate(Integer coordinateId);
+    ServerResult agreeCoordinate(Integer coordinateId);
+    CoordinateInfo findByCoordinateId(Integer coordinateId);
 }

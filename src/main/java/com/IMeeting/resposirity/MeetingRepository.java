@@ -37,4 +37,12 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     Long countMyReserve(Integer userId, String meetDate);
     @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate=?2 order by status ,begin")
     List<Meeting>findMyReserve(Integer userId,String meetDate);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update Meeting m set m.begin=?2 where m.id=?1")
+    int updateBegin(Integer meetingId,long begin);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update Meeting m set m.over=?2 where m.id=?1")
+    int updateOver(Integer meetingId,long over);
 }

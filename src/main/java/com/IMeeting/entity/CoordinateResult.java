@@ -1,4 +1,4 @@
-package com.IMeeting.resposirity;
+package com.IMeeting.entity;
 
 /**
  * Created by gjw on 2019/1/20.

@@ -112,4 +112,16 @@ public class MeetingController {
         ServerResult serverResult=meetingService.OneReserveDetail(meetingId);
         return serverResult;
     }
+    //拒绝调用会议
+    @RequestMapping("/disagreeCoordinate")
+    public ServerResult disagreeCoordinate(@RequestParam("coordinateId")Integer coordinateId){
+        ServerResult serverResult=meetingService.disagreeCoordinate(coordinateId);
+        return serverResult;
+    }
+    //同意调用会议
+    @RequestMapping("/agreeCoordinate")
+    public ServerResult agreeCoordinate(@RequestParam("coordinateId")Integer coordinateId){
+        ServerResult serverResult=meetingService.agreeCoordinate(coordinateId);
+        return serverResult;
+    }
 }
