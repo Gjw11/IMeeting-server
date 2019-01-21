@@ -16,8 +16,7 @@ public class CoordinateParameter {
     private List<Integer> joinPeopleId;
     private String note;
     private Integer beforeMeetingId;
-    private List<OutsideJoinPerson>outsideJoinPersons;
-
+    private List<OutsideJoinPerson> outsideJoinPersons;
 
     public List<OutsideJoinPerson> getOutsideJoinPersons() {
         return outsideJoinPersons;

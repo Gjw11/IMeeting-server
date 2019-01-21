@@ -45,4 +45,8 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.over=?2 where m.id=?1")
     int updateOver(Integer meetingId,long over);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update Meeting m set m.topic=?2,m.content=?3,m.prepareTime=?4 where m.id=?1")
+    int updateTCP(Integer meetingId,String topic,String content,Integer prepareTime);
 }

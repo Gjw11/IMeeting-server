@@ -28,10 +28,12 @@ public interface MeetingService {
     Meeting findByMeetingId(Integer meetingId);
     ServerResult showMyReserve(HttpServletRequest request);
     ServerResult specifiedMyReserve(HttpServletRequest request,String yearMonth);
-    ServerResult OneReserveDetail(Integer meetingId);
-    ServerResult OneDayMyReserve(String yearMonth,HttpServletRequest request);
+    ServerResult oneReserveDetail(Integer meetingId);
+    ServerResult oneDayMyReserve(String yearMonth,HttpServletRequest request);
     Meetroom finByMeetRoomId(Integer meetRoomId);
     ServerResult disagreeCoordinate(Integer coordinateId);
     ServerResult agreeCoordinate(Integer coordinateId);
     CoordinateInfo findByCoordinateId(Integer coordinateId);
+    ServerResult oneEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception;
+    ServerResult twoEditMyServer(ReserveParameter reserveParameter);
 }

@@ -7,6 +7,7 @@ import java.util.List;
  * Created by gjw on 2019/1/13.
  */
 public class ReserveParameter {
+    private Integer meetingId;
     private String topic;
     private String content;
     private Integer meetRoomId;
@@ -19,6 +20,15 @@ public class ReserveParameter {
     private String meetroom;
     private String overTime;
     private List<OutsideJoinPerson>outsideJoinPersons;
+
+    public Integer getMeetingId() {
+        return meetingId;
+    }
+
+    public void setMeetingId(Integer meetingId) {
+        this.meetingId = meetingId;
+    }
+
     public List<OutsideJoinPerson> getOutsideJoinPersons() {
         return outsideJoinPersons;
     }

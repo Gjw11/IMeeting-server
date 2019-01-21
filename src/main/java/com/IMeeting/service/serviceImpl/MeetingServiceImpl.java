@@ -228,11 +228,11 @@ public class MeetingServiceImpl implements MeetingService {
                 meeting.setPrepareTime(reserveParameter.getPrepareTime());
                 meeting.setCreateTime(nowTime);
                 meetingRepository.saveAndFlush(meeting);
-                Integer meetringId = meeting.getId();
+                Integer meetingId = meeting.getId();
                 List<Integer> list = reserveParameter.getJoinPeopleId();
                 for (int i = 0; i < list.size(); i++) {
                     JoinPerson joinPerson = new JoinPerson();
-                    joinPerson.setMeetingId(meetringId);
+                    joinPerson.setMeetingId(meetingId);
                     joinPerson.setUserId(list.get(i));
                     joinPersonRepository.saveAndFlush(joinPerson);
                 }
@@ -241,6 +241,7 @@ public class MeetingServiceImpl implements MeetingService {
                     OutsideJoinPerson outsideJoinPerson = new OutsideJoinPerson();
                     outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
                     outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
+                    outsideJoinPerson.setMeetingId(meetingId);
                     outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
                 }
                 serverResult.setMessage("会议预定成功");
@@ -475,7 +476,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     //显示一个我预定的会议室的细节
     @Override
-    public ServerResult OneReserveDetail(Integer meetingId) {
+    public ServerResult oneReserveDetail(Integer meetingId) {
         Meeting meeting = findByMeetingId(meetingId);
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         ReserveParameter reserveParameter = new ReserveParameter();
@@ -551,7 +552,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     //显示某一天我的预定记录,格式如2019-01-20
     @Override
-    public ServerResult OneDayMyReserve(String reserveDate, HttpServletRequest request) {
+    public ServerResult oneDayMyReserve(String reserveDate, HttpServletRequest request) {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<Meeting> todayMeeting = meetingRepository.findMyReserve(userId, reserveDate);
@@ -662,4 +663,41 @@ public class MeetingServiceImpl implements MeetingService {
             return coordinateInfo.get();
         return null;
     }
+    //修改了会议室，会议时间
+    @Override
+    public ServerResult oneEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception {
+        cancelMeeting(reserveParameter.getMeetingId());
+        ServerResult serverResult=reserveMeeting(reserveParameter,request);
+        return serverResult;
+    }
+    //修改除会议室、时间之外的其他内容
+    @Override
+    public ServerResult twoEditMyServer(ReserveParameter reserveParameter){
+        Integer meetingId=reserveParameter.getMeetingId();
+        meetingRepository.updateTCP(meetingId,reserveParameter.getTopic(),reserveParameter.getContent(),reserveParameter.getPrepareTime());
+        List<OutsideJoinPerson>outsideJoinPersons=reserveParameter.getOutsideJoinPersons();
+        outsideJoinPersonRepository.deleteByMeetingId(meetingId);
+        OutsideJoinPerson outsideJoinPerson;
+        for (int i=0;i<outsideJoinPersons.size();i++){
+            outsideJoinPerson=new OutsideJoinPerson();
+            outsideJoinPerson.setMeetingId(meetingId);
+            outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
+            outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
+            outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
+        }
+        joinPersonRepository.deleteByMeetingId(meetingId);
+        List<Integer>joinPersonId=reserveParameter.getJoinPeopleId();
+        JoinPerson joinPerson;
+        for (int i=0;i<joinPersonId.size();i++){
+            joinPerson=new JoinPerson();
+            joinPerson.setMeetingId(meetingId);
+            joinPerson.setUserId(joinPersonId.get(i));
+            joinPersonRepository.saveAndFlush(joinPerson);
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
+        serverResult.setMessage("预定信息修改成功");
+        return serverResult;
+    }
+
 }

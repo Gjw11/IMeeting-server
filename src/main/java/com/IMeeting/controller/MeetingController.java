@@ -103,13 +103,13 @@ public class MeetingController {
     //显示用户某一天所有预定情况
     @RequestMapping("/showOneDayReserve")
     public ServerResult showMyReserve(@RequestParam("reserveDate")String reserveDate, HttpServletRequest request){
-        ServerResult serverResult=meetingService.OneDayMyReserve(reserveDate,request);
+        ServerResult serverResult=meetingService.oneDayMyReserve(reserveDate,request);
         return serverResult;
     }
     //显示某个预定会议的细节
     @RequestMapping("/showOneReserveDetail")
     public ServerResult showOneReserveDetail(@RequestParam("meetingId")Integer meetingId){
-        ServerResult serverResult=meetingService.OneReserveDetail(meetingId);
+        ServerResult serverResult=meetingService.oneReserveDetail(meetingId);
         return serverResult;
     }
     //拒绝调用会议
@@ -122,6 +122,23 @@ public class MeetingController {
     @RequestMapping("/agreeCoordinate")
     public ServerResult agreeCoordinate(@RequestParam("coordinateId")Integer coordinateId){
         ServerResult serverResult=meetingService.agreeCoordinate(coordinateId);
+        return serverResult;
+    }
+    //第一种修改方式，修改了时间或者会议室地点或者都修改，相当于取消原会议重新预定
+    //第二种修改方式，修改除时间和会议室地点外的其他内容
+    @RequestMapping("/editOneServer")
+    public ServerResult OneEditMyServer(@RequestBody ReserveParameter reserveParameter,HttpServletRequest request) throws Exception {
+        Meeting meeting=meetingService.findByMeetingId(reserveParameter.getMeetingId());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long reserveBegin = (sdf.parse(reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime())).getTime();
+        long reserveOver = reserveBegin + reserveParameter.getLastTime() * 60 * 1000;
+        Integer reserveMeetroomId=reserveParameter.getMeetRoomId();
+        ServerResult serverResult=null;
+        if (meeting.getBegin()==reserveBegin&&meeting.getOver()==reserveOver&&meeting.getMeetroomId().equals(reserveMeetroomId)){
+            serverResult=meetingService.oneEditMyServer(reserveParameter,request);
+        }else{
+            serverResult=meetingService.twoEditMyServer(reserveParameter);
+        }
         return serverResult;
     }
 }
