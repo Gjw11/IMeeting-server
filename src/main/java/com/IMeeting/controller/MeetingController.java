@@ -141,4 +141,10 @@ public class MeetingController {
         }
         return serverResult;
     }
+    //提前结束会议
+    @RequestMapping("/advanceOver")
+    public ServerResult advanceOver(@RequestParam("meetingid")Integer meetingId) throws Exception {
+        ServerResult serverResult=meetingService.advanceOver(meetingId);
+        return serverResult;
+    }
 }

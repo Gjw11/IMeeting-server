@@ -202,10 +202,15 @@ public class MeetingServiceImpl implements MeetingService {
         long over = begin + reserveParameter.getLastTime() * 60 * 1000;
         String reserveOverTime = sdf1.format(new Date(over));
         TimeUtil timeUtil = new TimeUtil();
-        int bol1 = 2, bol2 = 2;
+        int bol1 = 2, bol2 = 2,bol3=2;
         bol1 = timeUtil.DateCompare(reserveBeginTime, beginTime, "HH:mm");
         bol2 = timeUtil.DateCompare(reserveOverTime, overTime, "HH:mm");
-        if (bol1 == -1) {
+        bol3 = timeUtil.DateCompare(reserveBeginTime, reserveOverTime, "HH:mm");
+        if (reserveParameter.getPrepareTime()>reserveParameter.getLastTime()){
+            serverResult.setMessage("准备时间不能大于会议持续时间");
+        } else if (bol3==0){
+            serverResult.setMessage("预定时间不能为0分钟");
+        } else if (bol1 == -1) {
             serverResult.setMessage("预定时间不能早于" + beginTime);
         } else if (bol2 == 1) {
             serverResult.setMessage("结束时间不能晚于" + overTime);
@@ -490,7 +495,7 @@ public class MeetingServiceImpl implements MeetingService {
         long overTime=meeting.getOver();
         reserveParameter.setReserveDate(meeting.getMeetDate());
         reserveParameter.setBeginTime(sdf.format(new java.util.Date(beginTime)));
-        reserveParameter.setLastTime((int) ((overTime-beginTime)/1000));
+        reserveParameter.setLastTime((int) ((overTime-beginTime)/60000));
         reserveParameter.setOverTime(sdf.format(new java.util.Date(overTime)));
         reserveParameter.setPrepareTime(meeting.getPrepareTime());
         String status = "";
@@ -697,6 +702,20 @@ public class MeetingServiceImpl implements MeetingService {
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         serverResult.setMessage("预定信息修改成功");
+        return serverResult;
+    }
+    //提前结束会议
+    @Override
+    public ServerResult advanceOver(Integer meetingId) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long nowTime = sdf.parse(sdf.format(new java.util.Date())).getTime();
+        int bol=meetingRepository.advanceOver(meetingId,nowTime,4);
+        ServerResult serverResult=new ServerResult();
+        if (bol!=0){
+            serverResult.setStatus(true);
+            serverResult.setMessage("会议已经提前结束");
+        }
+        serverResult.setMessage("操作失败");
         return serverResult;
     }
 

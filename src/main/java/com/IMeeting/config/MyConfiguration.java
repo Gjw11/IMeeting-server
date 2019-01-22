@@ -1,4 +1,4 @@
-package com.IMeeting.controller;
+package com.IMeeting.config;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

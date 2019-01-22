@@ -36,4 +36,5 @@ public interface MeetingService {
     CoordinateInfo findByCoordinateId(Integer coordinateId);
     ServerResult oneEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception;
     ServerResult twoEditMyServer(ReserveParameter reserveParameter);
+    ServerResult advanceOver(Integer meetingId) throws ParseException;
 }
