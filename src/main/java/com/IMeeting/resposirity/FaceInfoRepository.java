@@ -15,6 +15,6 @@ public interface FaceInfoRepository extends JpaRepository<FaceInfo,Integer>{
     FaceInfo findByUserId(Integer userId);
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query(value = "update FaceInfo m set m.status=?2 ,m.faceAddress=3,m.faceDetail=4 where m.userId=?1")
+    @Query(value = "update FaceInfo m set m.status=?2 ,m.faceAddress=?3,m.faceDetail=?4 where m.userId=?1")
     int updateFaceInfo(Integer userId,Integer status,String faceAddress,String faceDetail);
 }
