@@ -37,4 +37,5 @@ public interface MeetingService {
     ServerResult oneEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception;
     ServerResult twoEditMyServer(ReserveParameter reserveParameter);
     ServerResult advanceOver(Integer meetingId) throws ParseException;
+    ServerResult selectMyJoinMeeting(HttpServletRequest request,String yearMonth);
 }

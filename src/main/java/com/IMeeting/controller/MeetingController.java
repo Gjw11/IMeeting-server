@@ -147,4 +147,13 @@ public class MeetingController {
         ServerResult serverResult=meetingService.advanceOver(meetingId);
         return serverResult;
     }
+    //显示我参加的会议
+    @RequestMapping("/toSelectMyJoinMeeting")
+    public ServerResult toSelectMyJoinMeeting(HttpServletRequest request){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String yearMonth = sdf.format(new java.util.Date()).substring(0, 7);
+        ServerResult serverResult=meetingService.selectMyJoinMeeting(request,yearMonth);
+        return serverResult;
+    }
+
 }

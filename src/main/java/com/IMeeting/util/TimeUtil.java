@@ -7,8 +7,6 @@ import java.util.Date;
  * Created by gjw on 2019/1/18.
  */
 public class TimeUtil {
-
-
     /**
      * 根据时间类型比较时间大小
      *

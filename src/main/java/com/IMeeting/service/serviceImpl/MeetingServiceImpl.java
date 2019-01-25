@@ -718,5 +718,15 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setMessage("操作失败");
         return serverResult;
     }
+    //显示我参加的会议
+    @Override
+    public ServerResult selectMyJoinMeeting(HttpServletRequest request,String yearMonth) {
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        List<Meeting>meetings=meetingRepository.selectMyJoinMeeting(userId,yearMonth);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(meetings);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
 
 }
