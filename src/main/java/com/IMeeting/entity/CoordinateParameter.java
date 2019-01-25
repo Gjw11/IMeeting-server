@@ -13,6 +13,8 @@ public class CoordinateParameter {
     private String beginTime;
     private String overTime;
     private int prepareTime;
+    private int lastTime;
+    private int beforeOrLast;//1表示开始后 2表示结束前
     private List<Integer> joinPeopleId;
     private String note;
     private Integer beforeMeetingId;
@@ -24,6 +26,22 @@ public class CoordinateParameter {
 
     public void setOutsideJoinPersons(List<OutsideJoinPerson> outsideJoinPersons) {
         this.outsideJoinPersons = outsideJoinPersons;
+    }
+
+    public int getBeforeOrLast() {
+        return beforeOrLast;
+    }
+
+    public void setBeforeOrLast(int beforeOrLast) {
+        this.beforeOrLast = beforeOrLast;
+    }
+
+    public int getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(int lastTime) {
+        this.lastTime = lastTime;
     }
 
     public Integer getBeforeMeetingId() {

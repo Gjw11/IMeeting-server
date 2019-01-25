@@ -22,9 +22,21 @@ public class Meeting {
     private Integer status;
     private Integer tenantId;
     private String meetDate;
-    private int prepareTime;
+    private Integer prepareTime;
     private String createTime;
+    private Integer lastTime;
 
+    public void setPrepareTime(Integer prepareTime) {
+        this.prepareTime = prepareTime;
+    }
+
+    public Integer getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(Integer lastTime) {
+        this.lastTime = lastTime;
+    }
 
     public String getCreateTime() {
         return createTime;

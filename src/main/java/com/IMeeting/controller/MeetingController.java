@@ -6,6 +6,7 @@ import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.GroupService;
 import com.IMeeting.service.MeetingService;
 import com.IMeeting.service.UserinfoService;
+import com.IMeeting.util.TimeUtil;
 import org.omg.CORBA.INTERNAL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -131,7 +132,7 @@ public class MeetingController {
         Meeting meeting=meetingService.findByMeetingId(reserveParameter.getMeetingId());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String reserveBegin =reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime();
-        String reserveOver =reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime();
+        String reserveOver = TimeUtil.addMinute(reserveBegin,reserveParameter.getLastTime());
         Integer reserveMeetroomId=reserveParameter.getMeetRoomId();
         ServerResult serverResult=null;
         if (meeting.getBegin().equals(reserveBegin)&&meeting.getOver().equals(reserveOver)&&meeting.getMeetroomId().equals(reserveMeetroomId)){

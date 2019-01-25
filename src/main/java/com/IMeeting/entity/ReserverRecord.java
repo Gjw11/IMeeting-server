@@ -18,6 +18,15 @@ public class ReserverRecord {
     private String createTime;
     private int prepareTime;
     private String status;
+    private int lastTime;
+
+    public int getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(int lastTime) {
+        this.lastTime = lastTime;
+    }
 
     public String getStatus() {
         return status;

@@ -151,6 +151,7 @@ public class MeetingServiceImpl implements MeetingService {
             reserverRecord.setOver(meeting.getOver());
             reserverRecord.setMeetDate(meeting.getMeetDate());
             reserverRecord.setTopic(meeting.getTopic());
+            reserverRecord.setLastTime(meeting.getLastTime());
             Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
             reserverRecord.setPeopleName(userinfo.getName());
             reserverRecord.setPhone(userinfo.getPhone());
@@ -189,17 +190,22 @@ public class MeetingServiceImpl implements MeetingService {
         MeetroomParameter meetroomParameter = meetroomParameterRepository.findByTenantId(tenantId);
         String beginTime = meetroomParameter.getBegin();
         String overTime = meetroomParameter.getOver();
+        int lastTime=reserveParameter.getLastTime();
+        int prepareTime=reserveParameter.getPrepareTime();
         String reserveBeginTime = reserveParameter.getBeginTime();
-        String reserveOverTime = reserveParameter.getOverTime();
         String reserveDate = reserveParameter.getReserveDate();
+        String afterBeginTime = reserveDate+" "+reserveParameter.getBeginTime();
+        String afterOverTime=TimeUtil.addMinute(afterBeginTime,lastTime);
         String nowTime = sdf.format(new java.util.Date());
         TimeUtil timeUtil = new TimeUtil();
         int bol1 = 2, bol2 = 2, bol3 = 2, bol4 = 2;
         bol1 = timeUtil.DateCompare(reserveBeginTime, beginTime, "HH:mm");
-        bol2 = timeUtil.DateCompare(reserveOverTime, overTime, "HH:mm");
-        bol3 = timeUtil.DateCompare(reserveBeginTime, reserveOverTime, "HH:mm");
-        bol4 = timeUtil.DateCompare(reserveDate + " " + reserveBeginTime, nowTime, "yyyy-MM-dd HH:mm");
-        if (bol3 == 0) {
+        bol2 = timeUtil.DateCompare(afterOverTime.substring(11,16), overTime, "HH:mm");
+        bol3 = timeUtil.DateCompare(reserveBeginTime, afterOverTime.substring(11,16), "HH:mm");
+        bol4 = timeUtil.DateCompare(afterBeginTime, nowTime, "yyyy-MM-dd HH:mm");
+        if (prepareTime>lastTime){
+            serverResult.setMessage("准备时间不能大于持续时间");
+        } else if (bol3 == 0) {
             serverResult.setMessage("预定时间不能为0分钟");
         } else if (bol1 == -1) {
             serverResult.setMessage("预定时间不能早于" + beginTime);
@@ -208,20 +214,21 @@ public class MeetingServiceImpl implements MeetingService {
         } else if (bol4 == -1) {
             serverResult.setMessage("预定会议时间不能在当前时间之前");
         } else {
-            List<Meeting> meetings = meetingRepository.findIntersectMeeting(reserveBeginTime, reserveOverTime);
+            List<Meeting> meetings = meetingRepository.findIntersectMeeting(afterBeginTime,afterOverTime);
             if (meetings.size() == 0) {
                 Meeting meeting = new Meeting();
                 meeting.setMeetDate(reserveParameter.getReserveDate());
-                meeting.setBegin(reserveDate + " " + reserveBeginTime);
+                meeting.setBegin(afterBeginTime);
                 meeting.setContent(reserveParameter.getContent());
                 meeting.setMeetroomId(reserveParameter.getMeetRoomId());
-                meeting.setOver(reserveDate + " " + reserveOverTime);
+                meeting.setOver(afterOverTime);
                 meeting.setStatus(1);
+                meeting.setLastTime(lastTime);
                 meeting.setTopic(reserveParameter.getTopic());
                 meeting.setTenantId(tenantId);
                 meeting.setUserId(userId);
                 meeting.setMeetDate(reserveDate);
-                meeting.setPrepareTime(reserveParameter.getPrepareTime());
+                meeting.setPrepareTime(prepareTime);
                 meeting.setCreateTime(nowTime);
                 meetingRepository.saveAndFlush(meeting);
                 Integer meetingId = meeting.getId();
@@ -256,20 +263,23 @@ public class MeetingServiceImpl implements MeetingService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        String reserveBeginTime = reserveParameter.getBeginTime();
-        String reserveOverTime = reserveParameter.getOverTime();
         String reserveDate = reserveParameter.getReserveDate();
+        String reserveBeginTime = reserveParameter.getBeginTime();
+        int lastTime=reserveParameter.getLastTime();
+        String afterBeginTime=reserveDate+" "+reserveBeginTime;
+        String afterOverTime = TimeUtil.addMinute(afterBeginTime,lastTime);
         String nowTime = sdf.format(new java.util.Date());
         Meeting meeting = new Meeting();
         meeting.setMeetDate(reserveParameter.getReserveDate());
-        meeting.setBegin(reserveDate + " " + reserveBeginTime);
+        meeting.setBegin(afterBeginTime);
         meeting.setContent(reserveParameter.getContent());
         meeting.setMeetroomId(reserveParameter.getMeetRoomId());
-        meeting.setOver(reserveDate + " " + reserveOverTime);
+        meeting.setOver(afterOverTime);
         meeting.setStatus(2);
         meeting.setTopic(reserveParameter.getTopic());
         meeting.setTenantId(tenantId);
         meeting.setUserId(userId);
+        meeting.setLastTime(lastTime);
         meeting.setMeetDate(reserveDate);
         meeting.setPrepareTime(reserveParameter.getPrepareTime());
         meeting.setCreateTime(nowTime);
@@ -301,24 +311,33 @@ public class MeetingServiceImpl implements MeetingService {
         Meeting meeting = new Meeting();
         meeting.setMeetDate(coordinateParameter.getReserveDate());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        long begin = 0;
-//        try {
-//            begin = (sdf.parse(coordinateParameter.getReserveDate() + " " + coordinateParameter.getBeginTime())).getTime();
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-        String reserveDate = coordinateParameter.getReserveDate();
+//        String reserveDate = coordinateParameter.getReserveDate();
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        Userinfo userinfo = userinfoService.getUserinfo(userId);
-        meeting.setTenantId(userinfo.getTenantId());
-        meeting.setBegin(reserveDate + " " + coordinateParameter.getBeginTime());
+        Integer tenantId=(Integer) request.getSession().getAttribute("tenantId");
+//        String reserveBeginTime = coordinateParameter.getBeginTime();
+//        String afterBeginTime=reserveDate+" "+reserveBeginTime;
+        int lastTime=coordinateParameter.getLastTime();
+//        String afterOverTime = TimeUtil.addMinute(,lastTime);
+        Integer beforeMeetingId=coordinateParameter.getBeforeMeetingId();
+        Meeting meeting1=findByMeetingId(beforeMeetingId);
+        int bol=coordinateParameter.getBeforeOrLast();
+        if (bol==1){
+            String begin=meeting1.getBegin();
+            meeting.setBegin(begin);
+            meeting.setOver(TimeUtil.addMinute(begin,lastTime));
+        }else if(bol==2){
+            String over=meeting1.getOver();
+            meeting.setOver(over);
+            meeting.setBegin(TimeUtil.addMinute(over,-lastTime));
+        }
+        meeting.setTenantId(tenantId);
         meeting.setTopic(coordinateParameter.getTopic());
         meeting.setContent(coordinateParameter.getContent());
-        meeting.setMeetroomId(coordinateParameter.getMeetRoomId());
-        meeting.setOver(reserveDate + " " + coordinateParameter.getOverTime());
+        meeting.setMeetroomId(meeting1.getMeetroomId());
+        meeting.setLastTime(lastTime);
         meeting.setStatus(2);
-        meeting.setUserId((Integer) request.getSession().getAttribute("userId"));
-        meeting.setMeetDate(coordinateParameter.getReserveDate());
+        meeting.setUserId(userId);
+        meeting.setMeetDate(meeting1.getMeetDate());
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
         meeting.setCreateTime(sdf.format(new java.util.Date()));
         Meeting m = meetingRepository.saveAndFlush(meeting);
@@ -333,7 +352,7 @@ public class MeetingServiceImpl implements MeetingService {
         CoordinateInfo coordinateInfo = new CoordinateInfo();
         coordinateInfo.setNote(coordinateParameter.getNote());
         coordinateInfo.setMeetingId(m.getId());
-        coordinateInfo.setBeforeMeetingId(coordinateParameter.getBeforeMeetingId());
+        coordinateInfo.setBeforeMeetingId(beforeMeetingId);
         coordinateInfo.setStatus(0);
         coordinateInfoRepository.saveAndFlush(coordinateInfo);
         List<OutsideJoinPerson> outsideJoinPersons = coordinateParameter.getOutsideJoinPersons();
@@ -476,6 +495,7 @@ public class MeetingServiceImpl implements MeetingService {
             reserveParameter.setMeetroom(meetroom.getName());
         reserveParameter.setReserveDate(meeting.getMeetDate());
         reserveParameter.setBeginTime(meeting.getBegin());
+        reserveParameter.setLastTime(meeting.getLastTime());
         reserveParameter.setOverTime(meeting.getOver());
         reserveParameter.setPrepareTime(meeting.getPrepareTime());
         String status = "";

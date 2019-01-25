@@ -19,6 +19,15 @@ public class ReserveParameter {
     private String meetroom;
     private String overTime;
     private List<OutsideJoinPerson>outsideJoinPersons;
+    private int lastTime;
+
+    public int getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(int lastTime) {
+        this.lastTime = lastTime;
+    }
 
     public Integer getMeetingId() {
         return meetingId;
