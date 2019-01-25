@@ -26,11 +26,11 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=?2 where m.id=?1")
     int updateStatus(Integer meetingId,Integer status);
-    List<Meeting>findByBeginAndOverAndMeetroomIdOrderByCreateTimeAsc(long begin,long over,Integer meetroomId);
+    List<Meeting>findByBeginAndOverAndMeetroomIdOrderByCreateTimeAsc(String begin,String over,Integer meetroomId);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "select m from Meeting m where m.begin<?2 and m.over>?1")
-    List<Meeting>findIntersectMeeting(long beginTime,long overTime);
+    List<Meeting>findIntersectMeeting(String beginTime,String overTime);
     @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 group by meetDate")
     List<Meeting> groupBymeetDate(Integer userId, String yearMonth);
     @Query(value = "select count (m) from Meeting m where m.userId=?1 and m.meetDate=?2")
@@ -40,11 +40,11 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.begin=?2 where m.id=?1")
-    int updateBegin(Integer meetingId,long begin);
+    int updateBegin(Integer meetingId,String begin);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.over=?2 where m.id=?1")
-    int updateOver(Integer meetingId,long over);
+    int updateOver(Integer meetingId,String over);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.topic=?2,m.content=?3,m.prepareTime=?4 where m.id=?1")
@@ -52,11 +52,11 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.over=?2,m.status=?3 where m.id=?1")
-    int advanceOver(Integer meetingId,long over,Integer status);
+    int advanceOver(Integer meetingId,String over,Integer status);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=3 where m.begin=?1 and m.status=1")
-    int startMeeting(long beginTime);
+    int startMeeting(String beginTime);
     @Query(value = "select m from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate like ?2 and (m.status=1 or m.status=3 or m.status=4)")
     List<Meeting> selectMyJoinMeeting(Integer userId,String yearMonth);
 }

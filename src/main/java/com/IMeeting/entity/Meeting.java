@@ -15,22 +15,22 @@ public class Meeting {
     private Integer id;
     private String topic;
     private String content;
-    private long begin;
-    private long over;
+    private String begin;
+    private String over;
     private Integer userId;
     private Integer meetroomId;
     private Integer status;
     private Integer tenantId;
     private String meetDate;
     private int prepareTime;
-    private long createTime;
+    private String createTime;
 
 
-    public long getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(long createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
@@ -66,19 +66,19 @@ public class Meeting {
         this.content = content;
     }
 
-    public long getBegin() {
+    public String getBegin() {
         return begin;
     }
 
-    public void setBegin(long begin) {
+    public void setBegin(String begin) {
         this.begin = begin;
     }
 
-    public long getOver() {
+    public String getOver() {
         return over;
     }
 
-    public void setOver(long over) {
+    public void setOver(String over) {
         this.over = over;
     }
 

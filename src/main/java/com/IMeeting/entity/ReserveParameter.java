@@ -13,7 +13,6 @@ public class ReserveParameter {
     private Integer meetRoomId;
     private String reserveDate;
     private String beginTime;
-    private int lastTime;
     private int prepareTime;
     private List<Integer>joinPeopleId;
     private String status;
@@ -99,14 +98,6 @@ public class ReserveParameter {
 
     public void setBeginTime(String beginTime) {
         this.beginTime = beginTime;
-    }
-
-    public int getLastTime() {
-        return lastTime;
-    }
-
-    public void setLastTime(int lastTime) {
-        this.lastTime = lastTime;
     }
 
     public int getPrepareTime() {

@@ -11,7 +11,7 @@ public class CoordinateParameter {
     private Integer meetRoomId;
     private String reserveDate;
     private String beginTime;
-    private int lastTime;
+    private String overTime;
     private int prepareTime;
     private List<Integer> joinPeopleId;
     private String note;
@@ -74,12 +74,12 @@ public class CoordinateParameter {
         this.beginTime = beginTime;
     }
 
-    public int getLastTime() {
-        return lastTime;
+    public String getOverTime() {
+        return overTime;
     }
 
-    public void setLastTime(int lastTime) {
-        this.lastTime = lastTime;
+    public void setOverTime(String overTime) {
+        this.overTime = overTime;
     }
 
     public int getPrepareTime() {

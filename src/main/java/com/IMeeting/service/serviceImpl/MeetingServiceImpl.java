@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Date;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,10 +146,9 @@ public class MeetingServiceImpl implements MeetingService {
         for (int j = 0; j < meetings.size(); j++) {
             ReserverRecord reserverRecord = new ReserverRecord();
             Meeting meeting = meetings.get(j);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            reserverRecord.setBegin(sdf.format(new Date(meeting.getBegin())));
-            reserverRecord.setCreateTime(sdf.format(meeting.getCreateTime()));
-            reserverRecord.setOver(sdf.format(new Date(meeting.getOver())));
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setCreateTime(meeting.getCreateTime());
+            reserverRecord.setOver(meeting.getOver());
             reserverRecord.setMeetDate(meeting.getMeetDate());
             reserverRecord.setTopic(meeting.getTopic());
             Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
@@ -187,49 +184,43 @@ public class MeetingServiceImpl implements MeetingService {
     public ServerResult reserveMeeting(ReserveParameter reserveParameter, HttpServletRequest request) throws Exception {
         ServerResult serverResult = new ServerResult();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SimpleDateFormat sdf1 = new SimpleDateFormat("HH:mm");
-        long begin = 0;
-        long nowTime = 0;
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        Userinfo userinfo = userinfoService.getUserinfo(userId);
-        Integer tenantId = userinfo.getTenantId();
         MeetroomParameter meetroomParameter = meetroomParameterRepository.findByTenantId(tenantId);
         String beginTime = meetroomParameter.getBegin();
         String overTime = meetroomParameter.getOver();
         String reserveBeginTime = reserveParameter.getBeginTime();
-        begin = (sdf.parse(reserveParameter.getReserveDate() + " " + reserveBeginTime)).getTime();
-        nowTime = sdf.parse(sdf.format(new java.util.Date())).getTime();
-        long over = begin + reserveParameter.getLastTime() * 60 * 1000;
-        String reserveOverTime = sdf1.format(new Date(over));
+        String reserveOverTime = reserveParameter.getOverTime();
+        String reserveDate = reserveParameter.getReserveDate();
+        String nowTime = sdf.format(new java.util.Date());
         TimeUtil timeUtil = new TimeUtil();
-        int bol1 = 2, bol2 = 2,bol3=2;
+        int bol1 = 2, bol2 = 2, bol3 = 2, bol4 = 2;
         bol1 = timeUtil.DateCompare(reserveBeginTime, beginTime, "HH:mm");
         bol2 = timeUtil.DateCompare(reserveOverTime, overTime, "HH:mm");
         bol3 = timeUtil.DateCompare(reserveBeginTime, reserveOverTime, "HH:mm");
-        if (reserveParameter.getPrepareTime()>reserveParameter.getLastTime()){
-            serverResult.setMessage("准备时间不能大于会议持续时间");
-        } else if (bol3==0){
+        bol4 = timeUtil.DateCompare(reserveDate + " " + reserveBeginTime, nowTime, "yyyy-MM-dd HH:mm");
+        if (bol3 == 0) {
             serverResult.setMessage("预定时间不能为0分钟");
         } else if (bol1 == -1) {
             serverResult.setMessage("预定时间不能早于" + beginTime);
         } else if (bol2 == 1) {
             serverResult.setMessage("结束时间不能晚于" + overTime);
-        } else if (begin < nowTime) {
+        } else if (bol4 == -1) {
             serverResult.setMessage("预定会议时间不能在当前时间之前");
         } else {
-            List<Meeting> meetings = meetingRepository.findIntersectMeeting(begin, over);
+            List<Meeting> meetings = meetingRepository.findIntersectMeeting(reserveBeginTime, reserveOverTime);
             if (meetings.size() == 0) {
                 Meeting meeting = new Meeting();
                 meeting.setMeetDate(reserveParameter.getReserveDate());
-                meeting.setBegin(begin);
+                meeting.setBegin(reserveDate + " " + reserveBeginTime);
                 meeting.setContent(reserveParameter.getContent());
                 meeting.setMeetroomId(reserveParameter.getMeetRoomId());
-                meeting.setOver(over);
+                meeting.setOver(reserveDate + " " + reserveOverTime);
                 meeting.setStatus(1);
                 meeting.setTopic(reserveParameter.getTopic());
                 meeting.setTenantId(tenantId);
                 meeting.setUserId(userId);
-                meeting.setMeetDate(reserveParameter.getReserveDate());
+                meeting.setMeetDate(reserveDate);
                 meeting.setPrepareTime(reserveParameter.getPrepareTime());
                 meeting.setCreateTime(nowTime);
                 meetingRepository.saveAndFlush(meeting);
@@ -261,38 +252,33 @@ public class MeetingServiceImpl implements MeetingService {
     //传入参数和预定会议一样,时间、会议室无法选择，只能是那一段
     @Override
     public ServerResult robMeeting(ReserveParameter reserveParameter, HttpServletRequest request) {
+        ServerResult serverResult = new ServerResult();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        String reserveBeginTime = reserveParameter.getBeginTime();
+        String reserveOverTime = reserveParameter.getOverTime();
+        String reserveDate = reserveParameter.getReserveDate();
+        String nowTime = sdf.format(new java.util.Date());
         Meeting meeting = new Meeting();
         meeting.setMeetDate(reserveParameter.getReserveDate());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        long begin = 0;
-        try {
-            begin = (sdf.parse(reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime())).getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        Integer userId = (Integer) request.getSession().getAttribute("userId");
-        Userinfo userinfo = userinfoService.getUserinfo(userId);
-        meeting.setTenantId(userinfo.getTenantId());
-        meeting.setBegin(begin);
-        meeting.setTopic(reserveParameter.getTopic());
+        meeting.setBegin(reserveDate + " " + reserveBeginTime);
         meeting.setContent(reserveParameter.getContent());
         meeting.setMeetroomId(reserveParameter.getMeetRoomId());
-        meeting.setOver(begin + reserveParameter.getLastTime() * 60 * 1000);
+        meeting.setOver(reserveDate + " " + reserveOverTime);
         meeting.setStatus(2);
-        meeting.setUserId((Integer) request.getSession().getAttribute("userId"));
-        meeting.setMeetDate(reserveParameter.getReserveDate());
+        meeting.setTopic(reserveParameter.getTopic());
+        meeting.setTenantId(tenantId);
+        meeting.setUserId(userId);
+        meeting.setMeetDate(reserveDate);
         meeting.setPrepareTime(reserveParameter.getPrepareTime());
-        try {
-            meeting.setCreateTime(sdf.parse(sdf.format(new java.util.Date())).getTime());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        meeting.setCreateTime(nowTime);
         meetingRepository.saveAndFlush(meeting);
-        Integer meetringId = meeting.getId();
+        Integer meetingId = meeting.getId();
         List<Integer> list = reserveParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
             JoinPerson joinPerson = new JoinPerson();
-            joinPerson.setMeetingId(meetringId);
+            joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(list.get(i));
             joinPersonRepository.saveAndFlush(joinPerson);
         }
@@ -301,10 +287,10 @@ public class MeetingServiceImpl implements MeetingService {
             OutsideJoinPerson outsideJoinPerson = new OutsideJoinPerson();
             outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
             outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
+            outsideJoinPerson.setMeetingId(meetingId);
             outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
-
         }
-        ServerResult serverResult = new ServerResult();
+        serverResult.setMessage("会议预定成功");
         serverResult.setStatus(true);
         return serverResult;
     }
@@ -315,29 +301,26 @@ public class MeetingServiceImpl implements MeetingService {
         Meeting meeting = new Meeting();
         meeting.setMeetDate(coordinateParameter.getReserveDate());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        long begin = 0;
-        try {
-            begin = (sdf.parse(coordinateParameter.getReserveDate() + " " + coordinateParameter.getBeginTime())).getTime();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+//        long begin = 0;
+//        try {
+//            begin = (sdf.parse(coordinateParameter.getReserveDate() + " " + coordinateParameter.getBeginTime())).getTime();
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+        String reserveDate = coordinateParameter.getReserveDate();
         Integer userId = (Integer) request.getSession().getAttribute("userId");
         Userinfo userinfo = userinfoService.getUserinfo(userId);
         meeting.setTenantId(userinfo.getTenantId());
-        meeting.setBegin(begin);
+        meeting.setBegin(reserveDate + " " + coordinateParameter.getBeginTime());
         meeting.setTopic(coordinateParameter.getTopic());
         meeting.setContent(coordinateParameter.getContent());
         meeting.setMeetroomId(coordinateParameter.getMeetRoomId());
-        meeting.setOver(begin + coordinateParameter.getLastTime() * 60 * 1000);
-        meeting.setStatus(5);
+        meeting.setOver(reserveDate + " " + coordinateParameter.getOverTime());
+        meeting.setStatus(2);
         meeting.setUserId((Integer) request.getSession().getAttribute("userId"));
         meeting.setMeetDate(coordinateParameter.getReserveDate());
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
-        try {
-            meeting.setCreateTime(sdf.parse(sdf.format(new java.util.Date())).getTime());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        meeting.setCreateTime(sdf.format(new java.util.Date()));
         Meeting m = meetingRepository.saveAndFlush(meeting);
         Integer meetringId = meeting.getId();
         List<Integer> list = coordinateParameter.getJoinPeopleId();
@@ -414,8 +397,8 @@ public class MeetingServiceImpl implements MeetingService {
             Meeting meeting = todayMeeting.get(i);
             reserverRecord = new ReserverRecord();
             reserverRecord.setId(meeting.getId());
-            reserverRecord.setBegin(sdf.format(new java.util.Date(meeting.getBegin())));
-            reserverRecord.setOver(sdf.format(new java.util.Date(meeting.getOver())));
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setOver(meeting.getOver());
             reserverRecord.setContent(meeting.getContent());
             reserverRecord.setTopic(meeting.getTopic());
             reserverRecord.setMeetDate(meeting.getMeetDate());
@@ -489,14 +472,11 @@ public class MeetingServiceImpl implements MeetingService {
         reserveParameter.setContent(meeting.getContent());
         reserveParameter.setMeetRoomId(meeting.getMeetroomId());
         Meetroom meetroom = finByMeetRoomId(meeting.getMeetroomId());
-        if (meetroom!=null)
+        if (meetroom != null)
             reserveParameter.setMeetroom(meetroom.getName());
-        long beginTime=meeting.getBegin();
-        long overTime=meeting.getOver();
         reserveParameter.setReserveDate(meeting.getMeetDate());
-        reserveParameter.setBeginTime(sdf.format(new java.util.Date(beginTime)));
-        reserveParameter.setLastTime((int) ((overTime-beginTime)/60000));
-        reserveParameter.setOverTime(sdf.format(new java.util.Date(overTime)));
+        reserveParameter.setBeginTime(meeting.getBegin());
+        reserveParameter.setOverTime(meeting.getOver());
         reserveParameter.setPrepareTime(meeting.getPrepareTime());
         String status = "";
         switch (meeting.getStatus()) {
@@ -523,31 +503,31 @@ public class MeetingServiceImpl implements MeetingService {
                 break;
         }
         reserveParameter.setStatus(status);
-        List<OutsideJoinPerson>outsideJoinPersons=outsideJoinPersonRepository.findByMeetingId(meetingId);
+        List<OutsideJoinPerson> outsideJoinPersons = outsideJoinPersonRepository.findByMeetingId(meetingId);
         reserveParameter.setOutsideJoinPersons(outsideJoinPersons);
-        List<JoinPerson>joinPersons=joinPersonRepository.findByMeetingId(meetingId);
-        List<Integer>userIds=new ArrayList<>();
-        for (int i=0;i<joinPersons.size();i++){
+        List<JoinPerson> joinPersons = joinPersonRepository.findByMeetingId(meetingId);
+        List<Integer> userIds = new ArrayList<>();
+        for (int i = 0; i < joinPersons.size(); i++) {
             userIds.add(joinPersons.get(i).getUserId());
         }
         reserveParameter.setJoinPeopleId(userIds);
-        List<CoordinateInfo> coordinateInfos=coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId,0);
-        List<CoordinateResult>coordinateResults=new ArrayList<>();
+        List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId, 0);
+        List<CoordinateResult> coordinateResults = new ArrayList<>();
         CoordinateResult coordinateResult;
-        for (int i=0;i<coordinateInfos.size();i++){
-            coordinateResult=new CoordinateResult();
-            Meeting meeting1=findByMeetingId(coordinateInfos.get(i).getMeetingId());
-            coordinateResult.setBeginTime(sdf.format(new java.util.Date(meeting1.getBegin())));
-            coordinateResult.setOverTime(sdf.format(new java.util.Date(meeting1.getOver())));
+        for (int i = 0; i < coordinateInfos.size(); i++) {
+            coordinateResult = new CoordinateResult();
+            Meeting meeting1 = findByMeetingId(coordinateInfos.get(i).getMeetingId());
+            coordinateResult.setBeginTime(sdf.format(meeting1.getBegin()));
+            coordinateResult.setOverTime(sdf.format(meeting1.getOver()));
             coordinateResult.setNote(coordinateInfos.get(i).getNote());
-            Userinfo userinfo=userinfoService.getUserinfo(meeting1.getUserId());
+            Userinfo userinfo = userinfoService.getUserinfo(meeting1.getUserId());
             coordinateResult.setPeopleName(userinfo.getName());
             coordinateResult.setPeoplePhone(userinfo.getPhone());
             coordinateResult.setCoordinateId(coordinateInfos.get(i).getId());
             coordinateResults.add(coordinateResult);
         }
-        ServerResult serverResult=new ServerResult();
-        List<Object>result=new ArrayList<>();
+        ServerResult serverResult = new ServerResult();
+        List<Object> result = new ArrayList<>();
         result.add(reserveParameter);
         result.add(coordinateResults);
         serverResult.setData(result);
@@ -559,7 +539,7 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public ServerResult oneDayMyReserve(String reserveDate, HttpServletRequest request) {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         List<Meeting> todayMeeting = meetingRepository.findMyReserve(userId, reserveDate);
         List<ReserverRecord> oneDayMeetingResult = new ArrayList<>();
         ReserverRecord reserverRecord;
@@ -567,8 +547,8 @@ public class MeetingServiceImpl implements MeetingService {
             Meeting meeting = todayMeeting.get(i);
             reserverRecord = new ReserverRecord();
             reserverRecord.setId(meeting.getId());
-            reserverRecord.setBegin(sdf.format(new java.util.Date(meeting.getBegin())));
-            reserverRecord.setOver(sdf.format(new java.util.Date(meeting.getOver())));
+            reserverRecord.setBegin(sdf.format((meeting.getBegin())));
+            reserverRecord.setOver(sdf.format((meeting.getOver())));
             reserverRecord.setContent(meeting.getContent());
             reserverRecord.setTopic(meeting.getTopic());
             reserverRecord.setMeetDate(meeting.getMeetDate());
@@ -616,47 +596,49 @@ public class MeetingServiceImpl implements MeetingService {
             return meetroom.get();
         return null;
     }
+
     //拒绝调用会议
     @Override
     public ServerResult disagreeCoordinate(Integer coordinateId) {
-        CoordinateInfo coordinateInfo=findByCoordinateId(coordinateId);
-        int bol1=0,bol2=0;
-        if (coordinateInfo!=null){
-            bol1=coordinateInfoRepository.updateCoordinateStatus(coordinateId,2);
-            bol2=meetingRepository.updateStatus(coordinateInfo.getMeetingId(),0);
+        CoordinateInfo coordinateInfo = findByCoordinateId(coordinateId);
+        int bol1 = 0, bol2 = 0;
+        if (coordinateInfo != null) {
+            bol1 = coordinateInfoRepository.updateCoordinateStatus(coordinateId, 2);
+            bol2 = meetingRepository.updateStatus(coordinateInfo.getMeetingId(), 0);
         }
-        ServerResult serverResult=new ServerResult();
-        if (bol1!=0&&bol2!=0)
+        ServerResult serverResult = new ServerResult();
+        if (bol1 != 0 && bol2 != 0)
             serverResult.setStatus(true);
         return serverResult;
     }
+
     //同意调用会议
     @Override
     public ServerResult agreeCoordinate(Integer coordinateId) {
-        CoordinateInfo coordinateInfo=findByCoordinateId(coordinateId);
-        if (coordinateInfo!=null){
-            Integer meetingId=coordinateInfo.getMeetingId();
-            Meeting meeting=findByMeetingId(meetingId);
-            long beginTime=meeting.getBegin();
-            long overTime=meeting.getOver();
-            meetingRepository.updateStatus(meetingId,1);
-            Meeting beforeMeeting=findByMeetingId(coordinateInfo.getBeforeMeetingId());
-            long beforeBeginTime=beforeMeeting.getBegin();
-            long beforeOverTime=beforeMeeting.getOver();
-            if (beforeBeginTime==beginTime){
-                meetingRepository.updateBegin(beforeMeeting.getId(),overTime);
-            }else if(overTime==beforeOverTime){
-                meetingRepository.updateOver(beforeMeeting.getId(),beginTime);
+        CoordinateInfo coordinateInfo = findByCoordinateId(coordinateId);
+        if (coordinateInfo != null) {
+            Integer meetingId = coordinateInfo.getMeetingId();
+            Meeting meeting = findByMeetingId(meetingId);
+            String beginTime = meeting.getBegin();
+            String overTime = meeting.getOver();
+            meetingRepository.updateStatus(meetingId, 1);
+            Meeting beforeMeeting = findByMeetingId(coordinateInfo.getBeforeMeetingId());
+            String beforeBeginTime = beforeMeeting.getBegin();
+            String beforeOverTime = beforeMeeting.getOver();
+            if (beforeBeginTime == beginTime) {
+                meetingRepository.updateBegin(beforeMeeting.getId(), overTime);
+            } else if (overTime == beforeOverTime) {
+                meetingRepository.updateOver(beforeMeeting.getId(), beginTime);
             }
-            coordinateInfoRepository.updateCoordinateStatus(coordinateId,1);
-            List<CoordinateInfo> coordinateInfos=coordinateInfoRepository.findByBeforeMeetingIdAndStatus(coordinateInfo.getBeforeMeetingId(),0);
-            for (int i=0;i<coordinateInfos.size();i++){
-                CoordinateInfo coordinateInfo1=coordinateInfos.get(i);
-                coordinateInfoRepository.updateCoordinateStatus(coordinateInfo1.getId(),2);
-                meetingRepository.updateStatus(coordinateInfo1.getMeetingId(),0);
+            coordinateInfoRepository.updateCoordinateStatus(coordinateId, 1);
+            List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(coordinateInfo.getBeforeMeetingId(), 0);
+            for (int i = 0; i < coordinateInfos.size(); i++) {
+                CoordinateInfo coordinateInfo1 = coordinateInfos.get(i);
+                coordinateInfoRepository.updateCoordinateStatus(coordinateInfo1.getId(), 2);
+                meetingRepository.updateStatus(coordinateInfo1.getMeetingId(), 0);
             }
         }
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
     }
@@ -668,62 +650,66 @@ public class MeetingServiceImpl implements MeetingService {
             return coordinateInfo.get();
         return null;
     }
+
     //修改了会议室，会议时间
     @Override
-    public ServerResult oneEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception {
+    public ServerResult oneEditMyServer(ReserveParameter reserveParameter, HttpServletRequest request) throws Exception {
         cancelMeeting(reserveParameter.getMeetingId());
-        ServerResult serverResult=reserveMeeting(reserveParameter,request);
+        ServerResult serverResult = reserveMeeting(reserveParameter, request);
         return serverResult;
     }
+
     //修改除会议室、时间之外的其他内容
     @Override
-    public ServerResult twoEditMyServer(ReserveParameter reserveParameter){
-        Integer meetingId=reserveParameter.getMeetingId();
-        meetingRepository.updateTCP(meetingId,reserveParameter.getTopic(),reserveParameter.getContent(),reserveParameter.getPrepareTime());
-        List<OutsideJoinPerson>outsideJoinPersons=reserveParameter.getOutsideJoinPersons();
+    public ServerResult twoEditMyServer(ReserveParameter reserveParameter) {
+        Integer meetingId = reserveParameter.getMeetingId();
+        meetingRepository.updateTCP(meetingId, reserveParameter.getTopic(), reserveParameter.getContent(), reserveParameter.getPrepareTime());
+        List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
         outsideJoinPersonRepository.deleteByMeetingId(meetingId);
         OutsideJoinPerson outsideJoinPerson;
-        for (int i=0;i<outsideJoinPersons.size();i++){
-            outsideJoinPerson=new OutsideJoinPerson();
+        for (int i = 0; i < outsideJoinPersons.size(); i++) {
+            outsideJoinPerson = new OutsideJoinPerson();
             outsideJoinPerson.setMeetingId(meetingId);
             outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
             outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
             outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
         }
         joinPersonRepository.deleteByMeetingId(meetingId);
-        List<Integer>joinPersonId=reserveParameter.getJoinPeopleId();
+        List<Integer> joinPersonId = reserveParameter.getJoinPeopleId();
         JoinPerson joinPerson;
-        for (int i=0;i<joinPersonId.size();i++){
-            joinPerson=new JoinPerson();
+        for (int i = 0; i < joinPersonId.size(); i++) {
+            joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(joinPersonId.get(i));
             joinPersonRepository.saveAndFlush(joinPerson);
         }
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         serverResult.setMessage("预定信息修改成功");
         return serverResult;
     }
+
     //提前结束会议
     @Override
-    public ServerResult advanceOver(Integer meetingId) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        long nowTime = sdf.parse(sdf.format(new java.util.Date())).getTime();
-        int bol=meetingRepository.advanceOver(meetingId,nowTime,4);
-        ServerResult serverResult=new ServerResult();
-        if (bol!=0){
+    public ServerResult advanceOver(Integer meetingId)  {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String nowTime = sdf.format(new java.util.Date());
+        int bol = meetingRepository.advanceOver(meetingId, nowTime, 4);
+        ServerResult serverResult = new ServerResult();
+        if (bol != 0) {
             serverResult.setStatus(true);
             serverResult.setMessage("会议已经提前结束");
         }
         serverResult.setMessage("操作失败");
         return serverResult;
     }
+
     //显示我参加的会议
     @Override
-    public ServerResult selectMyJoinMeeting(HttpServletRequest request,String yearMonth) {
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        List<Meeting>meetings=meetingRepository.selectMyJoinMeeting(userId,yearMonth);
-        ServerResult serverResult=new ServerResult();
+    public ServerResult selectMyJoinMeeting(HttpServletRequest request, String yearMonth) {
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        List<Meeting> meetings = meetingRepository.selectMyJoinMeeting(userId, yearMonth);
+        ServerResult serverResult = new ServerResult();
         serverResult.setData(meetings);
         serverResult.setStatus(true);
         return serverResult;

@@ -129,12 +129,12 @@ public class MeetingController {
     @RequestMapping("/editOneServer")
     public ServerResult OneEditMyServer(@RequestBody ReserveParameter reserveParameter,HttpServletRequest request) throws Exception {
         Meeting meeting=meetingService.findByMeetingId(reserveParameter.getMeetingId());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        long reserveBegin = (sdf.parse(reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime())).getTime();
-        long reserveOver = reserveBegin + reserveParameter.getLastTime() * 60 * 1000;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String reserveBegin =reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime();
+        String reserveOver =reserveParameter.getReserveDate() + " " + reserveParameter.getBeginTime();
         Integer reserveMeetroomId=reserveParameter.getMeetRoomId();
         ServerResult serverResult=null;
-        if (meeting.getBegin()==reserveBegin&&meeting.getOver()==reserveOver&&meeting.getMeetroomId().equals(reserveMeetroomId)){
+        if (meeting.getBegin().equals(reserveBegin)&&meeting.getOver().equals(reserveOver)&&meeting.getMeetroomId().equals(reserveMeetroomId)){
             serverResult=meetingService.oneEditMyServer(reserveParameter,request);
         }else{
             serverResult=meetingService.twoEditMyServer(reserveParameter);
