@@ -634,7 +634,7 @@ public class MeetingServiceImpl implements MeetingService {
         int bol1 = 0, bol2 = 0;
         if (coordinateInfo != null) {
             bol1 = coordinateInfoRepository.updateCoordinateStatus(coordinateId, 2);
-            bol2 = meetingRepository.updateStatus(coordinateInfo.getMeetingId(), 0);
+            bol2 = meetingRepository.updateStatus(coordinateInfo.getMeetingId(), 7);
         }
         ServerResult serverResult = new ServerResult();
         if (bol1 != 0 && bol2 != 0)

@@ -22,8 +22,23 @@ public class TimerTask {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime=sdf.format(new Date());
         meetingRepository.updateMeetingStatus(nowTime,1,3);
+    }
+    @Scheduled(fixedRate = oneTime)
+    public void startMeeting1() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String nowTime=sdf.format(new Date());
         meetingRepository.updateMeetingStatus(nowTime,2,6);
+    }
+    @Scheduled(fixedRate = oneTime)
+    public void startMeeting2() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String nowTime=sdf.format(new Date());
         meetingRepository.updateMeetingStatus(nowTime,8,7);
+    }
+    @Scheduled(fixedRate = oneTime)
+    public void overMeeting() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String nowTime=sdf.format(new Date());
         meetingRepository.updateMeetingOverStatus(nowTime,3,4);
 
     }
