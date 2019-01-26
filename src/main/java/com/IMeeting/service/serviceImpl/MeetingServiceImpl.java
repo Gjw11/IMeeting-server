@@ -574,8 +574,8 @@ public class MeetingServiceImpl implements MeetingService {
             Meeting meeting = todayMeeting.get(i);
             reserverRecord = new ReserverRecord();
             reserverRecord.setId(meeting.getId());
-            reserverRecord.setBegin(sdf.format((meeting.getBegin())));
-            reserverRecord.setOver(sdf.format((meeting.getOver())));
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setOver(meeting.getOver());
             reserverRecord.setContent(meeting.getContent());
             reserverRecord.setTopic(meeting.getTopic());
             reserverRecord.setMeetDate(meeting.getMeetDate());
@@ -744,12 +744,12 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setStatus(true);
         return serverResult;
     }
-
+    //到会议预约开始时间将预约成功状态变为进行中，预约中变为预约失败，调用中变为调用失败
     @Override
     public void updateMeetingStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
         meetingRepository.updateMeetingStatus(nowTime,beforeStatus,afterStatus);
     }
-
+    //到会议结束时间将进行中状态变为会议结束
     @Override
     public void updateMeetingOverStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
         meetingRepository.updateMeetingOverStatus(nowTime,beforeStatus,afterStatus);
