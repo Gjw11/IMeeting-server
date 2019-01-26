@@ -745,4 +745,14 @@ public class MeetingServiceImpl implements MeetingService {
         return serverResult;
     }
 
+    @Override
+    public void updateMeetingStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
+        meetingRepository.updateMeetingStatus(nowTime,beforeStatus,afterStatus);
+    }
+
+    @Override
+    public void updateMeetingOverStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
+        meetingRepository.updateMeetingOverStatus(nowTime,beforeStatus,afterStatus);
+    }
+
 }

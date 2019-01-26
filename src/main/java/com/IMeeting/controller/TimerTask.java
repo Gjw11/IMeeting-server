@@ -1,6 +1,7 @@
 package com.IMeeting.controller;
 
 import com.IMeeting.resposirity.MeetingRepository;
+import com.IMeeting.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,30 +17,30 @@ import java.util.Date;
 public class TimerTask {
     public final static long oneTime = 60 * 1000;
     @Autowired
-    private MeetingRepository meetingRepository;
+    private MeetingService meetingService;
     @Scheduled(fixedRate = oneTime)
     public void startMeeting() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime=sdf.format(new Date());
-        meetingRepository.updateMeetingStatus(nowTime,1,3);
+        meetingService.updateMeetingStatus(nowTime,1,3);
     }
     @Scheduled(fixedRate = oneTime)
     public void startMeeting1() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime=sdf.format(new Date());
-        meetingRepository.updateMeetingStatus(nowTime,2,6);
+        meetingService.updateMeetingStatus(nowTime,2,6);
     }
     @Scheduled(fixedRate = oneTime)
     public void startMeeting2() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime=sdf.format(new Date());
-        meetingRepository.updateMeetingStatus(nowTime,8,7);
+        meetingService.updateMeetingStatus(nowTime,8,7);
     }
     @Scheduled(fixedRate = oneTime)
     public void overMeeting() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime=sdf.format(new Date());
-        meetingRepository.updateMeetingOverStatus(nowTime,3,4);
+        meetingService.updateMeetingOverStatus(nowTime,3,4);
 
     }
 }

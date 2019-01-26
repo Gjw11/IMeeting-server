@@ -38,4 +38,6 @@ public interface MeetingService {
     ServerResult twoEditMyServer(ReserveParameter reserveParameter);
     ServerResult advanceOver(Integer meetingId);
     ServerResult selectMyJoinMeeting(HttpServletRequest request,String yearMonth);
+    void updateMeetingStatus(String nowTime,Integer beforeStatus,Integer afterStatus);
+    void updateMeetingOverStatus(String nowTime,Integer beforeStatus,Integer afterStatus);
 }
