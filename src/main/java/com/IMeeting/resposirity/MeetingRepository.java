@@ -57,6 +57,8 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=?3 where m.begin=?1 and m.status=?2")
     int updateMeetingStatus(String beginTime,Integer beforeStatus,Integer afterStatus);
+    @Transactional
+    @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=?3 where m.over=?1 and m.status=?2")
     int updateMeetingOverStatus(String overTime,Integer beforeStatus,Integer afterStatus);
     @Query(value = "select m from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate like ?2 and (m.status=1 or m.status=3 or m.status=4)")

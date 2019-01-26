@@ -336,7 +336,7 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setContent(coordinateParameter.getContent());
         meeting.setMeetroomId(meeting1.getMeetroomId());
         meeting.setLastTime(lastTime);
-        meeting.setStatus(2);
+        meeting.setStatus(8);
         meeting.setUserId(userId);
         meeting.setMeetDate(meeting1.getMeetDate());
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
@@ -449,6 +449,9 @@ public class MeetingServiceImpl implements MeetingService {
                 case 7:
                     status = "调用失败";
                     break;
+                case 8:
+                    status = "调用中";
+                    break;
             }
             reserverRecord.setStatus(status);
             todayMeetingResult.add(reserverRecord);
@@ -521,6 +524,9 @@ public class MeetingServiceImpl implements MeetingService {
                 break;
             case 7:
                 status = "调用失败";
+                break;
+            case 8:
+                status = "调用中";
                 break;
         }
         reserveParameter.setStatus(status);
@@ -599,6 +605,9 @@ public class MeetingServiceImpl implements MeetingService {
                     break;
                 case 7:
                     status = "调用失败";
+                    break;
+                case 8:
+                    status = "调用中";
                     break;
             }
             reserverRecord.setStatus(status);

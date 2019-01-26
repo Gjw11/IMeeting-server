@@ -23,6 +23,7 @@ public class TimerTask {
         String nowTime=sdf.format(new Date());
         meetingRepository.updateMeetingStatus(nowTime,1,3);
         meetingRepository.updateMeetingStatus(nowTime,2,6);
+        meetingRepository.updateMeetingStatus(nowTime,8,7);
         meetingRepository.updateMeetingOverStatus(nowTime,3,4);
 
     }
