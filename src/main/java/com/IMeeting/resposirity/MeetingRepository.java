@@ -23,10 +23,10 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     List<Meeting> findAll(Specification<Meeting> specification);
     List<Meeting> findByMeetroomIdAndMeetDateAndStatusOrderByBegin(Integer meetRoomId, String meetDate,Integer status);
     @Transactional
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query(value = "update Meeting m set m.status=?2 where m.id=?1")
     int updateStatus(Integer meetingId,Integer status);
-    List<Meeting>findByBeginAndOverAndMeetroomIdOrderByCreateTimeAsc(String begin,String over,Integer meetroomId);
+    List<Meeting>findByBeginAndOverAndMeetroomIdAndStatusOrderByCreateTimeAsc(String begin,String over,Integer meetroomId,Integer status);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "select m from Meeting m where m.begin<?2 and m.over>?1 and m.meetroomId=?3 and(m.status=1 or m.status=3)")

@@ -370,14 +370,16 @@ public class MeetingServiceImpl implements MeetingService {
 
     //传入参数要取消的会议id
     @Override
-    public ServerResult cancelMeeting(Integer meentingId) {
-        meetingRepository.updateStatus(meentingId, 5);
-        List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meentingId, 1);
+    public ServerResult cancelMeeting(Integer meetingId) {
+        int bol=meetingRepository.updateStatus(meetingId, 5);
+        List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId, 1);
         if (coordinateInfos.size() == 0) {
-            Meeting meeting = findByMeetingId(meentingId);
-            List<Meeting> meetings = meetingRepository.findByBeginAndOverAndMeetroomIdOrderByCreateTimeAsc(meeting.getBegin(), meeting.getOver(), meeting.getMeetroomId());
-            Meeting meeting1 = meetings.get(0);
-            meetingRepository.updateStatus(meeting1.getId(), 1);
+            Meeting meeting = findByMeetingId(meetingId);
+            List<Meeting> meetings = meetingRepository.findByBeginAndOverAndMeetroomIdAndStatusOrderByCreateTimeAsc(meeting.getBegin(), meeting.getOver(), meeting.getMeetroomId(),2);
+           if (meetings.size()!=0) {
+               Meeting meeting1 = meetings.get(0);
+               meetingRepository.updateStatus(meeting1.getId(), 1);
+           }
         }
         ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
