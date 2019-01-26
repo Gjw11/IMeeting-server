@@ -214,13 +214,14 @@ public class MeetingServiceImpl implements MeetingService {
         } else if (bol4 == -1) {
             serverResult.setMessage("预定会议时间不能在当前时间之前");
         } else {
-            List<Meeting> meetings = meetingRepository.findIntersectMeeting(afterBeginTime,afterOverTime);
+            Integer meetroomId=reserveParameter.getMeetRoomId();
+            List<Meeting> meetings = meetingRepository.findIntersectMeeting(afterBeginTime,afterOverTime,meetroomId);
             if (meetings.size() == 0) {
                 Meeting meeting = new Meeting();
                 meeting.setMeetDate(reserveParameter.getReserveDate());
                 meeting.setBegin(afterBeginTime);
                 meeting.setContent(reserveParameter.getContent());
-                meeting.setMeetroomId(reserveParameter.getMeetRoomId());
+                meeting.setMeetroomId(meetroomId);
                 meeting.setOver(afterOverTime);
                 meeting.setStatus(1);
                 meeting.setLastTime(lastTime);
@@ -481,7 +482,7 @@ public class MeetingServiceImpl implements MeetingService {
         return serverResult;
     }
 
-    //显示一个我预定的会议室的细节
+    //显示一个我预定的会议的细节
     @Override
     public ServerResult oneReserveDetail(Integer meetingId) {
         Meeting meeting = findByMeetingId(meetingId);
