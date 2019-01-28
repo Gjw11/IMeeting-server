@@ -606,8 +606,8 @@ public class MeetingServiceImpl implements MeetingService {
         for (int i = 0; i < coordinateInfos.size(); i++) {
             coordinateResult = new CoordinateResult();
             Meeting meeting1 = findByMeetingId(coordinateInfos.get(i).getMeetingId());
-            coordinateResult.setBeginTime(sdf.format(meeting1.getBegin()));
-            coordinateResult.setOverTime(sdf.format(meeting1.getOver()));
+            coordinateResult.setBeginTime(meeting1.getBegin());
+            coordinateResult.setOverTime(meeting1.getOver());
             coordinateResult.setNote(coordinateInfos.get(i).getNote());
             Userinfo userinfo = userinfoService.getUserinfo(meeting1.getUserId());
             coordinateResult.setPeopleName(userinfo.getName());
