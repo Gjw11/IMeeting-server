@@ -138,7 +138,7 @@ public class MeetingController {
         if (meeting.getBegin().equals(reserveBegin)&&meeting.getOver().equals(reserveOver)&&meeting.getMeetroomId().equals(reserveMeetroomId)){
             serverResult=meetingService.oneEditMyServer(reserveParameter,request);
         }else{
-            serverResult=meetingService.twoEditMyServer(reserveParameter);
+            serverResult=meetingService.twoEditMyServer(reserveParameter,request);
         }
         return serverResult;
     }
@@ -148,11 +148,17 @@ public class MeetingController {
         ServerResult serverResult=meetingService.advanceOver(meetingId);
         return serverResult;
     }
-    //显示我参加的会议
+    //显示我参加的会议(本月)
     @RequestMapping("/toSelectMyJoinMeeting")
     public ServerResult toSelectMyJoinMeeting(HttpServletRequest request){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String yearMonth = sdf.format(new java.util.Date()).substring(0, 7);
+        ServerResult serverResult=meetingService.selectMyJoinMeeting(request,yearMonth);
+        return serverResult;
+    }
+    //根据月份显示我参加的会议 参数如2019-01-20
+    @RequestMapping("/specifiedMyJoinMeeting")
+    public ServerResult specifiedMyJoinMeeting(HttpServletRequest request,@RequestParam("yearMonth")String yearMonth){
         ServerResult serverResult=meetingService.selectMyJoinMeeting(request,yearMonth);
         return serverResult;
     }

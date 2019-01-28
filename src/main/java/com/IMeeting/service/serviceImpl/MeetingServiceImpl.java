@@ -136,13 +136,13 @@ public class MeetingServiceImpl implements MeetingService {
         return serverResult;
     }
 
-    //输入参数为某一天，格式如2019-01-13，会议室编号，前端需提前判断改天是否是限定天数之内
+    //输入参数为某一天，格式如2019-01-13，会议室编号，前端需提前判断该天是否是限定天数之内
     //输出结果为会议开始、结束时间、主题、预定人电话、预定人名字、预定人部门、会议创建时间、id用于抢会议、协调会议参数、实际按1、2、3显示
     @Override
     public ServerResult getOneRoomReserver(String reserverDate, Integer roomId) {
         ServerResult serverResult = new ServerResult();
-        List<Meeting> meetings = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(roomId, reserverDate, 1);
         List<ReserverRecord> reserverRecords = new ArrayList<>();
+        List<Meeting> meetings = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(roomId, reserverDate, 3);
         for (int j = 0; j < meetings.size(); j++) {
             ReserverRecord reserverRecord = new ReserverRecord();
             Meeting meeting = meetings.get(j);
@@ -155,6 +155,45 @@ public class MeetingServiceImpl implements MeetingService {
             Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
             reserverRecord.setPeopleName(userinfo.getName());
             reserverRecord.setPhone(userinfo.getPhone());
+            reserverRecord.setStatus("进行中");
+            Depart depart = userinfoService.getDepart(userinfo.getDepartId());
+            reserverRecord.setDepartName(depart.getName());
+            reserverRecord.setId(meeting.getId());
+            reserverRecords.add(reserverRecord);
+        }
+        List<Meeting> meetings1 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(roomId, reserverDate, 1);
+        for (int j = 0; j < meetings1.size(); j++) {
+            ReserverRecord reserverRecord = new ReserverRecord();
+            Meeting meeting = meetings1.get(j);
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setCreateTime(meeting.getCreateTime());
+            reserverRecord.setOver(meeting.getOver());
+            reserverRecord.setMeetDate(meeting.getMeetDate());
+            reserverRecord.setTopic(meeting.getTopic());
+            reserverRecord.setLastTime(meeting.getLastTime());
+            Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
+            reserverRecord.setPeopleName(userinfo.getName());
+            reserverRecord.setPhone(userinfo.getPhone());
+            reserverRecord.setStatus("未开始");
+            Depart depart = userinfoService.getDepart(userinfo.getDepartId());
+            reserverRecord.setDepartName(depart.getName());
+            reserverRecord.setId(meeting.getId());
+            reserverRecords.add(reserverRecord);
+        }
+        List<Meeting> meetings2 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(roomId, reserverDate, 4);
+        for (int j = 0; j < meetings1.size(); j++) {
+            ReserverRecord reserverRecord = new ReserverRecord();
+            Meeting meeting = meetings1.get(j);
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setCreateTime(meeting.getCreateTime());
+            reserverRecord.setOver(meeting.getOver());
+            reserverRecord.setMeetDate(meeting.getMeetDate());
+            reserverRecord.setTopic(meeting.getTopic());
+            reserverRecord.setLastTime(meeting.getLastTime());
+            Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
+            reserverRecord.setPeopleName(userinfo.getName());
+            reserverRecord.setPhone(userinfo.getPhone());
+            reserverRecord.setStatus("已结束");
             Depart depart = userinfoService.getDepart(userinfo.getDepartId());
             reserverRecord.setDepartName(depart.getName());
             reserverRecord.setId(meeting.getId());
@@ -190,20 +229,20 @@ public class MeetingServiceImpl implements MeetingService {
         MeetroomParameter meetroomParameter = meetroomParameterRepository.findByTenantId(tenantId);
         String beginTime = meetroomParameter.getBegin();
         String overTime = meetroomParameter.getOver();
-        int lastTime=reserveParameter.getLastTime();
-        int prepareTime=reserveParameter.getPrepareTime();
+        int lastTime = reserveParameter.getLastTime();
+        int prepareTime = reserveParameter.getPrepareTime();
         String reserveBeginTime = reserveParameter.getBeginTime();
         String reserveDate = reserveParameter.getReserveDate();
-        String afterBeginTime = reserveDate+" "+reserveParameter.getBeginTime();
-        String afterOverTime=TimeUtil.addMinute(afterBeginTime,lastTime);
+        String afterBeginTime = reserveDate + " " + reserveParameter.getBeginTime();
+        String afterOverTime = TimeUtil.addMinute(afterBeginTime, lastTime);
         String nowTime = sdf.format(new java.util.Date());
         TimeUtil timeUtil = new TimeUtil();
         int bol1 = 2, bol2 = 2, bol3 = 2, bol4 = 2;
         bol1 = timeUtil.DateCompare(reserveBeginTime, beginTime, "HH:mm");
-        bol2 = timeUtil.DateCompare(afterOverTime.substring(11,16), overTime, "HH:mm");
-        bol3 = timeUtil.DateCompare(reserveBeginTime, afterOverTime.substring(11,16), "HH:mm");
+        bol2 = timeUtil.DateCompare(afterOverTime.substring(11, 16), overTime, "HH:mm");
+        bol3 = timeUtil.DateCompare(reserveBeginTime, afterOverTime.substring(11, 16), "HH:mm");
         bol4 = timeUtil.DateCompare(afterBeginTime, nowTime, "yyyy-MM-dd HH:mm");
-        if (prepareTime>lastTime){
+        if (prepareTime > lastTime) {
             serverResult.setMessage("准备时间不能大于持续时间");
         } else if (bol3 == 0) {
             serverResult.setMessage("预定时间不能为0分钟");
@@ -214,8 +253,8 @@ public class MeetingServiceImpl implements MeetingService {
         } else if (bol4 == -1) {
             serverResult.setMessage("预定会议时间不能在当前时间之前");
         } else {
-            Integer meetroomId=reserveParameter.getMeetRoomId();
-            List<Meeting> meetings = meetingRepository.findIntersectMeeting(afterBeginTime,afterOverTime,meetroomId);
+            Integer meetroomId = reserveParameter.getMeetRoomId();
+            List<Meeting> meetings = meetingRepository.findIntersectMeeting(afterBeginTime, afterOverTime, meetroomId);
             if (meetings.size() == 0) {
                 Meeting meeting = new Meeting();
                 meeting.setMeetDate(reserveParameter.getReserveDate());
@@ -233,11 +272,18 @@ public class MeetingServiceImpl implements MeetingService {
                 meeting.setCreateTime(nowTime);
                 meetingRepository.saveAndFlush(meeting);
                 Integer meetingId = meeting.getId();
+                JoinPerson joinPerson;
+                joinPerson = new JoinPerson();
+                joinPerson.setMeetingId(meetingId);
+                joinPerson.setUserId(userId);
+                joinPerson.setStatus(0);
+                joinPersonRepository.saveAndFlush(joinPerson);
                 List<Integer> list = reserveParameter.getJoinPeopleId();
                 for (int i = 0; i < list.size(); i++) {
-                    JoinPerson joinPerson = new JoinPerson();
+                    joinPerson = new JoinPerson();
                     joinPerson.setMeetingId(meetingId);
                     joinPerson.setUserId(list.get(i));
+                    joinPerson.setStatus(0);
                     joinPersonRepository.saveAndFlush(joinPerson);
                 }
                 List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
@@ -266,9 +312,9 @@ public class MeetingServiceImpl implements MeetingService {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
         String reserveDate = reserveParameter.getReserveDate();
         String reserveBeginTime = reserveParameter.getBeginTime();
-        int lastTime=reserveParameter.getLastTime();
-        String afterBeginTime=reserveDate+" "+reserveBeginTime;
-        String afterOverTime = TimeUtil.addMinute(afterBeginTime,lastTime);
+        int lastTime = reserveParameter.getLastTime();
+        String afterBeginTime = reserveDate + " " + reserveBeginTime;
+        String afterOverTime = TimeUtil.addMinute(afterBeginTime, lastTime);
         String nowTime = sdf.format(new java.util.Date());
         Meeting meeting = new Meeting();
         meeting.setMeetDate(reserveParameter.getReserveDate());
@@ -286,11 +332,18 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setCreateTime(nowTime);
         meetingRepository.saveAndFlush(meeting);
         Integer meetingId = meeting.getId();
+        JoinPerson joinPerson;
+        joinPerson = new JoinPerson();
+        joinPerson.setMeetingId(meetingId);
+        joinPerson.setUserId(userId);
+        joinPerson.setStatus(0);
+        joinPersonRepository.saveAndFlush(joinPerson);
         List<Integer> list = reserveParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
-            JoinPerson joinPerson = new JoinPerson();
+            joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(list.get(i));
+            joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
         List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
@@ -314,22 +367,22 @@ public class MeetingServiceImpl implements MeetingService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        String reserveDate = coordinateParameter.getReserveDate();
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        Integer tenantId=(Integer) request.getSession().getAttribute("tenantId");
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
 //        String reserveBeginTime = coordinateParameter.getBeginTime();
 //        String afterBeginTime=reserveDate+" "+reserveBeginTime;
-        int lastTime=coordinateParameter.getLastTime();
+        int lastTime = coordinateParameter.getLastTime();
 //        String afterOverTime = TimeUtil.addMinute(,lastTime);
-        Integer beforeMeetingId=coordinateParameter.getBeforeMeetingId();
-        Meeting meeting1=findByMeetingId(beforeMeetingId);
-        int bol=coordinateParameter.getBeforeOrLast();
-        if (bol==1){
-            String begin=meeting1.getBegin();
+        Integer beforeMeetingId = coordinateParameter.getBeforeMeetingId();
+        Meeting meeting1 = findByMeetingId(beforeMeetingId);
+        int bol = coordinateParameter.getBeforeOrLast();
+        if (bol == 1) {
+            String begin = meeting1.getBegin();
             meeting.setBegin(begin);
-            meeting.setOver(TimeUtil.addMinute(begin,lastTime));
-        }else if(bol==2){
-            String over=meeting1.getOver();
+            meeting.setOver(TimeUtil.addMinute(begin, lastTime));
+        } else if (bol == 2) {
+            String over = meeting1.getOver();
             meeting.setOver(over);
-            meeting.setBegin(TimeUtil.addMinute(over,-lastTime));
+            meeting.setBegin(TimeUtil.addMinute(over, -lastTime));
         }
         meeting.setTenantId(tenantId);
         meeting.setTopic(coordinateParameter.getTopic());
@@ -342,12 +395,19 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
         meeting.setCreateTime(sdf.format(new java.util.Date()));
         Meeting m = meetingRepository.saveAndFlush(meeting);
-        Integer meetringId = meeting.getId();
+        Integer meetingId = meeting.getId();
+        JoinPerson joinPerson;
+        joinPerson = new JoinPerson();
+        joinPerson.setMeetingId(meetingId);
+        joinPerson.setUserId(userId);
+        joinPerson.setStatus(0);
+        joinPersonRepository.saveAndFlush(joinPerson);
         List<Integer> list = coordinateParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
-            JoinPerson joinPerson = new JoinPerson();
-            joinPerson.setMeetingId(meetringId);
+            joinPerson = new JoinPerson();
+            joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(list.get(i));
+            joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
         CoordinateInfo coordinateInfo = new CoordinateInfo();
@@ -371,15 +431,15 @@ public class MeetingServiceImpl implements MeetingService {
     //传入参数要取消的会议id
     @Override
     public ServerResult cancelMeeting(Integer meetingId) {
-        int bol=meetingRepository.updateStatus(meetingId, 5);
+        int bol = meetingRepository.updateStatus(meetingId, 5);
         List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId, 1);
         if (coordinateInfos.size() == 0) {
             Meeting meeting = findByMeetingId(meetingId);
-            List<Meeting> meetings = meetingRepository.findByBeginAndOverAndMeetroomIdAndStatusOrderByCreateTimeAsc(meeting.getBegin(), meeting.getOver(), meeting.getMeetroomId(),2);
-           if (meetings.size()!=0) {
-               Meeting meeting1 = meetings.get(0);
-               meetingRepository.updateStatus(meeting1.getId(), 1);
-           }
+            List<Meeting> meetings = meetingRepository.findByBeginAndOverAndMeetroomIdAndStatusOrderByCreateTimeAsc(meeting.getBegin(), meeting.getOver(), meeting.getMeetroomId(), 2);
+            if (meetings.size() != 0) {
+                Meeting meeting1 = meetings.get(0);
+                meetingRepository.updateStatus(meeting1.getId(), 1);
+            }
         }
         ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
@@ -693,7 +753,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     //修改除会议室、时间之外的其他内容
     @Override
-    public ServerResult twoEditMyServer(ReserveParameter reserveParameter) {
+    public ServerResult twoEditMyServer(ReserveParameter reserveParameter, HttpServletRequest request) {
         Integer meetingId = reserveParameter.getMeetingId();
         meetingRepository.updateTCP(meetingId, reserveParameter.getTopic(), reserveParameter.getContent(), reserveParameter.getPrepareTime());
         List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
@@ -709,10 +769,16 @@ public class MeetingServiceImpl implements MeetingService {
         joinPersonRepository.deleteByMeetingId(meetingId);
         List<Integer> joinPersonId = reserveParameter.getJoinPeopleId();
         JoinPerson joinPerson;
+        joinPerson = new JoinPerson();
+        joinPerson.setMeetingId(meetingId);
+        joinPerson.setUserId((Integer) request.getAttribute("userId"));
+        joinPerson.setStatus(0);
+        joinPersonRepository.saveAndFlush(joinPerson);
         for (int i = 0; i < joinPersonId.size(); i++) {
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(joinPersonId.get(i));
+            joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
         ServerResult serverResult = new ServerResult();
@@ -723,7 +789,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     //提前结束会议
     @Override
-    public ServerResult advanceOver(Integer meetingId)  {
+    public ServerResult advanceOver(Integer meetingId) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime = sdf.format(new java.util.Date());
         int bol = meetingRepository.advanceOver(meetingId, nowTime, 4);
@@ -740,21 +806,73 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public ServerResult selectMyJoinMeeting(HttpServletRequest request, String yearMonth) {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        List<Meeting> meetings = meetingRepository.selectMyJoinMeeting(userId, yearMonth);
+        List<Meeting> meetings = meetingRepository.MyJoinMeetingGroupByDate(userId, yearMonth + "%");
+        List<MyJoinCount> myJoinCounts = new ArrayList<>();
+        MyJoinCount myJoinCount;
+        for (int i = 0; i < meetings.size(); i++) {
+            myJoinCount = new MyJoinCount();
+            Meeting meeting = meetings.get(i);
+            String meetDate = meeting.getMeetDate();
+            myJoinCount.setMeetDate(meetDate);
+            myJoinCount.setNotStartCount(meetingRepository.countNotStartMeeting(userId, meetDate, 1));
+            myJoinCount.setOverCount(meetingRepository.countOverMeeting(userId, meetDate, 4));
+            myJoinCounts.add(myJoinCount);
+        }
         ServerResult serverResult = new ServerResult();
-        serverResult.setData(meetings);
+        serverResult.setData(myJoinCounts);
         serverResult.setStatus(true);
         return serverResult;
     }
+
     //到会议预约开始时间将预约成功状态变为进行中，预约中变为预约失败，调用中变为调用失败
     @Override
     public void updateMeetingStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
-        meetingRepository.updateMeetingStatus(nowTime,beforeStatus,afterStatus);
+        meetingRepository.updateMeetingStatus(nowTime, beforeStatus, afterStatus);
     }
+
     //到会议结束时间将进行中状态变为会议结束
     @Override
     public void updateMeetingOverStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
-        meetingRepository.updateMeetingOverStatus(nowTime,beforeStatus,afterStatus);
+        meetingRepository.updateMeetingOverStatus(nowTime, beforeStatus, afterStatus);
+    }
+
+    @Override
+    public ServerResult selectMyJoinMeetingByDate(String meetDate, HttpServletRequest request) {
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        List<Meeting> meetings = meetingRepository.MyJoinMeetingByDate(userId, meetDate);
+        List<ReserverRecord> reserverRecords = new ArrayList<>();
+        for (int j = 0; j < meetings.size(); j++) {
+            ReserverRecord reserverRecord = new ReserverRecord();
+            Meeting meeting = meetings.get(j);
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setCreateTime(meeting.getCreateTime());
+            reserverRecord.setOver(meeting.getOver());
+            reserverRecord.setTopic(meeting.getTopic());
+            reserverRecord.setLastTime(meeting.getLastTime());
+            Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
+            reserverRecord.setPeopleName(userinfo.getName());
+            reserverRecord.setPhone(userinfo.getPhone());
+            Depart depart = userinfoService.getDepart(userinfo.getDepartId());
+            reserverRecord.setDepartName(depart.getName());
+            reserverRecord.setId(meeting.getId());
+            String status = "";
+            switch (meeting.getStatus()) {
+                case 1:
+                    status = "未开始";
+                case 3:
+                    status = "进行中";
+                    break;
+                case 4:
+                    status = "已结束";
+                    break;
+            }
+            reserverRecord.setStatus(status);
+            reserverRecords.add(reserverRecord);
+        }
+        ServerResult serverResult = new ServerResult();
+        serverResult.setData(reserverRecords);
+        serverResult.setStatus(true);
+        return serverResult;
     }
 
 }

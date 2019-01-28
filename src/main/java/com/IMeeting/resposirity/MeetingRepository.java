@@ -31,11 +31,11 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "select m from Meeting m where m.begin<?2 and m.over>?1 and m.meetroomId=?3 and(m.status=1 or m.status=3)")
     List<Meeting>findIntersectMeeting(String beginTime,String overTime,Integer meetroomId);
-    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 group by meetDate")
+    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate like?2 group by m.meetDate")
     List<Meeting> groupBymeetDate(Integer userId, String yearMonth);
     @Query(value = "select count (m) from Meeting m where m.userId=?1 and m.meetDate=?2")
     Long countMyReserve(Integer userId, String meetDate);
-    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate=?2 order by status ,begin")
+    @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate=?2 order by m.status ,m.begin")
     List<Meeting>findMyReserve(Integer userId,String meetDate);
     @Transactional
     @Modifying(clearAutomatically = true)
@@ -61,6 +61,12 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=?3 where m.over=?1 and m.status=?2")
     int updateMeetingOverStatus(String overTime,Integer beforeStatus,Integer afterStatus);
-    @Query(value = "select m from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate like ?2 and (m.status=1 or m.status=3 or m.status=4)")
-    List<Meeting> selectMyJoinMeeting(Integer userId,String yearMonth);
+    @Query(value = "select m from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate like?2 and (m.status=1 or m.status=4)group by m.meetDate")
+    List<Meeting> MyJoinMeetingGroupByDate(Integer userId,String yearMonth);
+    @Query(value = "select count(m) from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate =?2 and m.status=?3")
+    int countNotStartMeeting(Integer userId,String meetDate,Integer status);
+    @Query(value = "select count(m) from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate =?2 and m.status=?3")
+    int countOverMeeting(Integer userId,String meetDate,Integer status);
+    @Query(value = "select m from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate =?2 and (m.status=1 or m.status=3 or m.status=4)order by m.status")
+    List<Meeting> MyJoinMeetingByDate(Integer userId,String date);
 }

@@ -35,9 +35,10 @@ public interface MeetingService {
     ServerResult agreeCoordinate(Integer coordinateId);
     CoordinateInfo findByCoordinateId(Integer coordinateId);
     ServerResult oneEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request) throws Exception;
-    ServerResult twoEditMyServer(ReserveParameter reserveParameter);
+    ServerResult twoEditMyServer(ReserveParameter reserveParameter,HttpServletRequest request);
     ServerResult advanceOver(Integer meetingId);
     ServerResult selectMyJoinMeeting(HttpServletRequest request,String yearMonth);
     void updateMeetingStatus(String nowTime,Integer beforeStatus,Integer afterStatus);
     void updateMeetingOverStatus(String nowTime,Integer beforeStatus,Integer afterStatus);
+    ServerResult selectMyJoinMeetingByDate(String meetDate,HttpServletRequest request);
 }

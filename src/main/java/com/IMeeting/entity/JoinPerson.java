@@ -13,6 +13,8 @@ public class JoinPerson {
     private Integer id;
     private Integer meetingId;
     private Integer userId;
+    private Integer status;
+    private String signTime;
 
     public Integer getId() {
         return id;
@@ -36,5 +38,21 @@ public class JoinPerson {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public String getSignTime() {
+        return signTime;
+    }
+
+    public void setSignTime(String signTime) {
+        this.signTime = signTime;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }
