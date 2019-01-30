@@ -19,4 +19,8 @@ public interface CoordinateInfoRepository extends JpaRepository<CoordinateInfo,I
     @Modifying(clearAutomatically = true)
     @Query(value = "update CoordinateInfo m set m.status=?2 where m.id=?1")
     int updateCoordinateStatus(Integer coordinateId,Integer status);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update CoordinateInfo m set m.status=?2 where m.meetingId=1")
+    int updateStatusByMeetingId(Integer meetingId,Integer status);
 }

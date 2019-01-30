@@ -431,17 +431,29 @@ public class MeetingServiceImpl implements MeetingService {
     //传入参数要取消的会议id
     @Override
     public ServerResult cancelMeeting(Integer meetingId) {
-        int bol = meetingRepository.updateStatus(meetingId, 5);
-        List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId, 1);
-        if (coordinateInfos.size() == 0) {
-            Meeting meeting = findByMeetingId(meetingId);
-            List<Meeting> meetings = meetingRepository.findByBeginAndOverAndMeetroomIdAndStatusOrderByCreateTimeAsc(meeting.getBegin(), meeting.getOver(), meeting.getMeetroomId(), 2);
-            if (meetings.size() != 0) {
-                Meeting meeting1 = meetings.get(0);
-                meetingRepository.updateStatus(meeting1.getId(), 1);
-            }
-        }
         ServerResult serverResult = new ServerResult();
+        Meeting meeting2 = findByMeetingId(meetingId);
+        Integer status = meeting2.getStatus();
+        if (status == 1) {
+            meetingRepository.updateStatus(meetingId, 5);
+            List<CoordinateInfo> coordinateInfos = coordinateInfoRepository.findByBeforeMeetingIdAndStatus(meetingId, 1);
+            if (coordinateInfos.size() == 0) {
+                Meeting meeting = findByMeetingId(meetingId);
+                List<Meeting> meetings = meetingRepository.findByBeginAndOverAndMeetroomIdAndStatusOrderByCreateTimeAsc(meeting.getBegin(), meeting.getOver(), meeting.getMeetroomId(), 2);
+                if (meetings.size() != 0) {
+                    Meeting meeting1 = meetings.get(0);
+                    meetingRepository.updateStatus(meeting1.getId(), 1);
+                }
+            }
+            serverResult.setMessage("会议取消成功");
+        } else if (status == 8) {
+            meetingRepository.updateStatus(meetingId, 5);
+            coordinateInfoRepository.updateStatusByMeetingId(meetingId,3);
+            serverResult.setMessage("调用取消成功");
+        } else {
+            meetingRepository.updateStatus(meetingId, 5);
+            serverResult.setMessage("预约取消成功");
+        }
         serverResult.setStatus(true);
         return serverResult;
     }
