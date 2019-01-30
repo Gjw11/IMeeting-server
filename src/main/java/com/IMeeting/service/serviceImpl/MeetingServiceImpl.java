@@ -181,7 +181,7 @@ public class MeetingServiceImpl implements MeetingService {
             reserverRecords.add(reserverRecord);
         }
         List<Meeting> meetings2 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(roomId, reserverDate, 4);
-        for (int j = 0; j < meetings1.size(); j++) {
+        for (int j = 0; j < meetings2.size(); j++) {
             ReserverRecord reserverRecord = new ReserverRecord();
             Meeting meeting = meetings1.get(j);
             reserverRecord.setBegin(meeting.getBegin());
