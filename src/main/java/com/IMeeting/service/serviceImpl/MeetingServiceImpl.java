@@ -569,8 +569,10 @@ public class MeetingServiceImpl implements MeetingService {
         reserveParameter.setContent(meeting.getContent());
         reserveParameter.setMeetRoomId(meeting.getMeetroomId());
         Meetroom meetroom = finByMeetRoomId(meeting.getMeetroomId());
-        if (meetroom != null)
+        if (meetroom != null) {
             reserveParameter.setMeetroom(meetroom.getName());
+            reserveParameter.setMeetroomPlace(meetroom.getPlace());
+        }
         reserveParameter.setReserveDate(meeting.getMeetDate());
         reserveParameter.setBeginTime(meeting.getBegin());
         reserveParameter.setLastTime(meeting.getLastTime());
@@ -847,7 +849,7 @@ public class MeetingServiceImpl implements MeetingService {
     public void updateMeetingOverStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
         meetingRepository.updateMeetingOverStatus(nowTime, beforeStatus, afterStatus);
     }
-
+    //显示某一天我参加的会议
     @Override
     public ServerResult selectMyJoinMeetingByDate(String meetDate, HttpServletRequest request) {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
