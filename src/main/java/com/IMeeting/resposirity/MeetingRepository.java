@@ -69,4 +69,6 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     int countOverMeeting(Integer userId,String meetDate,Integer status);
     @Query(value = "select m from Meeting m ,JoinPerson n where n.userId=?1 and m.id=n.meetingId and m.meetDate =?2 and (m.status=1 or m.status=3 or m.status=4)order by m.status")
     List<Meeting> MyJoinMeetingByDate(Integer userId,String date);
+    @Query(value = "select m from Meeting m where m.userId=?1 and (m.status=1 or m.status=3 )order by m.begin")
+    List<Meeting> selectByUserIdAndStatus(Integer userId);
 }

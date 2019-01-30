@@ -7,7 +7,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "m_leave_information")
-public class leaveInformation {
+public class LeaveInformation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

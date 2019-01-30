@@ -43,6 +43,8 @@ public class MeetingServiceImpl implements MeetingService {
     private JoinPersonRepository joinPersonRepository;
     @Autowired
     private CoordinateInfoRepository coordinateInfoRepository;
+    @Autowired
+    private LeaveInformationRepository leaveInformationRepository;
 
     @Override
     public MeetroomParameter selectParameter(Integer tenantId) {
@@ -888,5 +890,64 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setStatus(true);
         return serverResult;
     }
+    //请假，请假原因可略,参数为请假原因，会议id
+    @Override
+    public ServerResult sendLeaveInformation(LeaveInformation leaveInformation, HttpServletRequest request) {
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        leaveInformation.setStatus(0);
+        leaveInformation.setUserId(userId);
+        leaveInformationRepository.saveAndFlush(leaveInformation);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setMessage("请假已提交");
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //根据日期显示未开始和进行中会议的请假请求总数和未处理请假数量
+    @Override
+    public ServerResult countLeaveInformation(HttpServletRequest request) {
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        List<Meeting> meetings=meetingRepository.selectByUserIdAndStatus(userId);
+        List<LeaveInformationCount> leaveInformationCounts=new ArrayList<>();
+        Meeting meeting;
+        LeaveInformationCount leaveInformationCount;
+        for (int i=0;i<meetings.size();i++){
+            meeting=meetings.get(i);
+            Integer meetingId=meeting.getId();
+            leaveInformationCount=new LeaveInformationCount();
+            leaveInformationCount.setMeetingId(meetingId);
+            leaveInformationCount.setMeetTime(meeting.getBegin()+"-"+meeting.getOver());
+            leaveInformationCount.setTopic(meeting.getTopic());
+            leaveInformationCount.setAllCount(leaveInformationRepository.countAll(meetingId));
+            leaveInformationCount.setNotDealCount(leaveInformationRepository.notDealCount(meetingId));
+            leaveInformationCounts.add(leaveInformationCount);
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(leaveInformationCounts);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //查找某场会议的请假所有请假信息
+    @Override
+    public ServerResult showOneMeetingLeaveInfo(Integer meetingId) {
+        List<LeaveInformation>leaveInformations=leaveInformationRepository.findByMeetingIdOrderByStatus(meetingId);
+        LeaveInformation leaveInformation;
+        List<LeaveInfoResult>leaveInfoResults=new ArrayList<>();
+        LeaveInfoResult leaveInfoResult;
+        for (int i=0;i<leaveInformations.size();i++){
+            leaveInformation=leaveInformations.get(i);
+            leaveInfoResult=new LeaveInfoResult();
+            leaveInfoResult.setLeaveInfoId(leaveInformation.getId());
+            Userinfo userinfo=userinfoService.getUserinfo(leaveInformation.getUserId());
+            leaveInfoResult.setPeopleName(userinfo.getName());
+            leaveInfoResult.setPeoplePhone(userinfo.getPhone());
+            leaveInfoResult.setNote(leaveInformation.getNote());
+            leaveInfoResults.add(leaveInfoResult);
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(leaveInfoResults);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
 
 }

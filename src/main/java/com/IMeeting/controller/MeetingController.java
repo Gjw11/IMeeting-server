@@ -1,6 +1,7 @@
 package com.IMeeting.controller;
 
 import com.IMeeting.entity.*;
+import com.IMeeting.resposirity.LeaveInformationRepository;
 import com.IMeeting.resposirity.MeetingRepository;
 import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.GroupService;
@@ -28,6 +29,8 @@ public class MeetingController {
     private MeetingService meetingService;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private LeaveInformationRepository leaveInformationRepository;
     //预定会议首页
     @RequestMapping("/reserveIndex")
     public ServerResult reserveIndex(HttpServletRequest request){
@@ -166,6 +169,40 @@ public class MeetingController {
     @RequestMapping("/selectMyJoinMeetingByDate")
     public ServerResult selectMyJoinMeetingByDate(HttpServletRequest request,@RequestParam("meetDate")String meetDate){
         ServerResult serverResult=meetingService.selectMyJoinMeetingByDate(meetDate,request);
+        return serverResult;
+    }
+    //提交请假
+    @RequestMapping("/sendLeaveInformation")
+    public ServerResult sendLeaveInformation(HttpServletRequest request,@RequestBody LeaveInformation leaveInformation){
+        ServerResult serverResult=meetingService.sendLeaveInformation(leaveInformation,request);
+        return serverResult;
+    }
+    //根据日期显示未开始和进行中会议的请假请求总数和未处理请假数量
+    @RequestMapping("/CountLeaveInformation")
+    public ServerResult CountLeaveInformation(HttpServletRequest request){
+        ServerResult serverResult=meetingService.countLeaveInformation(request);
+        return serverResult;
+    }
+    //显示某场会议的请假情况
+    @RequestMapping("/showOneMeetingLeaveInfo")
+    public ServerResult showOneMeetingLeaveInfo(@RequestParam("meetingId")Integer meetingId){
+        ServerResult serverResult=meetingService.showOneMeetingLeaveInfo(meetingId);
+        return serverResult;
+    }
+    //同意请假
+    @RequestMapping("/agreeLeave")
+    public ServerResult agreeLeave(@RequestParam("leaveInfoId")Integer leaveInfoId){
+        leaveInformationRepository.agreeLeave(leaveInfoId);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //拒绝请假
+    @RequestMapping("/disagreeLeave")
+    public ServerResult disagreeLeave(@RequestParam("leaveInfoId")Integer leaveInfoId){
+        leaveInformationRepository.disagreeLeave(leaveInfoId);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
         return serverResult;
     }
 }

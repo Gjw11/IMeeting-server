@@ -41,4 +41,7 @@ public interface MeetingService {
     void updateMeetingStatus(String nowTime,Integer beforeStatus,Integer afterStatus);
     void updateMeetingOverStatus(String nowTime,Integer beforeStatus,Integer afterStatus);
     ServerResult selectMyJoinMeetingByDate(String meetDate,HttpServletRequest request);
+    ServerResult sendLeaveInformation(LeaveInformation leaveInformation,HttpServletRequest request);
+    ServerResult countLeaveInformation(HttpServletRequest request);
+    ServerResult showOneMeetingLeaveInfo(Integer meetingId);
 }
