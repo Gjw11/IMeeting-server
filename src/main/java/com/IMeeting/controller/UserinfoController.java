@@ -6,18 +6,23 @@ import com.IMeeting.entity.ServerResult;
 import com.IMeeting.entity.Userinfo;
 import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.UserinfoService;
+import com.IMeeting.util.FileUtil;
 import com.IMeeting.util.MD5;
 import com.IMeeting.util.Message;
 import com.IMeeting.util.Random;
 import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +51,12 @@ public class UserinfoController {
             session.setAttribute("departId", u.getDepartId());
             session.setAttribute("positionId", u.getPositionId());
             session.setAttribute("roleId", u.getRoleId());
+            Integer roleId=u.getRoleId();
+            if (roleId==null){
+                serverResult.setMessage("no");
+            }else {
+                serverResult.setMessage("yes");
+            }
         } else {
             serverResult.setMessage("账号密码错误");
         }
@@ -96,7 +107,7 @@ public class UserinfoController {
         if (userinfo != null) {
             serverResult.setStatus(false);
             serverResult.setMessage("该手机号已经绑定过账号，请更换手机号");
-        }else {
+        } else {
             Message message = new Message();
             Random random = new Random();
             String randomNum = random.GetRandom();
@@ -116,10 +127,10 @@ public class UserinfoController {
     @RequestMapping("/recordPhone")
     public ServerResult recordPhone(@RequestParam("phone") String phone, HttpServletRequest request) {
         ServerResult serverResult = new ServerResult();
-            Integer id = (Integer) request.getSession().getAttribute("userId");
-            int bol = userinfoRepository.updatePhone(phone, id);
-            if (bol != 0)
-                serverResult.setStatus(true);
+        Integer id = (Integer) request.getSession().getAttribute("userId");
+        int bol = userinfoRepository.updatePhone(phone, id);
+        if (bol != 0)
+            serverResult.setStatus(true);
         return serverResult;
     }
 
@@ -208,11 +219,69 @@ public class UserinfoController {
         serverResult.setStatus(true);
         return serverResult;
     }
+
     /*-------------华丽分割线-------------*/
-    @RequestMapping("/selectAllPeople")
+    //显示所有员工信息(显示项序号1、2、3、4非用户真实id，worknum工号，name名字，phone电话，departId对应的部门名字，positionId对应的职位名字，roleId对应的角色名字)
+    @RequestMapping("/userInfo/selectAllPeople")
     public ServerResult selectAllPeople(HttpServletRequest request) {
+        ServerResult serverResult = userinfoService.selectAllPeople(request);
+        return serverResult;
+    }
+
+    //删除一个员工
+    @RequestMapping("/userInfo/deleteOne")
+    public ServerResult deleteOne(@RequestParam("userId") Integer userId) {
         ServerResult serverResult = new ServerResult();
-        serverResult.setStatus(true);
+        int bol = userinfoRepository.deleteOne(userId);
+        if (bol != 0) {
+            serverResult.setStatus(true);
+        }
+        return serverResult;
+    }
+
+    //修改一个员工信息,需要传递的参数为id,worknum,name,phone,departId,positionId,roleId
+    @RequestMapping("/userInfo/updateOne")
+    public ServerResult deleteOne(@RequestBody Userinfo userinfo) {
+        ServerResult serverResult = userinfoService.updateOne(userinfo);
+        return serverResult;
+    }
+
+    //增加一个员工,需要传递的参数为worknum(必填),name(必填),phone,departId,positionId,roleId
+    @RequestMapping("/userInfo/insertOne")
+    public ServerResult insertOne(@RequestBody Userinfo userinfo, HttpServletRequest request) {
+        ServerResult serverResult = userinfoService.insertOne(userinfo, request);
+        return serverResult;
+    }
+
+    //下载人员导入范例excel表格
+    @RequestMapping("/userInfo/downloadInsertDemo")
+    public void downloadInsertDemo(HttpServletResponse res) {
+        FileUtil f=new FileUtil();
+        f.downLoad("insertDemo.xls",res);
+    }
+    //多个员工导入,worknum(必填),name(必填),phone
+    @RequestMapping("/userInfo/insertMore")
+    public ServerResult insertMore(@RequestParam("file") MultipartFile file,HttpServletRequest request) {
+        String fileName = file.getOriginalFilename();
+        ServerResult serverResult=null;
+        try {
+            serverResult=userinfoService.batchImport(fileName,file,request);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return serverResult;
+    }
+    //重置密码,参数为用户id
+    @RequestMapping("/userInfo/resetPwd")
+    public ServerResult resetPwd(@RequestParam("userId")Integer userId) {
+        MD5 md5=new MD5();
+        String password=md5.MD5("123456");
+        int bol=userinfoRepository.resetPwd(userId,password);
+        ServerResult serverResult=new ServerResult();
+        if (bol!=0){
+            serverResult.setStatus(true);
+            serverResult.setMessage("密码重置成功");
+        }
         return serverResult;
     }
 }

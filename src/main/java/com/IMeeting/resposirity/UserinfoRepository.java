@@ -20,6 +20,7 @@ public interface UserinfoRepository extends JpaRepository<Userinfo,Integer>{
     Userinfo findByUsernameAndPasswordAndStatus(String username,String password,Integer status);
     Userinfo findByPhoneAndPasswordAndStatus(String phone,String password,Integer status);
     Userinfo findByPhone(String phone);
+    Userinfo findByWorknumAndTenantId(String worknum,Integer tenantId);
     List<Userinfo> findByDepartId(Integer departId);
     List<Userinfo> findByTenantIdAndStatus(Integer tenantId,Integer status);
     List<Userinfo> findByPositionId(Integer positionId);
@@ -39,7 +40,22 @@ public interface UserinfoRepository extends JpaRepository<Userinfo,Integer>{
     int updatePhone(String phone,Integer id);
     @Transactional
     @Modifying(clearAutomatically = true)
+    @Query(value = "update Userinfo m set m.status=0 where m.id=?1")
+    int deleteOne(Integer id);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update Userinfo m set m.username=?2 where m.id=?1")
+    int updateUsername(Integer id,String username);
+    @Transactional
+    @Modifying(clearAutomatically = true)
     @Query(value = "update Userinfo m set m.resume=?1 where m.id=?2")
-    int updateResume(String resume,Integer id);
-
+    int updateResume(String resume,Integer userId);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update Userinfo m set m.worknum=?2,m.name=?3,m.phone=?4,m.departId=?5,m.positionId=?6,m.roleId=?7 where m.id=?1")
+    int updateUserInfo(Integer id,String worknum,String name, String phone,Integer departId,Integer positionId,Integer roleId);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update Userinfo m set m.password=?2 where m.id=?1")
+    int resetPwd(Integer userId,String pwd);
 }

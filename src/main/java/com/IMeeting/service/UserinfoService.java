@@ -6,6 +6,7 @@ import com.IMeeting.entity.ServerResult;
 import com.IMeeting.entity.Userinfo;
 import com.IMeeting.resposirity.UserinfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,4 +20,7 @@ public interface UserinfoService {
     Position getPosition(Integer id);
      /*-------------华丽分割线-------------*/
     ServerResult selectAllPeople(HttpServletRequest request);
+    ServerResult updateOne(Userinfo userinfo);
+    ServerResult insertOne(Userinfo userinfo,HttpServletRequest request);
+    ServerResult batchImport(String fileName, MultipartFile file,HttpServletRequest request) throws Exception;
 }

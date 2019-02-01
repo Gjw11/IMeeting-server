@@ -2,8 +2,8 @@ package com.IMeeting.util;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 
 /**
  * Created by gjw on 2019/1/18.
@@ -44,6 +44,24 @@ public class FileUtil {
             return false;
         }
 
+    }
+
+    public void downLoad(String fileName, HttpServletResponse response) {
+        InputStream is = this.getClass().getResourceAsStream("/templates/" + fileName);
+        response.reset();
+        response.setContentType("bin");
+        response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        byte[] b = new byte[10240];
+        int len;
+        try {
+            while ((len = is.read(b)) != -1) {
+                response.getOutputStream().write(b, 0, len);
+            }
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
