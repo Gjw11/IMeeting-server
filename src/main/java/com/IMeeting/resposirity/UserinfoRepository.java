@@ -17,10 +17,12 @@ import java.util.Optional;
  */
 @Repository
 public interface UserinfoRepository extends JpaRepository<Userinfo,Integer>{
-    Userinfo findByUsernameAndPassword(String username,String password);
-    Userinfo findByPhoneAndPassword(String phone,String password);
+    Userinfo findByUsernameAndPasswordAndStatus(String username,String password,Integer status);
+    Userinfo findByPhoneAndPasswordAndStatus(String phone,String password,Integer status);
     Userinfo findByPhone(String phone);
     List<Userinfo> findByDepartId(Integer departId);
+    List<Userinfo> findByTenantIdAndStatus(Integer tenantId,Integer status);
+    List<Userinfo> findByPositionId(Integer positionId);
     Optional<Userinfo> findById(Integer id);
     @Transactional
     @Modifying(clearAutomatically = true)

@@ -2,9 +2,12 @@ package com.IMeeting.service;
 
 import com.IMeeting.entity.Depart;
 import com.IMeeting.entity.Position;
+import com.IMeeting.entity.ServerResult;
 import com.IMeeting.entity.Userinfo;
 import com.IMeeting.resposirity.UserinfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by gjw on 2018/11/19.
@@ -14,4 +17,6 @@ public interface UserinfoService {
     Userinfo getUserinfo(Integer id);
     Depart getDepart(Integer id);
     Position getPosition(Integer id);
+     /*-------------华丽分割线-------------*/
+    ServerResult selectAllPeople(HttpServletRequest request);
 }

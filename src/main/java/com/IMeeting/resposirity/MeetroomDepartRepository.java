@@ -12,4 +12,5 @@ import java.util.List;
 @Repository
 public interface MeetroomDepartRepository extends JpaRepository<MeetroomDepart,Integer>{
     List<MeetroomDepart>findByMeetroomId(Integer meetroomId);
+    List<MeetroomDepart>findByDepartId(Integer departId);
 }

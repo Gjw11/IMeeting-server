@@ -208,5 +208,11 @@ public class UserinfoController {
         serverResult.setStatus(true);
         return serverResult;
     }
-
+    /*-------------华丽分割线-------------*/
+    @RequestMapping("/selectAllPeople")
+    public ServerResult selectAllPeople(HttpServletRequest request) {
+        ServerResult serverResult = new ServerResult();
+        serverResult.setStatus(true);
+        return serverResult;
+    }
 }
