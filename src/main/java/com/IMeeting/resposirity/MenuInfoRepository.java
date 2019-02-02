@@ -11,5 +11,5 @@ import java.util.List;
  */
 @Repository
 public interface MenuInfoRepository extends JpaRepository<MenuInfo,Integer>{
-    List<MenuInfo> findByRoleId(Integer roleId);
+
 }
