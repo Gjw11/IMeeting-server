@@ -24,6 +24,7 @@ public interface UserinfoRepository extends JpaRepository<Userinfo,Integer>{
     List<Userinfo> findByDepartId(Integer departId);
     List<Userinfo> findByTenantIdAndStatus(Integer tenantId,Integer status);
     List<Userinfo> findByPositionId(Integer positionId);
+    List<Userinfo> findByRoleId(Integer roleId);
     Optional<Userinfo> findById(Integer id);
     @Transactional
     @Modifying(clearAutomatically = true)
