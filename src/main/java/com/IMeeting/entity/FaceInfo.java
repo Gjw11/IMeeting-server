@@ -13,7 +13,7 @@ public class FaceInfo {
     private Integer id;
     private Integer userId;
     private String faceAddress;
-    private String faceDetail;
+    private byte[] faceDetail;
     private Integer status;
     private Integer tenantId;
 
@@ -41,11 +41,11 @@ public class FaceInfo {
         this.faceAddress = faceAddress;
     }
 
-    public String getFaceDetail() {
+    public byte[] getFaceDetail() {
         return faceDetail;
     }
 
-    public void setFaceDetail(String faceDetail) {
+    public void setFaceDetail(byte[] faceDetail) {
         this.faceDetail = faceDetail;
     }
 

@@ -2,8 +2,13 @@ package com.IMeeting.controller;
 
 import com.IMeeting.entity.FaceInfo;
 import com.IMeeting.entity.ServerResult;
+import com.IMeeting.entity.Userinfo;
 import com.IMeeting.resposirity.FaceInfoRepository;
+import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.FaceService;
+import com.IMeeting.util.BinaryConversion;
+import com.IMeeting.util.FaceRecognition;
+import com.IMeeting.util.FileUtil;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
@@ -30,6 +35,8 @@ public class FaceController {
     private FaceInfoRepository faceInfoRepository;
     @Autowired
     private FaceService faceService;
+    @Autowired
+    private UserinfoRepository userinfoRepository;
 
     public String getUrl(MultipartFile fileupload) throws OSSException, ClientException, IOException {
         String endpoint = "oss-cn-beijing.aliyuncs.com";
@@ -59,7 +66,7 @@ public class FaceController {
     public ServerResult insertPicture(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("faceDetail") String faceDetail, HttpServletRequest request) throws OSSException, ClientException, IOException {
         FaceInfo faceInfo = new FaceInfo();
         faceInfo.setTenantId((Integer) request.getSession().getAttribute("tenantId"));
-        faceInfo.setFaceDetail(faceDetail);
+        faceInfo.setFaceDetail(BinaryConversion.parseHexStr2Byte(faceDetail));
         faceInfo.setStatus(0);
         faceInfo.setUserId((Integer) request.getSession().getAttribute("userId"));
         faceInfo.setFaceAddress(getUrl(fileupload));
@@ -67,6 +74,19 @@ public class FaceController {
         ServerResult serverResult = new ServerResult();
         if (bol != null)
             serverResult.setStatus(true);
+        return serverResult;
+    }
+    //审核失败重新上传面部信息
+    @RequestMapping("/update")
+    public ServerResult update(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("faceDetail") String faceDetail, HttpServletRequest request) throws OSSException, ClientException, IOException {
+        String faceAddress=getUrl(fileupload);
+        byte[]realFaceDetail=BinaryConversion.parseHexStr2Byte(faceDetail);
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        int bol=faceInfoRepository.updateFaceInfo(userId,0,faceAddress,realFaceDetail);
+        ServerResult serverResult = new ServerResult();
+        if (bol!=0){
+            serverResult.setStatus(true);
+        }
         return serverResult;
     }
 
@@ -121,5 +141,24 @@ public class FaceController {
         serverResult.setStatus(true);
         return serverResult;
     }
+    //管理端上传员工人脸数据
+    @RequestMapping("/insertByManager")
+    public ServerResult insertByManager(@RequestParam("fileupload") MultipartFile fileupload,@RequestParam("worknum")String worknum,HttpServletRequest request) throws IOException {
+        Userinfo userinfo=userinfoRepository.findByWorknum(worknum);
+        ServerResult serverResult=new ServerResult();
+        if (userinfo==null){
+            serverResult.setMessage("该工号的员工不存在");
+        }else{
+            FaceInfo faceInfo = new FaceInfo();
+            faceInfo.setTenantId((Integer) request.getSession().getAttribute("tenantId"));
+            FaceRecognition faceRecognition=new FaceRecognition();
+            faceInfo.setFaceDetail(faceRecognition.getFeatureData(FileUtil.multoFile(fileupload)));
+            faceInfo.setStatus(1);
+            faceInfo.setUserId(userinfo.getId());
+            faceInfo.setFaceAddress(getUrl(fileupload));
+           Integer userId=userinfo.getId();
 
+        }
+        return serverResult;
+    }
 }

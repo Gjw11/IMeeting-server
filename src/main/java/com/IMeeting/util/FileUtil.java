@@ -1,5 +1,6 @@
 package com.IMeeting.util;
 
+import org.apache.http.HttpException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -62,6 +63,18 @@ public class FileUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static File multoFile(MultipartFile mulFile)throws IOException{
+        File file = null;
+        try {
+            file=File.createTempFile("tmp", null);
+            mulFile.transferTo(file);
+            file.deleteOnExit();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 }
 
