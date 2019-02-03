@@ -3,12 +3,11 @@ package com.IMeeting.controller;
 import com.IMeeting.entity.FaceInfo;
 import com.IMeeting.entity.ServerResult;
 import com.IMeeting.resposirity.FaceInfoRepository;
+import com.IMeeting.service.FaceService;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +28,9 @@ import java.util.Date;
 public class FaceController {
     @Autowired
     private FaceInfoRepository faceInfoRepository;
+    @Autowired
+    private FaceService faceService;
+
     public String getUrl(MultipartFile fileupload) throws OSSException, ClientException, IOException {
         String endpoint = "oss-cn-beijing.aliyuncs.com";
         String accessKeyId = "LTAI8bzC3TvwnYNZ";
@@ -52,33 +54,70 @@ public class FaceController {
         URL url = ossClient.generatePresignedUrl(bucketName, dateString, expiration);
         return url.toString();
     }
+
     @RequestMapping("/insert")
     public ServerResult insertPicture(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("faceDetail") String faceDetail, HttpServletRequest request) throws OSSException, ClientException, IOException {
-        FaceInfo faceInfo=new FaceInfo();
+        FaceInfo faceInfo = new FaceInfo();
         faceInfo.setTenantId((Integer) request.getSession().getAttribute("tenantId"));
         faceInfo.setFaceDetail(faceDetail);
         faceInfo.setStatus(0);
         faceInfo.setUserId((Integer) request.getSession().getAttribute("userId"));
         faceInfo.setFaceAddress(getUrl(fileupload));
-        FaceInfo bol=faceInfoRepository.saveAndFlush(faceInfo);
-        ServerResult serverResult=new ServerResult();
-        if (bol!=null)
+        FaceInfo bol = faceInfoRepository.saveAndFlush(faceInfo);
+        ServerResult serverResult = new ServerResult();
+        if (bol != null)
             serverResult.setStatus(true);
         return serverResult;
     }
+
     //查询该用户数据库中是否有人脸数据记录，如果有及相应状态
     //查询结构返回code -1表示没有人脸数据 0表示未审核 1表示已通过 2表示未通过
     @RequestMapping("/selectStatus")
-    public ServerResult insertPicture(HttpServletRequest request){
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        FaceInfo faceInfo=faceInfoRepository.findByUserId(userId);
-        ServerResult serverResult=new ServerResult();
-        if (faceInfo==null)
+    public ServerResult insertPicture(HttpServletRequest request) {
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        FaceInfo faceInfo = faceInfoRepository.findByUserId(userId);
+        ServerResult serverResult = new ServerResult();
+        if (faceInfo == null)
             serverResult.setCode(-1);//没有该用户人脸数据
-        else{
-            Integer status=faceInfo.getStatus();
+        else {
+            Integer status = faceInfo.getStatus();
             serverResult.setCode(status);
         }
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
+    /*-------------华丽分割线-------------*/
+    //查询该租户所有员工的面部信息
+    @RequestMapping("/selectAll")
+    public ServerResult selectAll(HttpServletRequest request) {
+        ServerResult serverResult = faceService.selectAll(request);
+        return serverResult;
+    }
+
+    //审核通过
+    @RequestMapping("/pass")
+    public ServerResult pass(@RequestParam("faceId") Integer faceId) {
+        faceInfoRepository.updateFaceStatus(faceId, 1);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
+    //审核未通过
+    @RequestMapping("/dispass")
+    public ServerResult dispass(@RequestParam("faceId") Integer faceId) {
+        faceInfoRepository.updateFaceStatus(faceId, 2);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
+    //删除某一员工的人脸数据
+    @RequestMapping("/deleteOne")
+    public ServerResult deleteOne(@RequestParam("faceId") Integer faceId) {
+        faceInfoRepository.deleteOne(faceId);
+        ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
     }
