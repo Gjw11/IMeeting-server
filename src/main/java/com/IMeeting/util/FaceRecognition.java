@@ -19,7 +19,7 @@ import java.util.List;
 public class FaceRecognition {
 
     final String APP_ID = "2q5Ymv1QbkBqp5L46toQ8cquVbU1CbiV32ApSsiwJYY5";
-    final String SDK_KEY = "CKhPAJE8NjvqzyLVsmwtZqdjMQ9bsEDPVGfM65PaJLip";
+    final String SDK_KEY = "CKhPAJE8NjvqzyLVsmwtZqdjDHaSJbZnAtt92BuGmAp6";
 
 //    public static void main(String[] args) {
 //        byte[] sourceFeature = null;
@@ -58,20 +58,37 @@ public class FaceRecognition {
         //返回图片中提取的人脸特征值
         return faceFeature.getFeatureData();
 
-        /*
-        //人脸对比
-        FaceFeature targetFaceFeature = new FaceFeature();
-        targetFaceFeature.setFeatureData(faceFeature.getFeatureData());
+    }
+    /*
+     * @param 源人脸特征值
+     * @param 目标脸特征值
+     * @return 相似度
+     */
+    public double faceCompare(byte source[], byte target[]) {
+        FaceEngine faceEngine = new FaceEngine();
+        //激活引擎
+        faceEngine.active(APP_ID, SDK_KEY);
+        //引擎配置 支持人脸侦测与人脸识别
+        EngineConfiguration engineConfiguration = EngineConfiguration.builder().functionConfiguration(
+                FunctionConfiguration.builder()
+                        .supportFaceDetect(true)
+                        .supportFaceRecognition(true)
+                        .build()).build();
+        //初始化引擎
+        faceEngine.init(engineConfiguration);
 
-        FaceFeature sourceFaceFeature = new FaceFeature(sourceFeature);
+        //人脸对比
+        FaceFeature sourceFeature = new FaceFeature(source);
+        FaceFeature targetFaceFeature = new FaceFeature(target);
 
         FaceSimilar faceSimilar = new FaceSimilar();
-        faceEngine.compareFaceFeature(targetFaceFeature, sourceFaceFeature, faceSimilar);
+        faceEngine.compareFaceFeature(targetFaceFeature, sourceFeature, faceSimilar);
 
         System.out.println("人脸相似度: " + faceSimilar.getScore());
         return faceSimilar.getScore();
-        */
     }
+
+
 
     /**
      *获取图片数据

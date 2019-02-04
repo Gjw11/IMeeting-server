@@ -28,5 +28,5 @@ public interface FaceInfoRepository extends JpaRepository<FaceInfo,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "delete from FaceInfo m where m.id=?1")
     int deleteOne(Integer faceId);
-
+    List<FaceInfo>findByTenantIdAndStatus(Integer tenantId,Integer status);
 }

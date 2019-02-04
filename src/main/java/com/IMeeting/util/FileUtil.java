@@ -1,7 +1,9 @@
 package com.IMeeting.util;
 
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.http.HttpException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -66,15 +68,29 @@ public class FileUtil {
     }
 
     public static File multoFile(MultipartFile mulFile)throws IOException{
-        File file = null;
+        File f = null;
+        if(mulFile.equals("")||mulFile.getSize()<=0){
+            mulFile = null;
+        }else{
+            InputStream ins = mulFile.getInputStream();
+            f=new File(mulFile.getOriginalFilename());
+            inputStreamToFile(ins, f);
+        }
+        return f;
+    }
+    public static void inputStreamToFile(InputStream ins,File file) {
         try {
-            file=File.createTempFile("tmp", null);
-            mulFile.transferTo(file);
-            file.deleteOnExit();
-        } catch (IOException e) {
+            OutputStream os = new FileOutputStream(file);
+            int bytesRead = 0;
+            byte[] buffer = new byte[8192];
+            while ((bytesRead = ins.read(buffer, 0, 8192)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.close();
+            ins.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return file;
     }
 }
 

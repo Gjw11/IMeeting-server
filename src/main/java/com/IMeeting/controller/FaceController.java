@@ -20,10 +20,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by gjw on 2019/1/18.
@@ -76,15 +78,16 @@ public class FaceController {
             serverResult.setStatus(true);
         return serverResult;
     }
+
     //审核失败重新上传面部信息
     @RequestMapping("/update")
     public ServerResult update(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("faceDetail") String faceDetail, HttpServletRequest request) throws OSSException, ClientException, IOException {
-        String faceAddress=getUrl(fileupload);
-        byte[]realFaceDetail=BinaryConversion.parseHexStr2Byte(faceDetail);
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        int bol=faceInfoRepository.updateFaceInfo(userId,0,faceAddress,realFaceDetail);
+        String faceAddress = getUrl(fileupload);
+        byte[] realFaceDetail = BinaryConversion.parseHexStr2Byte(faceDetail);
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        int bol = faceInfoRepository.updateFaceInfo(userId, 0, faceAddress, realFaceDetail);
         ServerResult serverResult = new ServerResult();
-        if (bol!=0){
+        if (bol != 0) {
             serverResult.setStatus(true);
         }
         return serverResult;
@@ -119,7 +122,7 @@ public class FaceController {
     @RequestMapping("/pass")
     public ServerResult pass(@RequestParam("faceId") Integer faceId) {
         faceInfoRepository.updateFaceStatus(faceId, 1);
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
     }
@@ -128,7 +131,7 @@ public class FaceController {
     @RequestMapping("/dispass")
     public ServerResult dispass(@RequestParam("faceId") Integer faceId) {
         faceInfoRepository.updateFaceStatus(faceId, 2);
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
     }
@@ -137,28 +140,59 @@ public class FaceController {
     @RequestMapping("/deleteOne")
     public ServerResult deleteOne(@RequestParam("faceId") Integer faceId) {
         faceInfoRepository.deleteOne(faceId);
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
     }
+
     //管理端上传员工人脸数据
     @RequestMapping("/insertByManager")
-    public ServerResult insertByManager(@RequestParam("fileupload") MultipartFile fileupload,@RequestParam("worknum")String worknum,HttpServletRequest request) throws IOException {
-        Userinfo userinfo=userinfoRepository.findByWorknum(worknum);
-        ServerResult serverResult=new ServerResult();
-        if (userinfo==null){
+    public ServerResult insertByManager(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("worknum") String worknum, HttpServletRequest request) throws IOException {
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        Userinfo userinfo = userinfoRepository.findByWorknumAndTenantId(worknum, tenantId);
+        ServerResult serverResult = new ServerResult();
+        if (userinfo == null) {
             serverResult.setMessage("该工号的员工不存在");
-        }else{
-            FaceInfo faceInfo = new FaceInfo();
-            faceInfo.setTenantId((Integer) request.getSession().getAttribute("tenantId"));
-            FaceRecognition faceRecognition=new FaceRecognition();
-            faceInfo.setFaceDetail(faceRecognition.getFeatureData(FileUtil.multoFile(fileupload)));
-            faceInfo.setStatus(1);
-            faceInfo.setUserId(userinfo.getId());
-            faceInfo.setFaceAddress(getUrl(fileupload));
-           Integer userId=userinfo.getId();
-
+        } else {
+            Integer userId = userinfo.getId();
+            FaceInfo faceinfo = faceInfoRepository.findByUserId(userId);
+            if (faceinfo != null) {
+                serverResult.setMessage("该工号的员工面部信息已存在，请勿重复录入");
+            } else {
+                FaceInfo faceInfo = new FaceInfo();
+                faceInfo.setTenantId(tenantId);
+                FaceRecognition faceRecognition = new FaceRecognition();
+                File f=FileUtil.multoFile(fileupload);
+                faceInfo.setFaceDetail(faceRecognition.getFeatureData(f));
+                File del = new File(f.toURI());
+                del.delete();
+                faceInfo.setStatus(1);
+                faceInfo.setUserId(userId);
+                faceInfo.setFaceAddress(getUrl(fileupload));
+                faceInfoRepository.saveAndFlush(faceInfo);
+                serverResult.setStatus(true);
+            }
         }
+        return serverResult;
+    }
+
+    //删除某一员工的人脸数据
+    @RequestMapping("/compare")
+    public ServerResult compare(@RequestParam("fileupload") MultipartFile fileupload,HttpServletRequest request) throws IOException {
+        File f=FileUtil.multoFile(fileupload);
+        FaceRecognition faceRecognition=new FaceRecognition();
+        byte[]source=faceRecognition.getFeatureData(f);
+        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
+        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
+        FaceInfo faceInfo=new FaceInfo();
+        for (int i=0;i<faceInfoList.size();i++){
+            faceInfo=faceInfoList.get(i);
+            byte[]target=faceInfo.getFaceDetail();
+            double similarResult=faceRecognition.faceCompare(source,target);
+            System.out.println(similarResult);
+        }
+        ServerResult serverResult = new ServerResult();
+        serverResult.setStatus(true);
         return serverResult;
     }
 }

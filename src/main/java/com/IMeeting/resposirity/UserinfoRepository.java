@@ -26,7 +26,6 @@ public interface UserinfoRepository extends JpaRepository<Userinfo,Integer>{
     List<Userinfo> findByPositionId(Integer positionId);
     List<Userinfo> findByRoleId(Integer roleId);
     Optional<Userinfo> findById(Integer id);
-    Userinfo findByWorknum(String worknum);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Userinfo m set m.password=?1 where m.phone=?2")
