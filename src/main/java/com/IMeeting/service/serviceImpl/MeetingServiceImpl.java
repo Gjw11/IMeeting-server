@@ -875,6 +875,7 @@ public class MeetingServiceImpl implements MeetingService {
             switch (meeting.getStatus()) {
                 case 1:
                     status = "未开始";
+                    break;
                 case 3:
                     status = "进行中";
                     break;
