@@ -178,6 +178,7 @@ public class UserinfoController {
         userinfo.put("worknum", u.getWorknum());
         userinfo.put("phone", u.getPhone());
         userinfo.put("resume", u.getResume());
+        userinfo.put("roleId", u.getRoleId());
         userinfo.put("departName", departName);
         userinfo.put("positionName", positionName);
         serverResult.setData(userinfo);
