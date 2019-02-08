@@ -191,6 +191,8 @@ public class FaceController {
             double similarResult=faceRecognition.faceCompare(source,target);
             System.out.println(similarResult);
         }
+        File del = new File(f.toURI());
+        del.delete();
         ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;

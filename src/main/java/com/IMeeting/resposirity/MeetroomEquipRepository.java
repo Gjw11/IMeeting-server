@@ -20,4 +20,8 @@ public interface MeetroomEquipRepository extends JpaRepository<MeetroomEquip,Int
     @Modifying(clearAutomatically = true)
     @Query(value = "delete from MeetroomEquip m where m.equipId=?1")
     int deleteByEquipId(Integer equipId);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "delete from MeetroomEquip m where m.meetroomId=?1")
+    int deleteByMeetRoomId(Integer meetRoomId);
 }

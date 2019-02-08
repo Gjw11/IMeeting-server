@@ -13,7 +13,7 @@ public class MeetroomDepart {
     private Integer id;
     private Integer meetroomId;
     private Integer departId;
-    private Integer satus;
+    private Integer status;
 
     public Integer getId() {
         return id;
@@ -39,11 +39,11 @@ public class MeetroomDepart {
         this.departId = departId;
     }
 
-    public Integer getSatus() {
-        return satus;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setSatus(Integer satus) {
-        this.satus = satus;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }
