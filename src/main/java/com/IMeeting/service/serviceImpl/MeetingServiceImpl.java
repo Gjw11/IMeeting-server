@@ -275,16 +275,22 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingRepository.saveAndFlush(meeting);
                 Integer meetingId = meeting.getId();
                 JoinPerson joinPerson;
-                joinPerson = new JoinPerson();
-                joinPerson.setMeetingId(meetingId);
-                joinPerson.setUserId(userId);
-                joinPerson.setStatus(0);
-                joinPersonRepository.saveAndFlush(joinPerson);
+                int b=0;
                 List<Integer> list = reserveParameter.getJoinPeopleId();
                 for (int i = 0; i < list.size(); i++) {
+                    Integer id=list.get(i);
+                    if (id.equals(userId))
+                        b=1;
                     joinPerson = new JoinPerson();
                     joinPerson.setMeetingId(meetingId);
-                    joinPerson.setUserId(list.get(i));
+                    joinPerson.setUserId(id);
+                    joinPerson.setStatus(0);
+                    joinPersonRepository.saveAndFlush(joinPerson);
+                }
+                if (b==0){
+                    joinPerson = new JoinPerson();
+                    joinPerson.setMeetingId(meetingId);
+                    joinPerson.setUserId(userId);
                     joinPerson.setStatus(0);
                     joinPersonRepository.saveAndFlush(joinPerson);
                 }
@@ -335,16 +341,22 @@ public class MeetingServiceImpl implements MeetingService {
         meetingRepository.saveAndFlush(meeting);
         Integer meetingId = meeting.getId();
         JoinPerson joinPerson;
-        joinPerson = new JoinPerson();
-        joinPerson.setMeetingId(meetingId);
-        joinPerson.setUserId(userId);
-        joinPerson.setStatus(0);
-        joinPersonRepository.saveAndFlush(joinPerson);
+        int b=0;
         List<Integer> list = reserveParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
+            Integer id=list.get(i);
+            if (id.equals(userId))
+                b=1;
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
-            joinPerson.setUserId(list.get(i));
+            joinPerson.setUserId(id);
+            joinPerson.setStatus(0);
+            joinPersonRepository.saveAndFlush(joinPerson);
+        }
+        if (b==0){
+            joinPerson = new JoinPerson();
+            joinPerson.setMeetingId(meetingId);
+            joinPerson.setUserId(userId);
             joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
@@ -399,16 +411,22 @@ public class MeetingServiceImpl implements MeetingService {
         Meeting m = meetingRepository.saveAndFlush(meeting);
         Integer meetingId = meeting.getId();
         JoinPerson joinPerson;
-        joinPerson = new JoinPerson();
-        joinPerson.setMeetingId(meetingId);
-        joinPerson.setUserId(userId);
-        joinPerson.setStatus(0);
-        joinPersonRepository.saveAndFlush(joinPerson);
+        int b=0;
         List<Integer> list = coordinateParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
+            Integer id=list.get(i);
+            if (id.equals(userId))
+                b=1;
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
-            joinPerson.setUserId(list.get(i));
+            joinPerson.setUserId(id);
+            joinPerson.setStatus(0);
+            joinPersonRepository.saveAndFlush(joinPerson);
+        }
+        if (b==0){
+            joinPerson = new JoinPerson();
+            joinPerson.setMeetingId(meetingId);
+            joinPerson.setUserId(userId);
             joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
