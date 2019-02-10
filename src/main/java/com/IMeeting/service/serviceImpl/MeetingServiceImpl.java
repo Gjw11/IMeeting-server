@@ -967,6 +967,7 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setStatus(true);
         return serverResult;
     }
+     /*-------------华丽分割线-------------*/
 
 
 }

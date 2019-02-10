@@ -206,5 +206,10 @@ public class MeetingController {
         return serverResult;
     }
        /*-------------华丽分割线-------------*/
-    
+       @RequestMapping("/toShowMeetingData")
+       public ServerResult toShowMeetingData(HttpServletRequest request){
+           ServerResult serverResult=new ServerResult();
+           serverResult.setStatus(true);
+           return serverResult;
+       }
 }

@@ -44,4 +44,6 @@ public interface MeetingService {
     ServerResult sendLeaveInformation(LeaveInformation leaveInformation,HttpServletRequest request);
     ServerResult countLeaveInformation(HttpServletRequest request);
     ServerResult showOneMeetingLeaveInfo(Integer meetingId);
+    /*-------------华丽分割线-------------*/
+//    List findBySpecification()
 }

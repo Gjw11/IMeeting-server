@@ -20,7 +20,6 @@ import java.util.List;
  */
 @Repository
 public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
-    List<Meeting> findAll(Specification<Meeting> specification);
     List<Meeting> findByMeetroomIdAndMeetDateAndStatusOrderByBegin(Integer meetRoomId, String meetDate,Integer status);
     @Transactional
     @Modifying
@@ -71,4 +70,6 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>{
     List<Meeting> MyJoinMeetingByDate(Integer userId,String date);
     @Query(value = "select m from Meeting m where m.userId=?1 and (m.status=1 or m.status=3 )order by m.begin")
     List<Meeting> selectByUserIdAndStatus(Integer userId);
+    /*-------------华丽分割线-------------*/
+    List findAll(Specification mySpec);
 }
