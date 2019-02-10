@@ -8,6 +8,7 @@ public class LeaveInfoResult {
     String peopleName;
     String peoplePhone;
     String note;
+    Integer status;
 
     public Integer getLeaveInfoId() {
         return leaveInfoId;
@@ -40,4 +41,8 @@ public class LeaveInfoResult {
     public void setNote(String note) {
         this.note = note;
     }
+
+    public Integer getStatus() { return status; }
+
+    public void setStatus(Integer status) { this.status = status; }
 }
