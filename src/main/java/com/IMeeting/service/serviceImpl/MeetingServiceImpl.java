@@ -6,8 +6,11 @@ import com.IMeeting.service.MeetingService;
 import com.IMeeting.service.UserinfoService;
 import com.IMeeting.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,7 +90,7 @@ public class MeetingServiceImpl implements MeetingService {
                     }
                 }
             }
-            if (bol==1) {
+            if (bol == 1) {
                 meetrooms.add(lists.get(i));
             }
         }
@@ -276,19 +279,19 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingRepository.saveAndFlush(meeting);
                 Integer meetingId = meeting.getId();
                 JoinPerson joinPerson;
-                int b=0;
+                int b = 0;
                 List<Integer> list = reserveParameter.getJoinPeopleId();
                 for (int i = 0; i < list.size(); i++) {
-                    Integer id=list.get(i);
+                    Integer id = list.get(i);
                     if (id.equals(userId))
-                        b=1;
+                        b = 1;
                     joinPerson = new JoinPerson();
                     joinPerson.setMeetingId(meetingId);
                     joinPerson.setUserId(id);
                     joinPerson.setStatus(0);
                     joinPersonRepository.saveAndFlush(joinPerson);
                 }
-                if (b==0){
+                if (b == 0) {
                     joinPerson = new JoinPerson();
                     joinPerson.setMeetingId(meetingId);
                     joinPerson.setUserId(userId);
@@ -342,19 +345,19 @@ public class MeetingServiceImpl implements MeetingService {
         meetingRepository.saveAndFlush(meeting);
         Integer meetingId = meeting.getId();
         JoinPerson joinPerson;
-        int b=0;
+        int b = 0;
         List<Integer> list = reserveParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
-            Integer id=list.get(i);
+            Integer id = list.get(i);
             if (id.equals(userId))
-                b=1;
+                b = 1;
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(id);
             joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
-        if (b==0){
+        if (b == 0) {
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(userId);
@@ -412,19 +415,19 @@ public class MeetingServiceImpl implements MeetingService {
         Meeting m = meetingRepository.saveAndFlush(meeting);
         Integer meetingId = meeting.getId();
         JoinPerson joinPerson;
-        int b=0;
+        int b = 0;
         List<Integer> list = coordinateParameter.getJoinPeopleId();
         for (int i = 0; i < list.size(); i++) {
-            Integer id=list.get(i);
+            Integer id = list.get(i);
             if (id.equals(userId))
-                b=1;
+                b = 1;
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(id);
             joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
         }
-        if (b==0){
+        if (b == 0) {
             joinPerson = new JoinPerson();
             joinPerson.setMeetingId(meetingId);
             joinPerson.setUserId(userId);
@@ -469,7 +472,7 @@ public class MeetingServiceImpl implements MeetingService {
             serverResult.setMessage("会议取消成功");
         } else if (status == 8) {
             meetingRepository.updateStatus(meetingId, 5);
-            coordinateInfoRepository.updateStatusByMeetingId(meetingId,3);
+            coordinateInfoRepository.updateStatusByMeetingId(meetingId, 3);
             serverResult.setMessage("调用取消成功");
         } else {
             meetingRepository.updateStatus(meetingId, 5);
@@ -870,6 +873,7 @@ public class MeetingServiceImpl implements MeetingService {
     public void updateMeetingOverStatus(String nowTime, Integer beforeStatus, Integer afterStatus) {
         meetingRepository.updateMeetingOverStatus(nowTime, beforeStatus, afterStatus);
     }
+
     //显示某一天我参加的会议
     @Override
     public ServerResult selectMyJoinMeetingByDate(String meetDate, HttpServletRequest request) {
@@ -910,66 +914,107 @@ public class MeetingServiceImpl implements MeetingService {
         serverResult.setStatus(true);
         return serverResult;
     }
+
     //请假，请假原因可略,参数为请假原因，会议id
     @Override
     public ServerResult sendLeaveInformation(LeaveInformation leaveInformation, HttpServletRequest request) {
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
         leaveInformation.setStatus(0);
         leaveInformation.setUserId(userId);
         leaveInformationRepository.saveAndFlush(leaveInformation);
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setMessage("请假已提交");
         serverResult.setStatus(true);
         return serverResult;
     }
+
     //根据日期显示未开始和进行中会议的请假请求总数和未处理请假数量
     @Override
     public ServerResult countLeaveInformation(HttpServletRequest request) {
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        List<Meeting> meetings=meetingRepository.selectByUserIdAndStatus(userId);
-        List<LeaveInformationCount> leaveInformationCounts=new ArrayList<>();
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        List<Meeting> meetings = meetingRepository.selectByUserIdAndStatus(userId);
+        List<LeaveInformationCount> leaveInformationCounts = new ArrayList<>();
         Meeting meeting;
         LeaveInformationCount leaveInformationCount;
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer meetingId=meeting.getId();
-            leaveInformationCount=new LeaveInformationCount();
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer meetingId = meeting.getId();
+            leaveInformationCount = new LeaveInformationCount();
             leaveInformationCount.setMeetingId(meetingId);
-            leaveInformationCount.setMeetTime(meeting.getBegin()+"-"+meeting.getOver());
+            leaveInformationCount.setMeetTime(meeting.getBegin() + "-" + meeting.getOver());
             leaveInformationCount.setTopic(meeting.getTopic());
             leaveInformationCount.setAllCount(leaveInformationRepository.countAll(meetingId));
             leaveInformationCount.setNotDealCount(leaveInformationRepository.notDealCount(meetingId));
             leaveInformationCounts.add(leaveInformationCount);
         }
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setData(leaveInformationCounts);
         serverResult.setStatus(true);
         return serverResult;
     }
+
     //查找某场会议的请假所有请假信息
     @Override
     public ServerResult showOneMeetingLeaveInfo(Integer meetingId) {
-        List<LeaveInformation>leaveInformations=leaveInformationRepository.findByMeetingIdOrderByStatus(meetingId);
+        List<LeaveInformation> leaveInformations = leaveInformationRepository.findByMeetingIdOrderByStatus(meetingId);
         LeaveInformation leaveInformation;
-        List<LeaveInfoResult>leaveInfoResults=new ArrayList<>();
+        List<LeaveInfoResult> leaveInfoResults = new ArrayList<>();
         LeaveInfoResult leaveInfoResult;
-        for (int i=0;i<leaveInformations.size();i++){
-            leaveInformation=leaveInformations.get(i);
-            leaveInfoResult=new LeaveInfoResult();
+        for (int i = 0; i < leaveInformations.size(); i++) {
+            leaveInformation = leaveInformations.get(i);
+            leaveInfoResult = new LeaveInfoResult();
             leaveInfoResult.setLeaveInfoId(leaveInformation.getId());
-            Userinfo userinfo=userinfoService.getUserinfo(leaveInformation.getUserId());
+            Userinfo userinfo = userinfoService.getUserinfo(leaveInformation.getUserId());
             leaveInfoResult.setPeopleName(userinfo.getName());
             leaveInfoResult.setPeoplePhone(userinfo.getPhone());
             leaveInfoResult.setNote(leaveInformation.getNote());
             leaveInfoResult.setStatus(leaveInformation.getStatus());
             leaveInfoResults.add(leaveInfoResult);
         }
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setData(leaveInfoResults);
         serverResult.setStatus(true);
         return serverResult;
     }
-     /*-------------华丽分割线-------------*/
 
+    /*-------------华丽分割线-------------*/
+    @Override
+    public List findBySpecification(SelectMeetingParameter sp,HttpServletRequest request) {
+        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
+        Specification<Meeting> specification = new Specification<Meeting>() {
+            @Override
+            public Predicate toPredicate(Root<Meeting> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                List<Predicate> predicatesList = new ArrayList<>();
+                Predicate tenantPredicate=cb.equal(root.get("tenantId"),tenantId);
+                predicatesList.add(tenantPredicate);
+                System.out.println(sp.getTopic());
+                if (!StringUtils.isEmpty(sp.getTopic())) {
+                    Predicate topicPredicate = cb.like(root.get("topic"), '%'+sp.getTopic()+'%');
+                    predicatesList.add(topicPredicate);
+                }
+                if (!StringUtils.isEmpty(sp.getReserveName())) {
+                    Join<Meeting,Userinfo>userinfoJoin=root.join("userinfo",JoinType.LEFT);
+                    Predicate reserveNamePredicate = cb.like(userinfoJoin.get("name"), '%'+sp.getReserveName()+'%');
+                    predicatesList.add(reserveNamePredicate);
+                }
+                if (!StringUtils.isEmpty(sp.getDepartmentId())) {
+                    Predicate departmentIdPredicate = cb.equal(root.get("departmentId"), sp.getDepartmentId());
+                    predicatesList.add(departmentIdPredicate);
+                }
+                if (!StringUtils.isEmpty(sp.getMeetRoomId())) {
+                    Predicate meetroomIdPredicate = cb.equal(root.get("meetroomId"), sp.getMeetRoomId());
+                    predicatesList.add(meetroomIdPredicate);
+                }
+                if (!StringUtils.isEmpty(sp.getSelectBegin())&&!StringUtils.isEmpty(sp.getSelectOver())) {
+                    Predicate meetDatePredicate = cb.between(root.get("meetDate"), sp.getSelectBegin(),sp.getSelectOver());
+                    predicatesList.add(meetDatePredicate);
+                }
+                query.orderBy(cb.asc(root.get("begin")),cb.asc(root.get("status")));
+                Predicate[] predicates = new Predicate[predicatesList.size()];
+                return cb.and(predicatesList.toArray(predicates));
+            }
+        };
+        return meetingRepository.findAll(specification);
+    }
 
 }

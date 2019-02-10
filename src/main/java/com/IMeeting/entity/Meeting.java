@@ -17,6 +17,7 @@ public class Meeting {
     private String content;
     private String begin;
     private String over;
+    @Column(name = "user_id",insertable = false, updatable = false, nullable = false)
     private Integer userId;
     private Integer meetroomId;
     private Integer status;
@@ -25,6 +26,39 @@ public class Meeting {
     private Integer prepareTime;
     private String createTime;
     private Integer lastTime;
+    @Column(name = "depart_id",insertable = false, updatable = false, nullable = false)
+    private Integer departId;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private Userinfo userinfo;
+    @OneToOne
+    @JoinColumn(name = "depart_id")
+    private Depart depart;
+
+    public Userinfo getUserinfo() {
+        return userinfo;
+    }
+
+    public void setUserinfo(Userinfo userinfo) {
+        this.userinfo = userinfo;
+    }
+
+    public Depart getDepart() {
+        return depart;
+    }
+
+    public void setDepart(Depart depart) {
+        this.depart = depart;
+    }
+
+    public Integer getDepartId() {
+        return departId;
+    }
+
+    public void setDepartId(Integer departId) {
+        this.departId = departId;
+    }
 
     public void setPrepareTime(Integer prepareTime) {
         this.prepareTime = prepareTime;

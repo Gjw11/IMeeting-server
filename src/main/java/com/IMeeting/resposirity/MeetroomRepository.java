@@ -39,4 +39,5 @@ public interface MeetroomRepository extends JpaRepository<Meetroom,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meetroom m set m.name=?2,m.num=?3,m.place=?4,m.contain=?5 where m.id=?1")
     int updateMeetRoom(Integer meetRoomId,String name,String num,String place,Integer contain);
+    List<Meetroom> findByTenantId(Integer tenantId);
 }

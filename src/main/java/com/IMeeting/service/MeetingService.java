@@ -45,5 +45,5 @@ public interface MeetingService {
     ServerResult countLeaveInformation(HttpServletRequest request);
     ServerResult showOneMeetingLeaveInfo(Integer meetingId);
     /*-------------华丽分割线-------------*/
-//    List findBySpecification()
+    List findBySpecification(SelectMeetingParameter selectMeetingParameter,HttpServletRequest request);
 }
