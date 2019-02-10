@@ -77,6 +77,7 @@ public class MeetingServiceImpl implements MeetingService {
                 bol = 1;
             } else {
                 for (int m = 0; m < meetroomDeparts.size(); m++) {
+
                     if (meetroomDeparts.get(m).getDepartId().equals(departId)) {
                         if (meetroomDeparts.get(m).getStatus().equals(1))
                             bol = 1;
@@ -960,6 +961,7 @@ public class MeetingServiceImpl implements MeetingService {
             leaveInfoResult.setPeopleName(userinfo.getName());
             leaveInfoResult.setPeoplePhone(userinfo.getPhone());
             leaveInfoResult.setNote(leaveInformation.getNote());
+            leaveInfoResult.setStatus(leaveInformation.getStatus());
             leaveInfoResults.add(leaveInfoResult);
         }
         ServerResult serverResult=new ServerResult();
