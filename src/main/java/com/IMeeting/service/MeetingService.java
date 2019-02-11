@@ -32,7 +32,7 @@ public interface MeetingService {
     ServerResult specifiedMyReserve(HttpServletRequest request,String yearMonth);
     ServerResult oneReserveDetail(Integer meetingId);
     ServerResult oneDayMyReserve(String yearMonth,HttpServletRequest request);
-    Meetroom finByMeetRoomId(Integer meetRoomId);
+    Meetroom findByMeetRoomId(Integer meetRoomId);
     ServerResult disagreeCoordinate(Integer coordinateId);
     ServerResult agreeCoordinate(Integer coordinateId);
     CoordinateInfo findByCoordinateId(Integer coordinateId);
@@ -46,6 +46,7 @@ public interface MeetingService {
     ServerResult sendLeaveInformation(LeaveInformation leaveInformation,HttpServletRequest request);
     ServerResult countLeaveInformation(HttpServletRequest request);
     ServerResult showOneMeetingLeaveInfo(Integer meetingId);
+    ServerResult findPushMessage(HttpServletRequest request);
     /*-------------华丽分割线-------------*/
     List findBySpecification(SelectMeetingParameter selectMeetingParameter,HttpServletRequest request);
     void exportMeetingRecord(List<Meeting> meetings,HttpServletResponse response) throws IOException;

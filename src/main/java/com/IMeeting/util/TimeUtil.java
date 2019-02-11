@@ -1,5 +1,7 @@
 package com.IMeeting.util;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,7 +30,7 @@ public class TimeUtil {
         ret = sourcedate.compareTo(tragetdate);
         return ret;
     }
-
+    //计算一个时间加上某分钟后的时间
     public static String addMinute(String beforeTime, int minute) {
         Calendar cal = Calendar.getInstance();
         int year = Integer.parseInt(beforeTime.substring(0, 4));
@@ -43,5 +45,20 @@ public class TimeUtil {
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String result = sf.format(afterTime);
         return result;
+    }
+    //计算两个时间之间的分钟
+    public static long reduceMinute(String startTime,String endTime) throws ParseException {
+        //看自己的时间格式选择对应的转换对象
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+        //转换成date类型
+        Date start = sdf.parse(startTime);
+        Date end = sdf.parse(endTime);
+        //获取毫秒数
+        Long startLong = start.getTime();
+        Long endLong = end.getTime();
+        //计算时间差,单位毫秒
+        Long ms = (endLong-startLong)/60000;
+        return ms;
     }
 }

@@ -237,6 +237,12 @@ public class MeetingController {
         serverResult.setStatus(true);
         return serverResult;
     }
+    //消息推送
+    @RequestMapping("/pushMessage")
+    public ServerResult pushMessage(HttpServletRequest request) {
+        ServerResult serverResult = meetingService.findPushMessage(request);
+        return serverResult;
+    }
 
     /*-------------华丽分割线-------------*/
     //跳转条件查找预定记录页面,返回显示会议室id和名字，部门id和名字
