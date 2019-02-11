@@ -171,7 +171,7 @@ public class MeetingController {
 
     //提前结束会议
     @RequestMapping("/advanceOver")
-    public ServerResult advanceOver(@RequestParam("meetingid") Integer meetingId) throws Exception {
+    public ServerResult advanceOver(@RequestParam("meetingId") Integer meetingId) throws Exception {
         ServerResult serverResult = meetingService.advanceOver(meetingId);
         return serverResult;
     }

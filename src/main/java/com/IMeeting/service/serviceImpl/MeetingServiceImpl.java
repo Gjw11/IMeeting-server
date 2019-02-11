@@ -1136,6 +1136,8 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countHourByPeople(Integer tenantId, String begin, String over) {
+        System.out.println(begin);
+        System.out.println(over);
         List<UserHour>userHours=new ArrayList<>();
         Userinfo userinfo;
         Meeting meeting;
@@ -1147,7 +1149,7 @@ public class MeetingServiceImpl implements MeetingService {
             userinfo=userinfoService.getUserinfo(userId);
             userHour=new UserHour();
             userHour.setUserName(userinfo.getName());
-            double hour= NumUtil.hold2(meetingRepository.countHourByUser(userId,begin,over));
+            double hour= NumUtil.hold2((meetingRepository.countHourByUser(userId,begin,over))*0.0166667);
             userHour.setHour(hour);
             userHours.add(userHour);
         }
