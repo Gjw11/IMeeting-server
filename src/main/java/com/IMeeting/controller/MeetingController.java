@@ -7,6 +7,7 @@ import com.IMeeting.resposirity.MeetroomRepository;
 import com.IMeeting.service.GroupService;
 import com.IMeeting.service.MeetingService;
 import com.IMeeting.util.TimeUtil;
+import com.aliyuncs.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -259,5 +262,20 @@ public class MeetingController {
         serverResult.setStatus(true);
         return serverResult;
     }
-
+    //导出会议预定情况，需要和findMeetingBySpecification一样的条件传入
+    @RequestMapping("/exportMeetingRecord")
+    public void exportMeetingRecord(@RequestBody SelectMeetingParameter selectMeetingParameter, HttpServletRequest request,HttpServletResponse response) throws IOException {
+        ServerResult serverResult = new ServerResult();
+        List<Meeting> meetings = meetingService.findBySpecification(selectMeetingParameter, request);
+        meetingService.exportMeetingRecord(meetings,response);
+    }
+    @RequestMapping("/selectDataCount")
+    public ServerResult selectDataCount(HttpServletRequest request,String begin,String over) {
+        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
+        List<UserHour> userHours = meetingService.countHourByPeople(tenantId,begin, over);
+        ServerResult serverResult = new ServerResult();
+        serverResult.setData(userHours);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
 }

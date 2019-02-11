@@ -2,9 +2,13 @@ package com.IMeeting.service.serviceImpl;
 
 import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.*;
+import com.IMeeting.service.DepartService;
 import com.IMeeting.service.MeetingService;
 import com.IMeeting.service.UserinfoService;
+import com.IMeeting.util.NumUtil;
 import com.IMeeting.util.TimeUtil;
+import org.apache.catalina.User;
+import org.apache.poi.hssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -12,6 +16,8 @@ import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +54,8 @@ public class MeetingServiceImpl implements MeetingService {
     private CoordinateInfoRepository coordinateInfoRepository;
     @Autowired
     private LeaveInformationRepository leaveInformationRepository;
+    @Autowired
+    private DepartService departService;
 
     @Override
     public MeetroomParameter selectParameter(Integer tenantId) {
@@ -979,22 +987,21 @@ public class MeetingServiceImpl implements MeetingService {
 
     /*-------------华丽分割线-------------*/
     @Override
-    public List findBySpecification(SelectMeetingParameter sp,HttpServletRequest request) {
-        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
+    public List findBySpecification(SelectMeetingParameter sp, HttpServletRequest request) {
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         Specification<Meeting> specification = new Specification<Meeting>() {
             @Override
             public Predicate toPredicate(Root<Meeting> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
                 List<Predicate> predicatesList = new ArrayList<>();
-                Predicate tenantPredicate=cb.equal(root.get("tenantId"),tenantId);
+                Predicate tenantPredicate = cb.equal(root.get("tenantId"), tenantId);
                 predicatesList.add(tenantPredicate);
-                System.out.println(sp.getTopic());
                 if (!StringUtils.isEmpty(sp.getTopic())) {
-                    Predicate topicPredicate = cb.like(root.get("topic"), '%'+sp.getTopic()+'%');
+                    Predicate topicPredicate = cb.like(root.get("topic"), '%' + sp.getTopic() + '%');
                     predicatesList.add(topicPredicate);
                 }
                 if (!StringUtils.isEmpty(sp.getReserveName())) {
-                    Join<Meeting,Userinfo>userinfoJoin=root.join("userinfo",JoinType.LEFT);
-                    Predicate reserveNamePredicate = cb.like(userinfoJoin.get("name"), '%'+sp.getReserveName()+'%');
+                    Join<Meeting, Userinfo> userinfoJoin = root.join("userinfo", JoinType.LEFT);
+                    Predicate reserveNamePredicate = cb.like(userinfoJoin.get("name"), '%' + sp.getReserveName() + '%');
                     predicatesList.add(reserveNamePredicate);
                 }
                 if (!StringUtils.isEmpty(sp.getDepartmentId())) {
@@ -1005,16 +1012,152 @@ public class MeetingServiceImpl implements MeetingService {
                     Predicate meetroomIdPredicate = cb.equal(root.get("meetroomId"), sp.getMeetRoomId());
                     predicatesList.add(meetroomIdPredicate);
                 }
-                if (!StringUtils.isEmpty(sp.getSelectBegin())&&!StringUtils.isEmpty(sp.getSelectOver())) {
-                    Predicate meetDatePredicate = cb.between(root.get("meetDate"), sp.getSelectBegin(),sp.getSelectOver());
+                if (!StringUtils.isEmpty(sp.getSelectBegin()) && !StringUtils.isEmpty(sp.getSelectOver())) {
+                    Predicate meetDatePredicate = cb.between(root.get("meetDate"), sp.getSelectBegin(), sp.getSelectOver());
                     predicatesList.add(meetDatePredicate);
                 }
-                query.orderBy(cb.asc(root.get("begin")),cb.asc(root.get("status")));
+                if (!StringUtils.isEmpty(sp.getStatus())) {
+                    Integer status = null;
+                    switch (sp.getStatus()) {
+                        case "预约失败":
+                            status = 6;
+                            break;
+                        case "预约成功":
+                            status = 1;
+                            break;
+                        case "预约中":
+                            status = 2;
+                            break;
+                        case "会议进行中":
+                            status = 3;
+                            break;
+                        case "会议结束":
+                            status = 4;
+                            break;
+                        case "取消会议":
+                            status = 5;
+                            break;
+                        case "调用失败":
+                            status = 7;
+                            break;
+                        case "调用中":
+                            status = 8;
+                            break;
+                    }
+                    Predicate statusPredicate = cb.equal(root.get("status"), sp.getStatus());
+                    predicatesList.add(statusPredicate);
+                }
+                query.orderBy(cb.asc(root.get("begin")), cb.asc(root.get("status")));
                 Predicate[] predicates = new Predicate[predicatesList.size()];
                 return cb.and(predicatesList.toArray(predicates));
             }
         };
         return meetingRepository.findAll(specification);
     }
+
+    @Override
+    public void exportMeetingRecord(List<Meeting> meetings, HttpServletResponse response) throws IOException {
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("会议记录");
+
+        String fileName = "meetingRecord" + ".xls";//设置要导出的文件的名字
+        //新增数据行，并且设置单元格数据
+
+        int rowNum = 1;
+
+        String[] headers = {"主题", "预定人", "会议室", "开始时间", "结束时间", "准备时间", "部门"};
+        //headers表示excel表中第一行的表头
+
+        HSSFRow row = sheet.createRow(0);
+        //在excel表中添加表头
+
+        for (int i = 0; i < headers.length; i++) {
+            HSSFCell cell = row.createCell(i);
+            HSSFRichTextString text = new HSSFRichTextString(headers[i]);
+            cell.setCellValue(text);
+        }
+        Integer meetRoomId;
+        Integer departId;
+//        String joinPersonStr = "";
+//        List<JoinPerson> joinPersons;
+        Depart depart;
+        //在表中存放查询到的数据放入对应的列
+        for (Meeting meeting : meetings) {
+            HSSFRow row1 = sheet.createRow(rowNum);
+            row1.createCell(0).setCellValue(meeting.getTopic());
+            row1.createCell(1).setCellValue(meeting.getUserinfo().getName());
+            meetRoomId = meeting.getMeetroomId();
+            Meetroom meetroom = finByMeetRoomId(meetRoomId);
+            row1.createCell(2).setCellValue(meetroom.getName());
+            row1.createCell(3).setCellValue(meeting.getBegin());
+            row1.createCell(4).setCellValue(meeting.getOver());
+            row1.createCell(5).setCellValue(meeting.getPrepareTime());
+            departId = meeting.getDepartId();
+            if (departId != null) {
+                depart = departService.findByDepartId(departId);
+                row1.createCell(6).setCellValue(depart.getName());
+            }else {
+                row1.createCell(6).setCellValue("");
+            }
+//            joinPersons = joinPersonRepository.findByMeetingId(meeting.getId());
+//            for (JoinPerson joinPerson : joinPersons) {
+//                Userinfo userinfo = userinfoService.getUserinfo(joinPerson.getUserId());
+//                joinPersonStr += userinfo.getName() + " ";
+//            }
+//            row1.createCell(7).setCellValue(joinPersonStr);
+            rowNum++;
+        }
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+        response.flushBuffer();
+        workbook.write(response.getOutputStream());
+    }
+
+    @Override
+    public List countTimeByDepart(Integer tenantId, String begin, String over) {
+        return null;
+    }
+
+    @Override
+    public List countTimeByPeople(Integer tenantId, String begin, String over) {
+        return null;
+    }
+
+    @Override
+    public List countTimeByMeetRoom(Integer tenantId, String begin, String over) {
+        return null;
+    }
+
+    @Override
+    public List countHourByDepart(Integer tenantId, String begin, String over) {
+        return null;
+    }
+
+
+    @Override
+    public List countHourByPeople(Integer tenantId, String begin, String over) {
+        List<UserHour>userHours=new ArrayList<>();
+        Userinfo userinfo;
+        Meeting meeting;
+        UserHour userHour;
+        List<Meeting>meetings=meetingRepository.selectGroupByUser(tenantId,begin,over);
+        for (int i=0;i<meetings.size();i++){
+            meeting=meetings.get(i);
+            Integer userId=meeting.getUserId();
+            userinfo=userinfoService.getUserinfo(userId);
+            userHour=new UserHour();
+            userHour.setUserName(userinfo.getName());
+            double hour= NumUtil.hold2(meetingRepository.countHourByUser(userId,begin,over));
+            userHour.setHour(hour);
+            userHours.add(userHour);
+        }
+        return userHours;
+    }
+
+    @Override
+    public List countHourByMeetRoom(Integer tenantId, String begin, String over) {
+        return null;
+    }
+
 
 }

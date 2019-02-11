@@ -72,5 +72,12 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     @Query(value = "select m from Meeting m where m.userId=?1 and (m.status=1 or m.status=3 )order by m.begin")
     List<Meeting> selectByUserIdAndStatus(Integer userId);
     /*-------------华丽分割线-------------*/
-
+    @Query(value = "select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by m.departId")
+    List<Meeting>selectGroupByDepart(Integer tenantId,String begin,String over);
+    @Query(value = "select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by m.userId")
+    List<Meeting>selectGroupByUser(Integer tenantId,String begin,String over);
+    @Query(value = "select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by m.meetroomId")
+    List<Meeting>selectGroupByMeetRoom(Integer tenantId,String begin,String over);
+    @Query(value = "select sum(m.lastTime) from Meeting m where m.userId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
+    int countHourByUser(Integer userId,String begin,String over);
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by gjw on 2019/2/1.
@@ -55,5 +56,13 @@ public class DepartServiceImpl implements DepartService{
                 serverResult.setStatus(true);
         }
         return serverResult;
+    }
+
+    @Override
+    public Depart findByDepartId(Integer departId) {
+        Optional<Depart>depart=departRepository.findById(departId);
+        if (depart.isPresent())
+            return depart.get();
+        return null;
     }
 }

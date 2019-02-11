@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.List;
@@ -46,4 +48,12 @@ public interface MeetingService {
     ServerResult showOneMeetingLeaveInfo(Integer meetingId);
     /*-------------华丽分割线-------------*/
     List findBySpecification(SelectMeetingParameter selectMeetingParameter,HttpServletRequest request);
+    void exportMeetingRecord(List<Meeting> meetings,HttpServletResponse response) throws IOException;
+    List countTimeByDepart(Integer tenantId,String begin,String over);
+    List countTimeByPeople(Integer tenantId,String begin,String over);
+    List countTimeByMeetRoom(Integer tenantId,String begin,String over);
+    List countHourByDepart(Integer tenantId,String begin,String over);
+    List countHourByPeople(Integer tenantId,String begin,String over);
+    List countHourByMeetRoom(Integer tenantId,String begin,String over);
+
 }

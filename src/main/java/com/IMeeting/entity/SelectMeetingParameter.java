@@ -10,11 +10,19 @@ public class SelectMeetingParameter {
     private Integer meetRoomId;//会议室id
     private Integer departmentId;//部门id
     private String reserveName;//预定人名字
+    private String status;//预定会议状态
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getTopic() {
         return topic;
     }
-
     public void setTopic(String topic) {
         this.topic = topic;
     }

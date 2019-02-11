@@ -55,7 +55,7 @@ public class ManagerController {
     //更新一个角色 传入参数角色id、角色名字和角色的权限菜单id集合
     @RequestMapping("/updateOneRole")
     public ServerResult updateOneRole(@RequestBody RoleMenuPara roleMenuPara,HttpServletRequest request){
-        ServerResult serverResult=managerService.insertOne(roleMenuPara,request);
+        ServerResult serverResult=managerService.updateOne(roleMenuPara);
         return  serverResult;
     }
     //点击用户界面跳转到管理员界面时显示该管理员所具有的权限即可操作的菜单
