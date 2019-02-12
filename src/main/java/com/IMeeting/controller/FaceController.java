@@ -1,11 +1,14 @@
 package com.IMeeting.controller;
 
 import com.IMeeting.entity.FaceInfo;
+import com.IMeeting.entity.JoinPerson;
 import com.IMeeting.entity.ServerResult;
 import com.IMeeting.entity.Userinfo;
 import com.IMeeting.resposirity.FaceInfoRepository;
+import com.IMeeting.resposirity.JoinPersonRepository;
 import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.FaceService;
+import com.IMeeting.service.UserinfoService;
 import com.IMeeting.util.BinaryConversion;
 import com.IMeeting.util.FaceRecognition;
 import com.IMeeting.util.FileUtil;
@@ -39,6 +42,10 @@ public class FaceController {
     private FaceService faceService;
     @Autowired
     private UserinfoRepository userinfoRepository;
+    @Autowired
+    private JoinPersonRepository joinPersonRepository;
+    @Autowired
+    private UserinfoService userinfoService;
 
     public String getUrl(MultipartFile fileupload) throws OSSException, ClientException, IOException {
         String endpoint = "oss-cn-beijing.aliyuncs.com";
@@ -110,6 +117,48 @@ public class FaceController {
         return serverResult;
     }
 
+    //比较某一员工的人脸数据
+    @RequestMapping("/compare")
+    public ServerResult compare(@RequestParam("faceDetail") String faceDetail, @RequestParam("meetingId") Integer meetingId, HttpServletRequest request) throws IOException {
+//        File f=FileUtil.multoFile(fileupload);
+        ServerResult serverResult = new ServerResult();
+        FaceRecognition faceRecognition = new FaceRecognition();
+        byte[] source = BinaryConversion.parseHexStr2Byte(faceDetail);
+//        byte[]=faceRecognition.getFeatureData(f);
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        List<JoinPerson> joinPersons = joinPersonRepository.findByMeetingId(meetingId);
+//        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
+        FaceInfo faceInfo;
+        JoinPerson joinPerson;
+        double similarResult = 0;
+        int bol = 0;
+        for (int i = 0; i < joinPersons.size(); i++) {
+            joinPerson = joinPersons.get(i);
+            faceInfo = faceInfoRepository.findByUserIdAndStatus(joinPerson.getUserId(), 1);
+            if (faceInfo != null) {
+                byte[] target = faceInfo.getFaceDetail();
+                similarResult = faceRecognition.faceCompare(source, target);
+            }
+            if (similarResult > 80) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String nowTime = sdf.format(new java.util.Date());
+                joinPersonRepository.updateStatusAndTime(joinPerson.getId(), 1, nowTime);
+                bol = 1;
+                Userinfo userinfo=userinfoService.getUserinfo(joinPerson.getUserId());
+                serverResult.setMessage(userinfo.getName()+",欢迎您参加会议");
+                break;
+            }
+//            System.out.println(similarResult);
+        }
+//        File del = new File(f.toURI());
+//        del.delete();
+        if (bol == 0) {
+            serverResult.setMessage("对不起，您非本场会议人员");
+        }
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
     /*-------------华丽分割线-------------*/
     //查询该租户所有员工的面部信息
     @RequestMapping("/selectAll")
@@ -162,7 +211,7 @@ public class FaceController {
                 FaceInfo faceInfo = new FaceInfo();
                 faceInfo.setTenantId(tenantId);
                 FaceRecognition faceRecognition = new FaceRecognition();
-                File f=FileUtil.multoFile(fileupload);
+                File f = FileUtil.multoFile(fileupload);
                 faceInfo.setFaceDetail(faceRecognition.getFeatureData(f));
                 File del = new File(f.toURI());
                 del.delete();
@@ -176,25 +225,4 @@ public class FaceController {
         return serverResult;
     }
 
-    //删除某一员工的人脸数据
-    @RequestMapping("/compare")
-    public ServerResult compare(@RequestParam("fileupload") MultipartFile fileupload,HttpServletRequest request) throws IOException {
-        File f=FileUtil.multoFile(fileupload);
-        FaceRecognition faceRecognition=new FaceRecognition();
-        byte[]source=faceRecognition.getFeatureData(f);
-        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
-        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
-        FaceInfo faceInfo=new FaceInfo();
-        for (int i=0;i<faceInfoList.size();i++){
-            faceInfo=faceInfoList.get(i);
-            byte[]target=faceInfo.getFaceDetail();
-            double similarResult=faceRecognition.faceCompare(source,target);
-            System.out.println(similarResult);
-        }
-        File del = new File(f.toURI());
-        del.delete();
-        ServerResult serverResult = new ServerResult();
-        serverResult.setStatus(true);
-        return serverResult;
-    }
 }

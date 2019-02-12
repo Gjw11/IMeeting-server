@@ -2,6 +2,7 @@ package com.IMeeting.controller;
 
 import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.DepartRepository;
+import com.IMeeting.resposirity.JoinPersonRepository;
 import com.IMeeting.resposirity.LeaveInformationRepository;
 import com.IMeeting.resposirity.MeetroomRepository;
 import com.IMeeting.service.GroupService;
@@ -37,6 +38,8 @@ public class MeetingController {
     private MeetroomRepository meetroomRepository;
     @Autowired
     private DepartRepository departRepository;
+    @Autowired
+    private JoinPersonRepository joinPersonRepository;
 
     //预定会议首页
     @RequestMapping("/reserveIndex")
@@ -224,6 +227,8 @@ public class MeetingController {
     @RequestMapping("/agreeLeave")
     public ServerResult agreeLeave(@RequestParam("leaveInfoId") Integer leaveInfoId) {
         leaveInformationRepository.agreeLeave(leaveInfoId);
+        LeaveInformation leaveInformation=meetingService.findById(leaveInfoId);
+        joinPersonRepository.updateStatus(3,leaveInformation.getMeetingId(),leaveInformation.getUserId());
         ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
@@ -233,6 +238,8 @@ public class MeetingController {
     @RequestMapping("/disagreeLeave")
     public ServerResult disagreeLeave(@RequestParam("leaveInfoId") Integer leaveInfoId) {
         leaveInformationRepository.disagreeLeave(leaveInfoId);
+        LeaveInformation leaveInformation=meetingService.findById(leaveInfoId);
+        joinPersonRepository.updateStatus(4,leaveInformation.getMeetingId(),leaveInformation.getUserId());
         ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
         return serverResult;

@@ -11,5 +11,5 @@ import java.util.List;
  */
 @Repository
 public interface PushMessageRepository extends JpaRepository<PushMessage,Integer>{
-    List<PushMessage>findByUserIdAndStatus(Integer userId,Integer status);
+    List<PushMessage>findByReceiveIdAndStatus(Integer receiveId,Integer status);
 }

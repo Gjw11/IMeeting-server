@@ -51,8 +51,8 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     int updateTCP(Integer meetingId,String topic,String content,Integer prepareTime);
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query(value = "update Meeting m set m.over=?2,m.status=?3 where m.id=?1")
-    int advanceOver(Integer meetingId,String over,Integer status);
+    @Query(value = "update Meeting m set m.over=?2,m.status=?3,m.lastTime=?4 where m.id=?1")
+    int advanceOver(Integer meetingId,String over,Integer status,Integer lastTime);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Meeting m set m.status=?3 where m.begin=?1 and m.status=?2")
@@ -80,4 +80,14 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     List<Meeting>selectGroupByMeetRoom(Integer tenantId,String begin,String over);
     @Query(value = "select sum(m.lastTime) from Meeting m where m.userId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
     int countHourByUser(Integer userId,String begin,String over);
+    @Query(value = "select sum(m.lastTime) from Meeting m where m.departId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
+    int countHourByDepart(Integer departId,String begin,String over);
+    @Query(value = "select sum(m.lastTime) from Meeting m where m.meetroomId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
+    int countHourByMeetRoom(Integer meetRoomId,String begin,String over);
+    @Query(value = "select count (m) from Meeting m where m.userId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
+    int countTimeByUser(Integer userId,String begin,String over);
+    @Query(value = "select count (m) from Meeting m where m.departId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
+    int countTimeByDepart(Integer departId,String begin,String over);
+    @Query(value = "select count (m) from Meeting m where m.meetroomId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4")
+    int countTimeByMeetRoom(Integer meetRoomId,String begin,String over);
 }

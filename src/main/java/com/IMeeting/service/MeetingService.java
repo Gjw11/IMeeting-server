@@ -47,6 +47,7 @@ public interface MeetingService {
     ServerResult countLeaveInformation(HttpServletRequest request);
     ServerResult showOneMeetingLeaveInfo(Integer meetingId);
     ServerResult findPushMessage(HttpServletRequest request);
+    LeaveInformation findById(Integer id);
     /*-------------华丽分割线-------------*/
     List findBySpecification(SelectMeetingParameter selectMeetingParameter,HttpServletRequest request);
     void exportMeetingRecord(List<Meeting> meetings,HttpServletResponse response) throws IOException;

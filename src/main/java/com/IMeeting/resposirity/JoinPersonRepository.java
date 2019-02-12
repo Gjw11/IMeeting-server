@@ -19,4 +19,12 @@ public interface JoinPersonRepository extends JpaRepository<JoinPerson,Integer>{
     @Modifying(clearAutomatically = true)
     @Query(value = "delete from JoinPerson m where m.meetingId=?1")
     int deleteByMeetingId(Integer meetingId);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update JoinPerson m set m.status=?2,m.signTime=?3 where m.id=?1")
+    int updateStatusAndTime(Integer id,Integer status,String time);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update JoinPerson m set m.status=?1 where m.meetingId=?2 and m.userId=?3")
+    int updateStatus(Integer status,Integer meetingId,Integer userId);
 }

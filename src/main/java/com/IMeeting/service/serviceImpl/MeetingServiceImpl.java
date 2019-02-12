@@ -1022,6 +1022,7 @@ public class MeetingServiceImpl implements MeetingService {
         leaveInformation.setStatus(0);
         leaveInformation.setUserId(userId);
         leaveInformationRepository.saveAndFlush(leaveInformation);
+        joinPersonRepository.updateStatus(2,leaveInformation.getMeetingId(),leaveInformation.getUserId());
         ServerResult serverResult = new ServerResult();
         serverResult.setMessage("请假已提交");
         serverResult.setStatus(true);
@@ -1080,11 +1081,19 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public ServerResult findPushMessage(HttpServletRequest request) {
         Integer userId= (Integer) request.getSession().getAttribute("userId");
-        List<PushMessage> list=pushMessageRepository.findByUserIdAndStatus(userId,0);
+        List<PushMessage> list=pushMessageRepository.findByReceiveIdAndStatus(userId,0);
         ServerResult serverResult=new ServerResult();
         serverResult.setData(list);
         serverResult.setStatus(true);
         return serverResult;
+    }
+
+    @Override
+    public LeaveInformation findById(Integer id) {
+        Optional<LeaveInformation>leaveInformation=leaveInformationRepository.findById(id);
+        if (leaveInformation.isPresent())
+            return leaveInformation.get();
+        return null;
     }
 
     /*-------------华丽分割线-------------*/
