@@ -71,11 +71,13 @@ public class ManagerServiceImpl implements ManagerService{
         List<Integer>list=roleMenuPara.getMenus();
         Integer roleId=roleInfo1.getId();
         RoleMenu roleMenu;
-        for (int i=0;i<list.size();i++){
-            roleMenu=new RoleMenu();
-            roleMenu.setMenuId(list.get(i));
-            roleMenu.setRoleId(roleId);
-            roleMenuRepository.saveAndFlush(roleMenu);
+        if(list!=null){
+            for (int i=0;i<list.size();i++){
+                roleMenu=new RoleMenu();
+                roleMenu.setMenuId(list.get(i));
+                roleMenu.setRoleId(roleId);
+                roleMenuRepository.saveAndFlush(roleMenu);
+            }
         }
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
@@ -90,11 +92,13 @@ public class ManagerServiceImpl implements ManagerService{
         List<Integer>list=roleMenuPara.getMenus();
         roleMenuRepository.deleteOne(roleId);
         RoleMenu roleMenu;
-        for (int i=0;i<list.size();i++){
-            roleMenu=new RoleMenu();
-            roleMenu.setMenuId(list.get(i));
-            roleMenu.setRoleId(roleId);
-            roleMenuRepository.saveAndFlush(roleMenu);
+        if(list!=null){
+            for (int i=0;i<list.size();i++){
+                roleMenu=new RoleMenu();
+                roleMenu.setMenuId(list.get(i));
+                roleMenu.setRoleId(roleId);
+                roleMenuRepository.saveAndFlush(roleMenu);
+            }
         }
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
