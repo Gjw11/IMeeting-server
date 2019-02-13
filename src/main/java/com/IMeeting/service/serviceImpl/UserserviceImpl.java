@@ -217,4 +217,36 @@ public class UserserviceImpl implements UserinfoService {
         }
         return serverResult;
     }
+
+    @Override
+    public ServerResult showOne(Integer id) {
+        Userinfo userinfo = getUserinfo(id);
+        UserInfoResult userInfoResult = new UserInfoResult();
+        userInfoResult.setId(userinfo.getId());
+        userInfoResult.setWorknum(userinfo.getWorknum());
+        userInfoResult.setName(userinfo.getName());
+        userInfoResult.setPhone(userinfo.getPhone());
+        userInfoResult.setResume(userinfo.getResume());
+        userInfoResult.setDepartId(userinfo.getDepartId());
+        userInfoResult.setPositionId(userinfo.getPositionId());
+        userInfoResult.setRoleId(userinfo.getRoleId());
+        Depart depart = getDepart(userinfo.getDepartId());
+        userInfoResult.setDepartName(depart.getName());
+        Position position = getPosition(userinfo.getPositionId());
+        userInfoResult.setPositionName(position.getName());
+        RoleInfo role=getRoleInfo(userinfo.getRoleId());
+        userInfoResult.setRoleName(role.getName());
+        ServerResult serverResult = new ServerResult();
+        serverResult.setData(userInfoResult);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
+    @Override
+    public RoleInfo getRoleInfo(Integer roleId) {
+        Optional<RoleInfo> roleInfo = roleInfoRepository.findById(roleId);
+        if (roleInfo.isPresent())
+            return roleInfo.get();
+        return null;
+    }
 }

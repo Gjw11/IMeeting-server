@@ -1,9 +1,7 @@
 package com.IMeeting.controller;
 
-import com.IMeeting.entity.Depart;
-import com.IMeeting.entity.Position;
-import com.IMeeting.entity.ServerResult;
-import com.IMeeting.entity.Userinfo;
+import com.IMeeting.entity.*;
+import com.IMeeting.resposirity.TenantRepository;
 import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.UserinfoService;
 import com.IMeeting.util.FileUtil;
@@ -22,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +33,8 @@ public class UserinfoController {
     private UserinfoService userinfoService;
     @Autowired
     private UserinfoRepository userinfoRepository;
+    @Autowired
+    private TenantRepository tenantRepository;
 
     //登陆
     @RequestMapping("/login")
@@ -51,10 +50,10 @@ public class UserinfoController {
             session.setAttribute("departId", u.getDepartId());
             session.setAttribute("positionId", u.getPositionId());
             session.setAttribute("roleId", u.getRoleId());
-            Integer roleId=u.getRoleId();
-            if (roleId==null){
+            Integer roleId = u.getRoleId();
+            if (roleId == null) {
                 serverResult.setMessage("no");
-            }else {
+            } else {
                 serverResult.setMessage("yes");
             }
         } else {
@@ -240,6 +239,13 @@ public class UserinfoController {
         return serverResult;
     }
 
+    //显示一个员工详细信息,需要传递的参数为id
+    @RequestMapping("/userInfo/showOne")
+    public ServerResult showOne(@RequestParam ("id") Integer id) {
+        ServerResult serverResult= userinfoService.showOne(id);
+        return serverResult;
+    }
+
     //修改一个员工信息,需要传递的参数为id,worknum,name,phone,departId,positionId,roleId
     @RequestMapping("/userInfo/updateOne")
     public ServerResult deleteOne(@RequestBody Userinfo userinfo) {
@@ -257,31 +263,49 @@ public class UserinfoController {
     //下载人员导入范例excel表格
     @RequestMapping("/userInfo/downloadInsertDemo")
     public void downloadInsertDemo(HttpServletResponse res) {
-        FileUtil f=new FileUtil();
-        f.downLoad("insertDemo.xls",res);
+        FileUtil f = new FileUtil();
+        f.downLoad("insertDemo.xls", res);
     }
+
     //多个员工导入,worknum(必填),name(必填),phone
     @RequestMapping("/userInfo/insertMore")
-    public ServerResult insertMore(@RequestParam("file") MultipartFile file,HttpServletRequest request) {
+    public ServerResult insertMore(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         String fileName = file.getOriginalFilename();
-        ServerResult serverResult=null;
+        ServerResult serverResult = null;
         try {
-            serverResult=userinfoService.batchImport(fileName,file,request);
+            serverResult = userinfoService.batchImport(fileName, file, request);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return serverResult;
     }
+
     //重置密码,参数为用户id
     @RequestMapping("/userInfo/resetPwd")
-    public ServerResult resetPwd(@RequestParam("userId")Integer userId) {
-        MD5 md5=new MD5();
-        String password=md5.MD5("123456");
-        int bol=userinfoRepository.resetPwd(userId,password);
-        ServerResult serverResult=new ServerResult();
-        if (bol!=0){
+    public ServerResult resetPwd(@RequestParam("userId") Integer userId) {
+        MD5 md5 = new MD5();
+        String password = md5.MD5("123456");
+        int bol = userinfoRepository.resetPwd(userId, password);
+        ServerResult serverResult = new ServerResult();
+        if (bol != 0) {
             serverResult.setStatus(true);
             serverResult.setMessage("密码重置成功");
+        }
+        return serverResult;
+    }
+
+    //会议室前端账号登陆
+    @RequestMapping("/mangerLogin")
+    public ServerResult mangerLogin(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletRequest request) {
+        ServerResult serverResult = new ServerResult();
+        MD5 md5 = new MD5();
+        String newPassword = md5.MD5(password);
+        Tenant tenant = tenantRepository.findByUsernameAndPassword(username, newPassword);
+        if (tenant != null) {
+            serverResult.setStatus(true);
+            request.getSession().setAttribute("tenantId",tenant.getId());
+        } else {
+            serverResult.setMessage("账号密码错误");
         }
         return serverResult;
     }

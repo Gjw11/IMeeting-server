@@ -1,9 +1,6 @@
 package com.IMeeting.service;
 
-import com.IMeeting.entity.Depart;
-import com.IMeeting.entity.Position;
-import com.IMeeting.entity.ServerResult;
-import com.IMeeting.entity.Userinfo;
+import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.UserinfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,4 +20,6 @@ public interface UserinfoService {
     ServerResult updateOne(Userinfo userinfo);
     ServerResult insertOne(Userinfo userinfo,HttpServletRequest request);
     ServerResult batchImport(String fileName, MultipartFile file,HttpServletRequest request) throws Exception;
+    ServerResult showOne(Integer id);
+    RoleInfo getRoleInfo(Integer roleId);
 }
