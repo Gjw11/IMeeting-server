@@ -15,13 +15,13 @@ import javax.servlet.http.HttpServletRequest;
  * Created by gjw on 2019/2/2.
  */
 @RestController
-@RequestMapping("/MeetroomPara")
-public class MeetroomParaController {
+@RequestMapping("/MeetRoomPara")
+public class MeetRoomParaController {
     @Autowired
     private MeetroomParameterRepository meetroomParameterRepository;
     //跳转到会议设置参数界面
-    @RequestMapping("/toMeetroomPara")
-    public ServerResult toMeetroomPara(HttpServletRequest request) {
+    @RequestMapping("/toMeetRoomPara")
+    public ServerResult toMeetRoomPara(HttpServletRequest request) {
         Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         MeetroomParameter meetroomParameter = meetroomParameterRepository.findByTenantId(tenantId);
         ServerResult serverResult = new ServerResult();
@@ -30,16 +30,16 @@ public class MeetroomParaController {
         return serverResult;
     }
     //修改租户会议参数设置，除了租户id(tenant_id其他参数都需要)
-    @RequestMapping("/updateMeetroomPara")
-    public ServerResult updateMeetroomPara(@RequestBody MeetroomParameter meetroomParameter) {
+    @RequestMapping("/updateMeetRoomPara")
+    public ServerResult updateMeetRoomPara(@RequestBody MeetroomParameter meetroomParameter) {
         meetroomParameterRepository.updateMMeetroomPara(meetroomParameter.getId(),meetroomParameter.getBegin(),meetroomParameter.getDateLimit(),meetroomParameter.getOver(),meetroomParameter.getTimeInterval(),meetroomParameter.getTimeLimit());
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
     }
     //恢复出厂设置
-    @RequestMapping("/resetMeetroomPara")
-    public ServerResult resetMeetroomPara(@RequestParam("id")Integer id) {
+    @RequestMapping("/resetMeetRoomPara")
+    public ServerResult resetMeetRoomPara(@RequestParam("id")Integer id) {
         meetroomParameterRepository.updateMMeetroomPara(id,"08:00",7,"18:00",15,120);
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
