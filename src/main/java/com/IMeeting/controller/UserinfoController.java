@@ -241,8 +241,8 @@ public class UserinfoController {
 
     //显示一个员工详细信息,需要传递的参数为id
     @RequestMapping("/userInfo/showOne")
-    public ServerResult showOne(@RequestParam ("id") Integer id) {
-        ServerResult serverResult= userinfoService.showOne(id);
+    public ServerResult showOne(@RequestParam("id") Integer id) {
+        ServerResult serverResult = userinfoService.showOne(id);
         return serverResult;
     }
 
@@ -303,7 +303,7 @@ public class UserinfoController {
         Tenant tenant = tenantRepository.findByUsernameAndPassword(username, newPassword);
         if (tenant != null) {
             serverResult.setStatus(true);
-            request.getSession().setAttribute("tenantId",tenant.getId());
+            request.getSession().setAttribute("tenantId", tenant.getId());
         } else {
             serverResult.setMessage("账号密码错误");
         }

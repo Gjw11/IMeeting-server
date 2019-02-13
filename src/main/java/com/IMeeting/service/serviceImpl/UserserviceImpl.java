@@ -230,12 +230,18 @@ public class UserserviceImpl implements UserinfoService {
         userInfoResult.setDepartId(userinfo.getDepartId());
         userInfoResult.setPositionId(userinfo.getPositionId());
         userInfoResult.setRoleId(userinfo.getRoleId());
-        Depart depart = getDepart(userinfo.getDepartId());
-        userInfoResult.setDepartName(depart.getName());
-        Position position = getPosition(userinfo.getPositionId());
-        userInfoResult.setPositionName(position.getName());
-        RoleInfo role=getRoleInfo(userinfo.getRoleId());
-        userInfoResult.setRoleName(role.getName());
+        if (userinfo.getDepartId()!=null) {
+            Depart depart = getDepart(userinfo.getDepartId());
+            userInfoResult.setDepartName(depart.getName());
+        }
+        if (userinfo.getPositionId()!=null) {
+            Position position = getPosition(userinfo.getPositionId());
+            userInfoResult.setPositionName(position.getName());
+        }
+        if (userinfo.getRoleId()!=null) {
+            RoleInfo role = getRoleInfo(userinfo.getRoleId());
+            userInfoResult.setRoleName(role.getName());
+        }
         ServerResult serverResult = new ServerResult();
         serverResult.setData(userInfoResult);
         serverResult.setStatus(true);

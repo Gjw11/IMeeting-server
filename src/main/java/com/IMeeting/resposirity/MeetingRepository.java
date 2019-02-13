@@ -71,6 +71,8 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     List<Meeting> MyJoinMeetingByDate(Integer userId,String date);
     @Query(value = "select m from Meeting m where m.userId=?1 and (m.status=1 or m.status=3 )order by m.begin")
     List<Meeting> selectByUserIdAndStatus(Integer userId);
+    @Query(value = "select m from Meeting m where m.userId=?1 and (m.status=3 or m.status=4)order by m.begin desc")
+    List<Meeting> selectByUserIdAndStatusJoin(Integer userId);
     /*-------------华丽分割线-------------*/
     @Query(value = "select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by m.departId")
     List<Meeting>selectGroupByDepart(Integer tenantId,String begin,String over);
