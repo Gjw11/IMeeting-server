@@ -43,17 +43,21 @@ public class DepartServiceImpl implements DepartService{
         List<MeetroomDepart>meetroomDeparts=meetroomDepartRepository.findByDepartId(departId);
         if (userinfos.size()!=0){
             serverResult.setMessage("有员工属于该部门，该部门不能删除");
-            serverResult.setStatus(true);
+            serverResult.setStatus(false);
         }else if (positions.size()!=0){
             serverResult.setMessage("有职位从属于该部门，该部门不能删除");
-            serverResult.setStatus(true);
+            serverResult.setStatus(false);
         }else if (meetroomDeparts.size()!=0){
             serverResult.setMessage("有会议室绑定该部门，该部门不能删除");
-            serverResult.setStatus(true);
+            serverResult.setStatus(false);
         }else{
             int bol=departRepository.deleteOne(departId);
-            if (bol!=0)
+            if (bol!=0){
+                serverResult.setMessage("操作成功");
                 serverResult.setStatus(true);
+
+
+            }
         }
         return serverResult;
     }

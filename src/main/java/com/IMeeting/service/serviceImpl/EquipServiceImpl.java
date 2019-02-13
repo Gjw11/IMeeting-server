@@ -36,6 +36,7 @@ public class EquipServiceImpl implements EquipService{
         Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
         Equip equip=new Equip();
         equip.setTenantId(tenantId);
+        equip.setName(equipName);
         equipRepositpry.saveAndFlush(equip);
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
