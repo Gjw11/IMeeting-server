@@ -46,4 +46,5 @@ public class Position {
     public void setDepartId(Integer departId) {
         this.departId = departId;
     }
+
 }

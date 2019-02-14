@@ -21,6 +21,8 @@ public interface DepartRepository extends JpaRepository<Depart,Integer> {
    @Modifying(clearAutomatically = true)
    @Query(value = "update Depart m set m.name=?2 where m.id=?1")
    int editOne(Integer departId,String name);
+   @Transactional
+   @Modifying(clearAutomatically = true)
    @Query(value = "delete from Depart m where m.id=?1")
    int deleteOne(Integer departId);
 }
