@@ -15,6 +15,7 @@ import java.util.List;
 @Repository
 public interface JoinPersonRepository extends JpaRepository<JoinPerson,Integer>{
     List<JoinPerson>findByMeetingId(Integer meetingId);
+    List<JoinPerson>findByMeetingIdOrderByStatus(Integer meetingId);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "delete from JoinPerson m where m.meetingId=?1")

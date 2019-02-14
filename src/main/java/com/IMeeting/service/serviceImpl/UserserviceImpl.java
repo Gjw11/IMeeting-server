@@ -130,6 +130,9 @@ public class UserserviceImpl implements UserinfoService {
         userinfo.setUsername(tenant.getNum() + userinfo.getWorknum());
         userinfo.setTenantId(tenantId);
         userinfo.setStatus(1);
+        if (userinfo.getDepartId()==null){
+            userinfo.setDepartId(0);
+        }
         userinfoRepository.saveAndFlush(userinfo);
         ServerResult serverResult = new ServerResult();
         serverResult.setStatus(true);
@@ -206,6 +209,7 @@ public class UserserviceImpl implements UserinfoService {
             userinfo.setPhone(phone);
             userinfo.setTenantId(tenantId);
             userinfo.setStatus(1);
+            userinfo.setDepartId(0);
             userinfos.add(userinfo);
         }
         if (flag == false) {

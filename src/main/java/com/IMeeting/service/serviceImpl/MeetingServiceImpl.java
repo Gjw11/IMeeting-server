@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -285,15 +286,15 @@ public class MeetingServiceImpl implements MeetingService {
                 meeting.setUserId(userId);
                 meeting.setMeetDate(reserveDate);
                 meeting.setPrepareTime(prepareTime);
-                Userinfo userinfo=userinfoService.getUserinfo(userId);
+                Userinfo userinfo = userinfoService.getUserinfo(userId);
                 meeting.setDepartId(userinfo.getDepartId());
                 meeting.setCreateTime(nowTime);
-                Meeting meeting1=meetingRepository.saveAndFlush(meeting);
+                Meeting meeting1 = meetingRepository.saveAndFlush(meeting);
                 Integer meetingId = meeting1.getId();
                 JoinPerson joinPerson;
                 PushMessage pushMessage;
 //                Meetroom meetroom=findByMeetRoomId(meetroomId);
-                String message="您有一个新的会议，点击查看详情";
+                String message = "您有一个新的会议，点击查看详情";
                 int b = 0;
                 List<Integer> list = reserveParameter.getJoinPeopleId();
                 for (int i = 0; i < list.size(); i++) {
@@ -305,11 +306,12 @@ public class MeetingServiceImpl implements MeetingService {
                     joinPerson.setUserId(id);
                     joinPerson.setStatus(0);
                     joinPersonRepository.saveAndFlush(joinPerson);
-                    pushMessage=new PushMessage();
+                    pushMessage = new PushMessage();
                     pushMessage.setReceiveId(id);
                     pushMessage.setStatus(0);
                     pushMessage.setMessage(message);
                     pushMessage.setMeetingId(meetingId);
+                    pushMessage.setTime(nowTime);
                     pushMessageRepository.saveAndFlush(pushMessage);
                 }
                 if (b == 0) {
@@ -318,7 +320,7 @@ public class MeetingServiceImpl implements MeetingService {
                     joinPerson.setUserId(userId);
                     joinPerson.setStatus(0);
                     joinPersonRepository.saveAndFlush(joinPerson);
-                    pushMessage=new PushMessage();
+                    pushMessage = new PushMessage();
                     pushMessage.setReceiveId(userId);
                     pushMessage.setStatus(0);
                     pushMessage.setMessage(message);
@@ -364,7 +366,7 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setTopic(reserveParameter.getTopic());
         meeting.setTenantId(tenantId);
         meeting.setUserId(userId);
-        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        Userinfo userinfo = userinfoService.getUserinfo(userId);
         meeting.setUserId(userinfo.getId());
         meeting.setLastTime(lastTime);
         meeting.setMeetDate(reserveDate);
@@ -437,7 +439,7 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setLastTime(lastTime);
         meeting.setStatus(8);
         meeting.setUserId(userId);
-        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        Userinfo userinfo = userinfoService.getUserinfo(userId);
         meeting.setDepartId(userinfo.getDepartId());
         meeting.setMeetDate(meeting1.getMeetDate());
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
@@ -485,6 +487,8 @@ public class MeetingServiceImpl implements MeetingService {
     //传入参数要取消的会议id
     @Override
     public ServerResult cancelMeeting(Integer meetingId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowTime = sdf.format(new Date());
         ServerResult serverResult = new ServerResult();
         Meeting meeting2 = findByMeetingId(meetingId);
         Integer status = meeting2.getStatus();
@@ -498,29 +502,31 @@ public class MeetingServiceImpl implements MeetingService {
                 if (meetings.size() != 0) {
                     Meeting meeting1 = meetings.get(0);
                     meetingRepository.updateStatus(meeting1.getId(), 1);
-                    List<JoinPerson>joinPersonList=joinPersonRepository.findByMeetingId(meeting1.getId());
+                    List<JoinPerson> joinPersonList = joinPersonRepository.findByMeetingId(meeting1.getId());
 //                    Userinfo userinfo=userinfoService.getUserinfo(meeting1.getUserId());
 //                    Meetroom meetroom=findByMeetRoomId(meeting1.getMeetroomId());
-                    String message2="您有一个新的会议，点击查看详情";
-                    for (JoinPerson joinPerson:joinPersonList){
-                        pushMessage=new PushMessage();
+                    String message2 = "您有一个新的会议，点击查看详情";
+                    for (JoinPerson joinPerson : joinPersonList) {
+                        pushMessage = new PushMessage();
                         pushMessage.setReceiveId(joinPerson.getUserId());
                         pushMessage.setStatus(0);
                         pushMessage.setMessage(message2);
                         pushMessage.setMeetingId(meeting1.getId());
+                        pushMessage.setTime(nowTime);
                         pushMessageRepository.saveAndFlush(pushMessage);
                     }
                 }
             }
 //            Userinfo userinfo=userinfoService.getUserinfo(meeting2.getUserId());
-            String message="您有一个会议已被取消，点击查看详情";
-            List<JoinPerson>joinPersons=joinPersonRepository.findByMeetingId(meetingId);
-            for (JoinPerson joinPerson:joinPersons){
-                pushMessage=new PushMessage();
+            String message = "您有一个会议已被取消，点击查看详情";
+            List<JoinPerson> joinPersons = joinPersonRepository.findByMeetingId(meetingId);
+            for (JoinPerson joinPerson : joinPersons) {
+                pushMessage = new PushMessage();
                 pushMessage.setReceiveId(joinPerson.getUserId());
                 pushMessage.setStatus(0);
                 pushMessage.setMessage(message);
                 pushMessage.setMeetingId(meetingId);
+                pushMessage.setTime(nowTime);
                 pushMessageRepository.saveAndFlush(pushMessage);
             }
             serverResult.setMessage("会议取消成功");
@@ -538,7 +544,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public Meeting findByMeetingId(Integer meetingId) {
-        Optional<Meeting> meeting = meetingRepository.findById(meetingId);
+       Optional<Meeting> meeting = meetingRepository.findById(meetingId);
         if (meeting.isPresent())
             return meeting.get();
         return null;
@@ -811,14 +817,17 @@ public class MeetingServiceImpl implements MeetingService {
             PushMessage pushMessage;
 //            Meetroom meetroom=findByMeetRoomId(meeting.getMeetroomId());
 //            Userinfo userinfo=userinfoService.getUserinfo(meeting.getUserId());
-            String message="您有一个新的会议，点击查看详情";
+            String message = "您有一个新的会议，点击查看详情";
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String nowTime = sdf.format(new Date());
             for (int i = 0; i < list.size(); i++) {
                 Integer id = list.get(i).getUserId();
-                pushMessage=new PushMessage();
+                pushMessage = new PushMessage();
                 pushMessage.setReceiveId(id);
                 pushMessage.setStatus(0);
                 pushMessage.setMessage(message);
                 pushMessage.setMeetingId(meetingId);
+                pushMessage.setTime(nowTime);
                 pushMessageRepository.saveAndFlush(pushMessage);
             }
             Meeting beforeMeeting = findByMeetingId(coordinateInfo.getBeforeMeetingId());
@@ -861,8 +870,8 @@ public class MeetingServiceImpl implements MeetingService {
     //修改除会议室、时间之外的其他内容
     @Override
     public ServerResult twoEditMyServer(ReserveParameter reserveParameter, HttpServletRequest request) {
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        String topic=reserveParameter.getTopic();
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        String topic = reserveParameter.getTopic();
         Integer meetingId = reserveParameter.getMeetingId();
         meetingRepository.updateTCP(meetingId, topic, reserveParameter.getContent(), reserveParameter.getPrepareTime());
         List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
@@ -880,10 +889,12 @@ public class MeetingServiceImpl implements MeetingService {
         List<Integer> list = reserveParameter.getJoinPeopleId();
         JoinPerson joinPerson;
         PushMessage pushMessage;
-        Meeting meeting=findByMeetingId(meetingId);
+        Meeting meeting = findByMeetingId(meetingId);
 //        Meetroom meetroom=findByMeetRoomId(meeting.getMeetroomId());
 //        Userinfo userinfo=userinfoService.getUserinfo(userId);
-        String message="您有一个会议信息修改，点击查看详情";
+        String message = "您有一个会议信息修改，点击查看详情";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowTime = sdf.format(new Date());
         for (int i = 0; i < list.size(); i++) {
             Integer id = list.get(i);
             if (id.equals(userId))
@@ -893,11 +904,12 @@ public class MeetingServiceImpl implements MeetingService {
             joinPerson.setUserId(id);
             joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
-            pushMessage=new PushMessage();
+            pushMessage = new PushMessage();
             pushMessage.setReceiveId(id);
             pushMessage.setStatus(0);
             pushMessage.setMessage(message);
             pushMessage.setMeetingId(meetingId);
+            pushMessage.setTime(nowTime);
             pushMessageRepository.saveAndFlush(pushMessage);
         }
         if (b == 0) {
@@ -906,7 +918,7 @@ public class MeetingServiceImpl implements MeetingService {
             joinPerson.setUserId(userId);
             joinPerson.setStatus(0);
             joinPersonRepository.saveAndFlush(joinPerson);
-            pushMessage=new PushMessage();
+            pushMessage = new PushMessage();
             pushMessage.setReceiveId(userId);
             pushMessage.setStatus(0);
             pushMessage.setMessage(message);
@@ -923,14 +935,14 @@ public class MeetingServiceImpl implements MeetingService {
     public ServerResult advanceOver(Integer meetingId) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String nowTime = sdf.format(new java.util.Date());
-        Meeting meeting=findByMeetingId(meetingId);
-        int lastTime=0;
+        Meeting meeting = findByMeetingId(meetingId);
+        int lastTime = 0;
         try {
-            lastTime= (int) TimeUtil.reduceMinute(meeting.getBegin(),nowTime);
+            lastTime = (int) TimeUtil.reduceMinute(meeting.getBegin(), nowTime);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        int bol = meetingRepository.advanceOver(meetingId, nowTime, 4,lastTime);
+        int bol = meetingRepository.advanceOver(meetingId, nowTime, 4, lastTime);
         ServerResult serverResult = new ServerResult();
         if (bol != 0) {
             serverResult.setStatus(true);
@@ -1022,7 +1034,7 @@ public class MeetingServiceImpl implements MeetingService {
         leaveInformation.setStatus(0);
         leaveInformation.setUserId(userId);
         leaveInformationRepository.saveAndFlush(leaveInformation);
-        joinPersonRepository.updateStatus(2,leaveInformation.getMeetingId(),leaveInformation.getUserId());
+        joinPersonRepository.updateStatus(2, leaveInformation.getMeetingId(), leaveInformation.getUserId());
         ServerResult serverResult = new ServerResult();
         serverResult.setMessage("请假已提交");
         serverResult.setStatus(true);
@@ -1080,12 +1092,12 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public ServerResult findPushMessage(HttpServletRequest request) {
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        List<PushMessage> list=pushMessageRepository.findByReceiveIdAndStatus(userId,0);
-        for(int i=0;i<list.size();i++){
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        List<PushMessage> list = pushMessageRepository.findByReceiveIdAndStatus(userId, 0);
+        for (int i = 0; i < list.size(); i++) {
             pushMessageRepository.updateStatus(list.get(i).getId());
         }
-        ServerResult serverResult=new ServerResult();
+        ServerResult serverResult = new ServerResult();
         serverResult.setData(list);
         serverResult.setStatus(true);
         return serverResult;
@@ -1093,7 +1105,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public LeaveInformation findById(Integer id) {
-        Optional<LeaveInformation>leaveInformation=leaveInformationRepository.findById(id);
+        Optional<LeaveInformation> leaveInformation = leaveInformationRepository.findById(id);
         if (leaveInformation.isPresent())
             return leaveInformation.get();
         return null;
@@ -1210,7 +1222,7 @@ public class MeetingServiceImpl implements MeetingService {
             if (departId != null) {
                 depart = departService.findByDepartId(departId);
                 row1.createCell(6).setCellValue(depart.getName());
-            }else {
+            } else {
                 row1.createCell(6).setCellValue("");
             }
 //            joinPersons = joinPersonRepository.findByMeetingId(meeting.getId());
@@ -1229,18 +1241,18 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countTimeByDepart(Integer tenantId, String begin, String over) {
-        List<DepartTime>departTimes=new ArrayList<>();
+        List<DepartTime> departTimes = new ArrayList<>();
         Depart depart;
         Meeting meeting;
         DepartTime departTime;
-        List<Meeting>meetings=meetingRepository.selectGroupByDepart(tenantId,begin,over);
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer departId=meeting.getDepartId();
-            depart=departService.findByDepartId(departId);
-            departTime=new DepartTime();
+        List<Meeting> meetings = meetingRepository.selectGroupByDepart(tenantId, begin, over);
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer departId = meeting.getDepartId();
+            depart = departService.findByDepartId(departId);
+            departTime = new DepartTime();
             departTime.setDepartName(depart.getName());
-            int time= meetingRepository.countTimeByDepart(departId,begin,over);
+            int time = meetingRepository.countTimeByDepart(departId, begin, over);
             departTime.setTime(time);
             departTimes.add(departTime);
         }
@@ -1249,18 +1261,18 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countTimeByPeople(Integer tenantId, String begin, String over) {
-        List<UserTime>userTimes=new ArrayList<>();
+        List<UserTime> userTimes = new ArrayList<>();
         Userinfo userinfo;
         Meeting meeting;
         UserTime userTime;
-        List<Meeting>meetings=meetingRepository.selectGroupByUser(tenantId,begin,over);
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer userId=meeting.getUserId();
-            userinfo=userinfoService.getUserinfo(userId);
-            userTime=new UserTime();
+        List<Meeting> meetings = meetingRepository.selectGroupByUser(tenantId, begin, over);
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer userId = meeting.getUserId();
+            userinfo = userinfoService.getUserinfo(userId);
+            userTime = new UserTime();
             userTime.setUserName(userinfo.getName());
-            int time= meetingRepository.countHourByUser(userId,begin,over);
+            int time = meetingRepository.countHourByUser(userId, begin, over);
             userTime.setTime(time);
             userTimes.add(userTime);
         }
@@ -1269,18 +1281,18 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countTimeByMeetRoom(Integer tenantId, String begin, String over) {
-        List<MeetRoomTime>meetRoomTimes =new ArrayList<>();
+        List<MeetRoomTime> meetRoomTimes = new ArrayList<>();
         Meetroom meetroom;
         Meeting meeting;
         MeetRoomTime meetRoomTime;
-        List<Meeting>meetings=meetingRepository.selectGroupByMeetRoom(tenantId,begin,over);
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer meetroomId=meeting.getMeetroomId();
-            meetroom=findByMeetRoomId(meeting.getMeetroomId());
-            meetRoomTime=new MeetRoomTime();
+        List<Meeting> meetings = meetingRepository.selectGroupByMeetRoom(tenantId, begin, over);
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer meetroomId = meeting.getMeetroomId();
+            meetroom = findByMeetRoomId(meeting.getMeetroomId());
+            meetRoomTime = new MeetRoomTime();
             meetRoomTime.setMeetRoomName(meetroom.getName());
-            int time= meetingRepository.countHourByMeetRoom(meetroomId,begin,over);
+            int time = meetingRepository.countHourByMeetRoom(meetroomId, begin, over);
             meetRoomTime.setTime(time);
             meetRoomTimes.add(meetRoomTime);
         }
@@ -1289,18 +1301,18 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countHourByDepart(Integer tenantId, String begin, String over) {
-        List<DepartHour>departHours=new ArrayList<>();
+        List<DepartHour> departHours = new ArrayList<>();
         Depart depart;
         Meeting meeting;
         DepartHour departHour;
-        List<Meeting>meetings=meetingRepository.selectGroupByDepart(tenantId,begin,over);
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer departId=meeting.getDepartId();
-            depart=departService.findByDepartId(departId);
-            departHour=new DepartHour();
+        List<Meeting> meetings = meetingRepository.selectGroupByDepart(tenantId, begin, over);
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer departId = meeting.getDepartId();
+            depart = departService.findByDepartId(departId);
+            departHour = new DepartHour();
             departHour.setDepartName(depart.getName());
-            double hour= NumUtil.hold2((meetingRepository.countHourByDepart(departId,begin,over))*0.0166667);
+            double hour = NumUtil.hold2((meetingRepository.countHourByDepart(departId, begin, over)) * 0.0166667);
             departHour.setHour(hour);
             departHours.add(departHour);
         }
@@ -1310,18 +1322,18 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countHourByPeople(Integer tenantId, String begin, String over) {
-        List<UserHour>userHours=new ArrayList<>();
+        List<UserHour> userHours = new ArrayList<>();
         Userinfo userinfo;
         Meeting meeting;
         UserHour userHour;
-        List<Meeting>meetings=meetingRepository.selectGroupByUser(tenantId,begin,over);
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer userId=meeting.getUserId();
-            userinfo=userinfoService.getUserinfo(userId);
-            userHour=new UserHour();
+        List<Meeting> meetings = meetingRepository.selectGroupByUser(tenantId, begin, over);
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer userId = meeting.getUserId();
+            userinfo = userinfoService.getUserinfo(userId);
+            userHour = new UserHour();
             userHour.setUserName(userinfo.getName());
-            double hour= NumUtil.hold2((meetingRepository.countHourByUser(userId,begin,over))*0.0166667);
+            double hour = NumUtil.hold2((meetingRepository.countHourByUser(userId, begin, over)) * 0.0166667);
             userHour.setHour(hour);
             userHours.add(userHour);
         }
@@ -1330,18 +1342,18 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public List countHourByMeetRoom(Integer tenantId, String begin, String over) {
-        List<MeetRoomHour>meetRoomHours =new ArrayList<>();
+        List<MeetRoomHour> meetRoomHours = new ArrayList<>();
         Meetroom meetroom;
         Meeting meeting;
         MeetRoomHour meetRoomHour;
-        List<Meeting>meetings=meetingRepository.selectGroupByMeetRoom(tenantId,begin,over);
-        for (int i=0;i<meetings.size();i++){
-            meeting=meetings.get(i);
-            Integer meetroomId=meeting.getMeetroomId();
-            meetroom=findByMeetRoomId(meeting.getMeetroomId());
-            meetRoomHour=new MeetRoomHour();
+        List<Meeting> meetings = meetingRepository.selectGroupByMeetRoom(tenantId, begin, over);
+        for (int i = 0; i < meetings.size(); i++) {
+            meeting = meetings.get(i);
+            Integer meetroomId = meeting.getMeetroomId();
+            meetroom = findByMeetRoomId(meeting.getMeetroomId());
+            meetRoomHour = new MeetRoomHour();
             meetRoomHour.setMeetRoomName(meetroom.getName());
-            double hour= NumUtil.hold2((meetingRepository.countHourByMeetRoom(meetroomId,begin,over))*0.0166667);
+            double hour = NumUtil.hold2((meetingRepository.countHourByMeetRoom(meetroomId, begin, over)) * 0.0166667);
             meetRoomHour.setHour(hour);
             meetRoomHours.add(meetRoomHour);
         }

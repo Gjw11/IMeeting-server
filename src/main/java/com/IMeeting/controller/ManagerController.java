@@ -1,9 +1,6 @@
 package com.IMeeting.controller;
 
-import com.IMeeting.entity.MenuInfo;
-import com.IMeeting.entity.RoleMenu;
-import com.IMeeting.entity.RoleMenuPara;
-import com.IMeeting.entity.ServerResult;
+import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.RoleMenuRepository;
 import com.IMeeting.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,4 +61,5 @@ public class ManagerController {
         ServerResult serverResult=managerService.toManager(request);
         return  serverResult;
     }
+
 }

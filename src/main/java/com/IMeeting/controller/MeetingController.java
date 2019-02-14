@@ -291,4 +291,11 @@ public class MeetingController {
         serverResult.setStatus(true);
         return serverResult;
     }
+    @RequestMapping("/test")
+    public ServerResult test(@RequestParam("meetingId")Integer meetingId){
+        Meeting meeting=meetingService.findByMeetingId(meetingId);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(meeting);
+        return  serverResult;
+    }
 }
