@@ -15,6 +15,7 @@ public class PushMessage {
     private String time;
     private String message;
     private Integer status;
+    private Integer meetingId;
 
     public Integer getId() {
         return id;
@@ -54,5 +55,13 @@ public class PushMessage {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Integer getMeetingId() {
+        return meetingId;
+    }
+
+    public void setMeetingId(Integer meetingId) {
+        this.meetingId = meetingId;
     }
 }

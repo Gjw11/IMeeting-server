@@ -7,7 +7,6 @@ import com.IMeeting.service.MeetingService;
 import com.IMeeting.service.UserinfoService;
 import com.IMeeting.util.NumUtil;
 import com.IMeeting.util.TimeUtil;
-import org.apache.catalina.User;
 import org.apache.poi.hssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -286,16 +285,15 @@ public class MeetingServiceImpl implements MeetingService {
                 meeting.setUserId(userId);
                 meeting.setMeetDate(reserveDate);
                 meeting.setPrepareTime(prepareTime);
+                Userinfo userinfo=userinfoService.getUserinfo(userId);
+                meeting.setDepartId(userinfo.getDepartId());
                 meeting.setCreateTime(nowTime);
-                meetingRepository.saveAndFlush(meeting);
-                Integer meetingId = meeting.getId();
+                Meeting meeting1=meetingRepository.saveAndFlush(meeting);
+                Integer meetingId = meeting1.getId();
                 JoinPerson joinPerson;
                 PushMessage pushMessage;
-                Userinfo userinfo=userinfoService.getUserinfo(userId);
-                Meetroom meetroom=findByMeetRoomId(meetroomId);
-                String message="您好!"+userinfo.getName()+"发起的主题为"+reserveParameter.getTopic()+
-                        "的会议将于"+afterBeginTime+"开始,准备时间为"+prepareTime+"分钟,会议持续时间为"+lastTime+"分钟,会议室为"+meetroom.getName()+
-                        "会议室地点在"+meetroom.getPlace()+"。请准时出席！";
+//                Meetroom meetroom=findByMeetRoomId(meetroomId);
+                String message="您有一个新的会议，点击查看详情";
                 int b = 0;
                 List<Integer> list = reserveParameter.getJoinPeopleId();
                 for (int i = 0; i < list.size(); i++) {
@@ -311,6 +309,7 @@ public class MeetingServiceImpl implements MeetingService {
                     pushMessage.setReceiveId(id);
                     pushMessage.setStatus(0);
                     pushMessage.setMessage(message);
+                    pushMessage.setMeetingId(meetingId);
                     pushMessageRepository.saveAndFlush(pushMessage);
                 }
                 if (b == 0) {
@@ -365,6 +364,8 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setTopic(reserveParameter.getTopic());
         meeting.setTenantId(tenantId);
         meeting.setUserId(userId);
+        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        meeting.setUserId(userinfo.getId());
         meeting.setLastTime(lastTime);
         meeting.setMeetDate(reserveDate);
         meeting.setPrepareTime(reserveParameter.getPrepareTime());
@@ -436,6 +437,8 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setLastTime(lastTime);
         meeting.setStatus(8);
         meeting.setUserId(userId);
+        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        meeting.setDepartId(userinfo.getDepartId());
         meeting.setMeetDate(meeting1.getMeetDate());
         meeting.setPrepareTime(coordinateParameter.getPrepareTime());
         meeting.setCreateTime(sdf.format(new java.util.Date()));
@@ -495,30 +498,29 @@ public class MeetingServiceImpl implements MeetingService {
                 if (meetings.size() != 0) {
                     Meeting meeting1 = meetings.get(0);
                     meetingRepository.updateStatus(meeting1.getId(), 1);
-                    List<JoinPerson>joinPersonList=joinPersonRepository.findByMeetingId(meetingId);
-                    Userinfo userinfo=userinfoService.getUserinfo(meeting1.getUserId());
-                    Meetroom meetroom=findByMeetRoomId(meeting1.getMeetroomId());
-                    String message2="您好!"+userinfo.getName()+"发起的主题为"+meeting1.getTopic()+
-                            "的会议将于"+meeting1.getBegin()+"开始,准备时间为"+meeting1.getPrepareTime()+"分钟,会议持续时间为"+meeting1.getLastTime()+"分钟,会议室为"+meetroom.getName()+
-                            "会议室地点在"+meetroom.getPlace()+"。请准时出席！";
+                    List<JoinPerson>joinPersonList=joinPersonRepository.findByMeetingId(meeting1.getId());
+//                    Userinfo userinfo=userinfoService.getUserinfo(meeting1.getUserId());
+//                    Meetroom meetroom=findByMeetRoomId(meeting1.getMeetroomId());
+                    String message2="您有一个新的会议，点击查看详情";
                     for (JoinPerson joinPerson:joinPersonList){
                         pushMessage=new PushMessage();
                         pushMessage.setReceiveId(joinPerson.getUserId());
                         pushMessage.setStatus(0);
                         pushMessage.setMessage(message2);
+                        pushMessage.setMeetingId(meeting1.getId());
                         pushMessageRepository.saveAndFlush(pushMessage);
                     }
                 }
             }
-            Userinfo userinfo=userinfoService.getUserinfo(meeting2.getUserId());
-            String message="您好!"+userinfo.getName()+"发起的主题为"+meeting2.getTopic()+
-                    "的会议已取消请注意！";
+//            Userinfo userinfo=userinfoService.getUserinfo(meeting2.getUserId());
+            String message="您有一个会议已被取消，点击查看详情";
             List<JoinPerson>joinPersons=joinPersonRepository.findByMeetingId(meetingId);
             for (JoinPerson joinPerson:joinPersons){
                 pushMessage=new PushMessage();
                 pushMessage.setReceiveId(joinPerson.getUserId());
                 pushMessage.setStatus(0);
                 pushMessage.setMessage(message);
+                pushMessage.setMeetingId(meetingId);
                 pushMessageRepository.saveAndFlush(pushMessage);
             }
             serverResult.setMessage("会议取消成功");
@@ -807,17 +809,16 @@ public class MeetingServiceImpl implements MeetingService {
             List<JoinPerson> list = joinPersonRepository.findByMeetingId(meetingId);
             JoinPerson joinPerson;
             PushMessage pushMessage;
-            Meetroom meetroom=findByMeetRoomId(meeting.getMeetroomId());
-            Userinfo userinfo=userinfoService.getUserinfo(meeting.getUserId());
-            String message="您好!"+userinfo.getName()+"发起的主题为"+meeting.getTopic()+
-                    "的会议将于"+meeting.getBegin()+"开始,准备时间为"+meeting.getPrepareTime()+"分钟,会议持续时间为"+meeting.getLastTime()+"分钟,会议室为"+meetroom.getName()+
-                    "会议室地点在"+meetroom.getPlace()+"。请准时出席！";
+//            Meetroom meetroom=findByMeetRoomId(meeting.getMeetroomId());
+//            Userinfo userinfo=userinfoService.getUserinfo(meeting.getUserId());
+            String message="您有一个新的会议，点击查看详情";
             for (int i = 0; i < list.size(); i++) {
                 Integer id = list.get(i).getUserId();
                 pushMessage=new PushMessage();
                 pushMessage.setReceiveId(id);
                 pushMessage.setStatus(0);
                 pushMessage.setMessage(message);
+                pushMessage.setMeetingId(meetingId);
                 pushMessageRepository.saveAndFlush(pushMessage);
             }
             Meeting beforeMeeting = findByMeetingId(coordinateInfo.getBeforeMeetingId());
@@ -880,11 +881,9 @@ public class MeetingServiceImpl implements MeetingService {
         JoinPerson joinPerson;
         PushMessage pushMessage;
         Meeting meeting=findByMeetingId(meetingId);
-        Meetroom meetroom=findByMeetRoomId(meeting.getMeetroomId());
-        Userinfo userinfo=userinfoService.getUserinfo(userId);
-        String message="您好!"+userinfo.getName()+"发起的主题为"+topic+
-                "的会议将于"+meeting.getBegin()+"开始,准备时间为"+meeting.getPrepareTime()+"分钟,会议持续时间为"+meeting.getLastTime()+"分钟,会议室为"+meetroom.getName()+
-                "会议室地点在"+meetroom.getPlace()+"。请准时出席！";
+//        Meetroom meetroom=findByMeetRoomId(meeting.getMeetroomId());
+//        Userinfo userinfo=userinfoService.getUserinfo(userId);
+        String message="您有一个会议信息修改，点击查看详情";
         for (int i = 0; i < list.size(); i++) {
             Integer id = list.get(i);
             if (id.equals(userId))
@@ -898,6 +897,7 @@ public class MeetingServiceImpl implements MeetingService {
             pushMessage.setReceiveId(id);
             pushMessage.setStatus(0);
             pushMessage.setMessage(message);
+            pushMessage.setMeetingId(meetingId);
             pushMessageRepository.saveAndFlush(pushMessage);
         }
         if (b == 0) {
@@ -1082,6 +1082,9 @@ public class MeetingServiceImpl implements MeetingService {
     public ServerResult findPushMessage(HttpServletRequest request) {
         Integer userId= (Integer) request.getSession().getAttribute("userId");
         List<PushMessage> list=pushMessageRepository.findByReceiveIdAndStatus(userId,0);
+        for(int i=0;i<list.size();i++){
+            pushMessageRepository.updateStatus(list.get(i).getId());
+        }
         ServerResult serverResult=new ServerResult();
         serverResult.setData(list);
         serverResult.setStatus(true);

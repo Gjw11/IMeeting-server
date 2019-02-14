@@ -17,7 +17,7 @@ public class Meeting {
     private String content;
     private String begin;
     private String over;
-    @Column(name = "user_id",insertable = false, updatable = false, nullable = false)
+    @Column(name = "user_id")
     private Integer userId;
     private Integer meetroomId;
     private Integer status;
@@ -26,14 +26,14 @@ public class Meeting {
     private Integer prepareTime;
     private String createTime;
     private Integer lastTime;
-    @Column(name = "depart_id",insertable = false, updatable = false, nullable = false)
+    @Column(name = "depart_id")
     private Integer departId;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id",insertable = false,updatable = false,nullable = false)
     private Userinfo userinfo;
     @OneToOne
-    @JoinColumn(name = "depart_id")
+    @JoinColumn(name = "depart_id",insertable = false,updatable = false,nullable = false)
     private Depart depart;
 
     public Userinfo getUserinfo() {

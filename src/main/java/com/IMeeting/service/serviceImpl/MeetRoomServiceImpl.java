@@ -68,6 +68,7 @@ public class MeetRoomServiceImpl implements MeetRoomService{
         result.add(enables);    //该会议室允许使用的部门
         result.add(bans);       //该会议室禁止使用的部门
         serverResult.setStatus(true);
+        serverResult.setData(result);
         return serverResult;
     }
 

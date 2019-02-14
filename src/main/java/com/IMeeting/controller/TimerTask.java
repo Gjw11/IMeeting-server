@@ -64,7 +64,7 @@ public class TimerTask {
         String nowTime=sdf.format(new Date());
         List<Meetroom> meetrooms=meetroomRepository.findMeetRoomOver(nowTime);
         for (Meetroom meetroom:meetrooms){
-            meetroomRepository.updateMeetRoomRun(meetroom.getId());
+            meetroomRepository.updateMeetRoomOver(meetroom.getId());
         }
     }
 
