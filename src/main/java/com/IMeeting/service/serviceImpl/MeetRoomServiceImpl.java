@@ -77,13 +77,15 @@ public class MeetRoomServiceImpl implements MeetRoomService{
         Integer meetRoomId=meetroomPara.getId();
         meetroomRepository.updateMeetRoom(meetRoomId,meetroomPara.getName(),meetroomPara.getNum(),meetroomPara.getPlace(),meetroomPara.getContain());
         meetroomEquipRepository.deleteByMeetRoomId(meetRoomId);
-        List<Integer>equips=meetroomPara.getEquips();
-        MeetroomEquip meetroomEquip;
-        for (int i=0;i<equips.size();i++){
-            meetroomEquip=new MeetroomEquip();
-            meetroomEquip.setMeetroomId(meetRoomId);
-            meetroomEquip.setEquipId(equips.get(i));
-            meetroomEquipRepository.saveAndFlush(meetroomEquip);
+        if (meetroomPara.getEquips()!=null) {
+            List<Integer> equips = meetroomPara.getEquips();
+            MeetroomEquip meetroomEquip;
+            for (int i = 0; i < equips.size(); i++) {
+                meetroomEquip = new MeetroomEquip();
+                meetroomEquip.setMeetroomId(meetRoomId);
+                meetroomEquip.setEquipId(equips.get(i));
+                meetroomEquipRepository.saveAndFlush(meetroomEquip);
+            }
         }
         meetroomDepartRepository.deleteByMeetRoomId(meetRoomId);
         MeetroomDepart meetroomDepart;
@@ -125,30 +127,36 @@ public class MeetRoomServiceImpl implements MeetRoomService{
         meetroom.setPlace(meetroomPara.getPlace());
         Meetroom meetroom1=meetroomRepository.saveAndFlush(meetroom);
         Integer meetRoomId=meetroom1.getId();
-        List<Integer>equips=meetroomPara.getEquips();
-        MeetroomEquip meetroomEquip;
-        for (int i=0;i<equips.size();i++){
-            meetroomEquip=new MeetroomEquip();
-            meetroomEquip.setMeetroomId(meetRoomId);
-            meetroomEquip.setEquipId(equips.get(i));
-            meetroomEquipRepository.saveAndFlush(meetroomEquip);
+        if (meetroomPara.getEquips()!=null) {
+            List<Integer> equips = meetroomPara.getEquips();
+            MeetroomEquip meetroomEquip;
+            for (int i = 0; i < equips.size(); i++) {
+                meetroomEquip = new MeetroomEquip();
+                meetroomEquip.setMeetroomId(meetRoomId);
+                meetroomEquip.setEquipId(equips.get(i));
+                meetroomEquipRepository.saveAndFlush(meetroomEquip);
+            }
         }
         MeetroomDepart meetroomDepart;
-        List<Integer>enables=meetroomPara.getEnables();
-        for (int i=0;i<enables.size();i++){
-            meetroomDepart=new MeetroomDepart();
-            meetroomDepart.setMeetroomId(meetRoomId);
-            meetroomDepart.setDepartId(enables.get(i));
-            meetroomDepart.setStatus(1);
-            meetroomDepartRepository.saveAndFlush(meetroomDepart);
+        if (meetroomPara.getEnables()!=null) {
+            List<Integer> enables = meetroomPara.getEnables();
+            for (int i = 0; i < enables.size(); i++) {
+                meetroomDepart = new MeetroomDepart();
+                meetroomDepart.setMeetroomId(meetRoomId);
+                meetroomDepart.setDepartId(enables.get(i));
+                meetroomDepart.setStatus(1);
+                meetroomDepartRepository.saveAndFlush(meetroomDepart);
+            }
         }
-        List<Integer>bans=meetroomPara.getBans();
-        for (int i=0;i<bans.size();i++){
-            meetroomDepart=new MeetroomDepart();
-            meetroomDepart.setMeetroomId(meetRoomId);
-            meetroomDepart.setDepartId(bans.get(i));
-            meetroomDepart.setStatus(0);
-            meetroomDepartRepository.saveAndFlush(meetroomDepart);
+        if (meetroomPara.getBans()!=null) {
+            List<Integer> bans = meetroomPara.getBans();
+            for (int i = 0; i < bans.size(); i++) {
+                meetroomDepart = new MeetroomDepart();
+                meetroomDepart.setMeetroomId(meetRoomId);
+                meetroomDepart.setDepartId(bans.get(i));
+                meetroomDepart.setStatus(0);
+                meetroomDepartRepository.saveAndFlush(meetroomDepart);
+            }
         }
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
