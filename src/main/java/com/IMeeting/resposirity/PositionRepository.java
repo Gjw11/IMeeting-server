@@ -19,10 +19,12 @@ import java.util.Optional;
 public interface PositionRepository extends JpaRepository<Position,Integer> {
     Optional<Position> findById(Integer id);
     List<Position>findByDepartId(Integer departId);
+    List<Position>findByTenantId(Integer tenantId);
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "update Position m set m.departId=?2 ,m.name=3 where m.id=?1")
     int editOne(Integer positionId,Integer departId,String positionName);
+    @Transactional
     @Modifying(clearAutomatically = true)
     @Query(value = "delete from Position m where m.id=?1")
     int deleteOne(Integer positionId);

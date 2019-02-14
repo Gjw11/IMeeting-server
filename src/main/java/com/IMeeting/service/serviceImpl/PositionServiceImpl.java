@@ -29,7 +29,7 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public ServerResult selectAll(HttpServletRequest request) {
         Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
-        List<Position> positions=positionRepository.findByDepartId(tenantId);
+        List<Position> positions=positionRepository.findByTenantId(tenantId);
         List<Depart>departs=departRepository.findByTenantId(tenantId);
         List<List>result=new ArrayList<>();
         result.add(positions);
