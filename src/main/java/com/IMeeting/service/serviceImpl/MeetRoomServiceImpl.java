@@ -87,21 +87,25 @@ public class MeetRoomServiceImpl implements MeetRoomService{
         }
         meetroomDepartRepository.deleteByMeetRoomId(meetRoomId);
         MeetroomDepart meetroomDepart;
-        List<Integer>enables=meetroomPara.getEnables();
-        for (int i=0;i<enables.size();i++){
-            meetroomDepart=new MeetroomDepart();
-            meetroomDepart.setMeetroomId(meetRoomId);
-            meetroomDepart.setDepartId(enables.get(i));
-            meetroomDepart.setStatus(1);
-            meetroomDepartRepository.saveAndFlush(meetroomDepart);
+        if (meetroomPara.getEnables()!=null) {
+            List<Integer> enables = meetroomPara.getEnables();
+            for (int i = 0; i < enables.size(); i++) {
+                meetroomDepart = new MeetroomDepart();
+                meetroomDepart.setMeetroomId(meetRoomId);
+                meetroomDepart.setDepartId(enables.get(i));
+                meetroomDepart.setStatus(1);
+                meetroomDepartRepository.saveAndFlush(meetroomDepart);
+            }
         }
-        List<Integer>bans=meetroomPara.getBans();
-        for (int i=0;i<bans.size();i++){
-            meetroomDepart=new MeetroomDepart();
-            meetroomDepart.setMeetroomId(meetRoomId);
-            meetroomDepart.setDepartId(bans.get(i));
-            meetroomDepart.setStatus(0);
-            meetroomDepartRepository.saveAndFlush(meetroomDepart);
+        if (meetroomPara.getBans()!=null) {
+            List<Integer> bans = meetroomPara.getBans();
+            for (int i = 0; i < bans.size(); i++) {
+                meetroomDepart = new MeetroomDepart();
+                meetroomDepart.setMeetroomId(meetRoomId);
+                meetroomDepart.setDepartId(bans.get(i));
+                meetroomDepart.setStatus(0);
+                meetroomDepartRepository.saveAndFlush(meetroomDepart);
+            }
         }
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
