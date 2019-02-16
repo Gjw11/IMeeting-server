@@ -1245,6 +1245,9 @@ public class MeetingServiceImpl implements MeetingService {
         Depart depart;
         Meeting meeting;
         DepartTime departTime;
+        int place=0;
+        int num=0;
+        List<Object>result=new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByDepart(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1254,9 +1257,15 @@ public class MeetingServiceImpl implements MeetingService {
             departTime.setDepartName(depart.getName());
             int time = meetingRepository.countTimeByDepart(departId, begin, over);
             departTime.setTime(time);
+            if (time>num){
+                num=time;
+                place=i;
+            }
             departTimes.add(departTime);
         }
-        return departTimes;
+        result.add(departTimes);
+        result.add(place);
+        return result;
     }
 
     @Override
@@ -1265,6 +1274,9 @@ public class MeetingServiceImpl implements MeetingService {
         Userinfo userinfo;
         Meeting meeting;
         UserTime userTime;
+        int place=0;
+        int num=0;
+        List<Object>result=new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByUser(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1272,11 +1284,17 @@ public class MeetingServiceImpl implements MeetingService {
             userinfo = userinfoService.getUserinfo(userId);
             userTime = new UserTime();
             userTime.setUserName(userinfo.getName());
-            int time = meetingRepository.countHourByUser(userId, begin, over);
+            int time = meetingRepository.countTimeByUser(userId, begin, over);
             userTime.setTime(time);
+            if (time>num){
+                num=time;
+                place=i;
+            }
             userTimes.add(userTime);
         }
-        return userTimes;
+        result.add(userTimes);
+        result.add(place);
+        return result;
     }
 
     @Override
@@ -1285,6 +1303,9 @@ public class MeetingServiceImpl implements MeetingService {
         Meetroom meetroom;
         Meeting meeting;
         MeetRoomTime meetRoomTime;
+        int place=0;
+        int num=0;
+        List<Object>result=new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByMeetRoom(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1292,11 +1313,17 @@ public class MeetingServiceImpl implements MeetingService {
             meetroom = findByMeetRoomId(meeting.getMeetroomId());
             meetRoomTime = new MeetRoomTime();
             meetRoomTime.setMeetRoomName(meetroom.getName());
-            int time = meetingRepository.countHourByMeetRoom(meetroomId, begin, over);
+            int time = meetingRepository.countTimeByMeetRoom(meetroomId, begin, over);
             meetRoomTime.setTime(time);
+            if (time>num){
+                num=time;
+                place=i;
+            }
             meetRoomTimes.add(meetRoomTime);
         }
-        return meetRoomTimes;
+        result.add(meetRoomTimes);
+        result.add(place);
+        return result;
     }
 
     @Override
@@ -1305,6 +1332,9 @@ public class MeetingServiceImpl implements MeetingService {
         Depart depart;
         Meeting meeting;
         DepartHour departHour;
+        int place=0;
+        double num=0;
+        List<Object>result=new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByDepart(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1314,9 +1344,15 @@ public class MeetingServiceImpl implements MeetingService {
             departHour.setDepartName(depart.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByDepart(departId, begin, over)) * 0.0166667);
             departHour.setHour(hour);
+            if (hour>num){
+                num=hour;
+                place=i;
+            }
             departHours.add(departHour);
         }
-        return departHours;
+        result.add(departHours);
+        result.add(place);
+        return result;
     }
 
 
@@ -1326,6 +1362,9 @@ public class MeetingServiceImpl implements MeetingService {
         Userinfo userinfo;
         Meeting meeting;
         UserHour userHour;
+        int place=0;
+        double num=0;
+        List<Object>result=new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByUser(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1335,8 +1374,14 @@ public class MeetingServiceImpl implements MeetingService {
             userHour.setUserName(userinfo.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByUser(userId, begin, over)) * 0.0166667);
             userHour.setHour(hour);
+            if (hour>num){
+                num=hour;
+                place=i;
+            }
             userHours.add(userHour);
         }
+        result.add(userHours);
+        result.add(place);
         return userHours;
     }
 
@@ -1347,6 +1392,8 @@ public class MeetingServiceImpl implements MeetingService {
         Meeting meeting;
         MeetRoomHour meetRoomHour;
         List<Meeting> meetings = meetingRepository.selectGroupByMeetRoom(tenantId, begin, over);
+        int place=0;
+        double num=0;
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
             Integer meetroomId = meeting.getMeetroomId();
@@ -1354,10 +1401,17 @@ public class MeetingServiceImpl implements MeetingService {
             meetRoomHour = new MeetRoomHour();
             meetRoomHour.setMeetRoomName(meetroom.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByMeetRoom(meetroomId, begin, over)) * 0.0166667);
+            if (hour>num){
+                num=hour;
+                place=i;
+            }
             meetRoomHour.setHour(hour);
             meetRoomHours.add(meetRoomHour);
         }
-        return meetRoomHours;
+        List<Object>list=new ArrayList<>();
+        list.add(meetRoomHours);
+        list.add(place);
+        return list;
     }
 
 
