@@ -331,6 +331,7 @@ public class MeetingController {
             reserverRecord.setMeetRoom(meetroom.getName());
             reserverRecord.setCreateTime(meeting.getCreateTime());
             reserverRecord.setPeopleName(meeting.getUserinfo().getName());
+            reserverRecord.setDepartName(meeting.getDepart().getName());
             list.add(reserverRecord);
         }
         serverResult.setData(list);
