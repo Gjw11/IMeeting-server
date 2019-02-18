@@ -162,6 +162,7 @@ public class UserserviceImpl implements UserinfoService {
         boolean flag = false;
         Userinfo userinfo;
         Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        System.out.println(tenantId);
         Tenant tenant = tenantService.findById(tenantId);
         String tenantNum = tenant.getNum();
         MD5 m = new MD5();
