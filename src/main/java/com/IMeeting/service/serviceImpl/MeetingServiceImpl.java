@@ -36,8 +36,6 @@ public class MeetingServiceImpl implements MeetingService {
     @Autowired
     private MeetroomDepartRepository meetroomDepartRepository;
     @Autowired
-    private MeetroomRoleRepository meetroomRoleRepository;
-    @Autowired
     private EquipRepositpry equipRepositpry;
     @Autowired
     private OutsideJoinPersonRepository outsideJoinPersonRepository;
