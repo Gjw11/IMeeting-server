@@ -324,6 +324,7 @@ public class MeetingController {
                     break;
             }
             reserverRecord.setStatus(status);
+            reserverRecord.setId(meeting.getId());
             reserverRecord.setTopic(meeting.getTopic());
             reserverRecord.setBegin(meeting.getBegin());
             reserverRecord.setOver(meeting.getOver());
