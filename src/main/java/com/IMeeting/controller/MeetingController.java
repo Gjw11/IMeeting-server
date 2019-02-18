@@ -290,7 +290,50 @@ public class MeetingController {
     public ServerResult findMeetingBySpecification(@RequestBody SelectMeetingParameter selectMeetingParameter, HttpServletRequest request) {
         ServerResult serverResult = new ServerResult();
         List<Meeting> meetings = meetingService.findBySpecification(selectMeetingParameter, request);
-        serverResult.setData(meetings);
+        List<ReserverRecord>list=new ArrayList<>();
+        ReserverRecord reserverRecord;
+        Meeting meeting;
+        for (int i=0;i<meetings.size();i++){
+            reserverRecord=new ReserverRecord();
+            meeting=meetings.get(i);
+            String status = "";
+            switch (meeting.getStatus()) {
+                case 6:
+                    status = "预约失败";
+                    break;
+                case 1:
+                    status = "预约成功";
+                    break;
+                case 2:
+                    status = "预约中";
+                    break;
+                case 3:
+                    status = "会议进行中";
+                    break;
+                case 4:
+                    status = "会议结束";
+                    break;
+                case 5:
+                    status = "取消会议";
+                    break;
+                case 7:
+                    status = "调用失败";
+                    break;
+                case 8:
+                    status = "调用中";
+                    break;
+            }
+            reserverRecord.setStatus(status);
+            reserverRecord.setTopic(meeting.getTopic());
+            reserverRecord.setBegin(meeting.getBegin());
+            reserverRecord.setOver(meeting.getOver());
+            Meetroom meetroom=meetingService.findByMeetRoomId(meeting.getMeetroomId());
+            reserverRecord.setMeetRoom(meetroom.getName());
+            reserverRecord.setCreateTime(meeting.getCreateTime());
+            reserverRecord.setPeopleName(meeting.getUserinfo().getName());
+            list.add(reserverRecord);
+        }
+        serverResult.setData(list);
         serverResult.setStatus(true);
         return serverResult;
     }

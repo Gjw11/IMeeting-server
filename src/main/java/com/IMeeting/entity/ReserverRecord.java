@@ -19,6 +19,15 @@ public class ReserverRecord {
     private int prepareTime;
     private String status;
     private int lastTime;
+    private String meetRoom;
+
+    public String getMeetRoom() {
+        return meetRoom;
+    }
+
+    public void setMeetRoom(String meetRoom) {
+        this.meetRoom = meetRoom;
+    }
 
     public int getLastTime() {
         return lastTime;
