@@ -38,10 +38,13 @@ public class FaceServiceImpl implements FaceService {
             switch (faceInfo.getStatus()){
                 case 0:
                     status="未审核";
+                    break;
                 case 1:
                     status="已通过";
+                    break;
                 case 2:
                     status="未通过";
+                    break;
             }
             faceResult.setStatus(status);
             Userinfo userinfo=userinfoService.getUserinfo(faceInfo.getUserId());
