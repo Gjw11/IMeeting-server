@@ -139,7 +139,7 @@ public class FaceController {
                 byte[] target = faceInfo.getFaceDetail();
                 similarResult = faceRecognition.faceCompare(source, target);
             }
-            if (similarResult > 80) {
+            if (similarResult > 0.8) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String nowTime = sdf.format(new java.util.Date());
                 joinPersonRepository.updateStatusAndTime(joinPerson.getId(), 1, nowTime);
@@ -153,7 +153,7 @@ public class FaceController {
 //        File del = new File(f.toURI());
 //        del.delete();
         if (bol == 0) {
-            serverResult.setMessage("对不起，您非本场会议人员");
+            serverResult.setMessage("对不起，您非本场参会人员");
         }
         serverResult.setStatus(true);
         return serverResult;
