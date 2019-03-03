@@ -196,7 +196,7 @@ public class FaceController {
 
     //管理端上传员工人脸数据
     @RequestMapping("/insertByManager")
-    public ServerResult insertByManager(@RequestParam("fileupload") MultipartFile fileupload, @RequestParam("worknum") String worknum, HttpServletRequest request) throws IOException {
+    public ServerResult insertByManager(@RequestParam("file") MultipartFile fileupload, @RequestParam("worknum") String worknum, HttpServletRequest request) throws IOException {
         Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         Userinfo userinfo = userinfoRepository.findByWorknumAndTenantId(worknum, tenantId);
         ServerResult serverResult = new ServerResult();
