@@ -1380,7 +1380,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
         result.add(userHours);
         result.add(place);
-        return userHours;
+        return result;
     }
 
     @Override
