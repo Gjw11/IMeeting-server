@@ -18,6 +18,24 @@ public class Meetroom {
     private Integer availStatus;
     private Integer nowStatus;
     private Integer tenantId;
+    private String wifiCode;
+    private String QRCodeAddress;
+
+    public String getQRCodeAddress() {
+        return QRCodeAddress;
+    }
+
+    public void setQRCodeAddress(String QRCodeAddress) {
+        this.QRCodeAddress = QRCodeAddress;
+    }
+
+    public String getWifiCode() {
+        return wifiCode;
+    }
+
+    public void setWifiCode(String wifiCode) {
+        this.wifiCode = wifiCode;
+    }
 
     public Integer getId() {
         return id;
