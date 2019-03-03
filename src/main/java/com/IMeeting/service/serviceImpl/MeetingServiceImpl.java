@@ -1254,6 +1254,7 @@ public class MeetingServiceImpl implements MeetingService {
             departTime = new DepartTime();
             departTime.setDepartName(depart.getName());
             int time = meetingRepository.countTimeByDepart(departId, begin, over);
+            departTime.setId(i+1);
             departTime.setTime(time);
             if (time>num){
                 num=time;
@@ -1284,6 +1285,7 @@ public class MeetingServiceImpl implements MeetingService {
             userTime.setUserName(userinfo.getName());
             int time = meetingRepository.countTimeByUser(userId, begin, over);
             userTime.setTime(time);
+            userTime.setId(i+1);
             if (time>num){
                 num=time;
                 place=i;
@@ -1312,6 +1314,7 @@ public class MeetingServiceImpl implements MeetingService {
             meetRoomTime = new MeetRoomTime();
             meetRoomTime.setMeetRoomName(meetroom.getName());
             int time = meetingRepository.countTimeByMeetRoom(meetroomId, begin, over);
+            meetRoomTime.setId(i+1);
             meetRoomTime.setTime(time);
             if (time>num){
                 num=time;
@@ -1342,6 +1345,7 @@ public class MeetingServiceImpl implements MeetingService {
             departHour.setDepartName(depart.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByDepart(departId, begin, over)) * 0.0166667);
             departHour.setHour(hour);
+            departHour.setId(i+1);
             if (hour>num){
                 num=hour;
                 place=i;
@@ -1372,6 +1376,7 @@ public class MeetingServiceImpl implements MeetingService {
             userHour.setUserName(userinfo.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByUser(userId, begin, over)) * 0.0166667);
             userHour.setHour(hour);
+            userHour.setId(i+1);
             if (hour>num){
                 num=hour;
                 place=i;
@@ -1404,6 +1409,7 @@ public class MeetingServiceImpl implements MeetingService {
                 place=i;
             }
             meetRoomHour.setHour(hour);
+            meetRoomHour.setId(i+1);
             meetRoomHours.add(meetRoomHour);
         }
         List<Object>list=new ArrayList<>();

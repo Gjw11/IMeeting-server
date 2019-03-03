@@ -4,8 +4,17 @@ package com.IMeeting.entity;
  * Created by gjw on 2019/2/11.
  */
 public class UserTime {
+    private int id;
     private String userName;
     private int time;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getUserName() {
         return userName;
