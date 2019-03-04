@@ -170,6 +170,8 @@ public class MeetingServiceImpl implements MeetingService {
             Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
             reserverRecord.setPeopleName(userinfo.getName());
             reserverRecord.setPhone(userinfo.getPhone());
+            reserverRecord.setPrepareTime(meeting.getPrepareTime());
+            reserverRecord.setContent(meeting.getContent());
             reserverRecord.setStatus("进行中");
             Depart depart = userinfoService.getDepart(userinfo.getDepartId());
             reserverRecord.setDepartName(depart.getName());
@@ -189,6 +191,8 @@ public class MeetingServiceImpl implements MeetingService {
             Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
             reserverRecord.setPeopleName(userinfo.getName());
             reserverRecord.setPhone(userinfo.getPhone());
+            reserverRecord.setPrepareTime(meeting.getPrepareTime());
+            reserverRecord.setContent(meeting.getContent());
             reserverRecord.setStatus("未开始");
             Depart depart = userinfoService.getDepart(userinfo.getDepartId());
             reserverRecord.setDepartName(depart.getName());
@@ -203,6 +207,8 @@ public class MeetingServiceImpl implements MeetingService {
             reserverRecord.setCreateTime(meeting.getCreateTime());
             reserverRecord.setOver(meeting.getOver());
             reserverRecord.setMeetDate(meeting.getMeetDate());
+            reserverRecord.setPrepareTime(meeting.getPrepareTime());
+            reserverRecord.setContent(meeting.getContent());
             reserverRecord.setTopic(meeting.getTopic());
             reserverRecord.setLastTime(meeting.getLastTime());
             Userinfo userinfo = userinfoService.getUserinfo(meeting.getUserId());
