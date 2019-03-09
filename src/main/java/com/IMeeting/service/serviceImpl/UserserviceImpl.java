@@ -88,7 +88,7 @@ public class UserserviceImpl implements UserinfoService {
         Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         List<List> result = new ArrayList<>();
         List<Depart> departs = departRepository.findByTenantId(tenantId);
-        List<Position> positions = positionRepository.findByDepartId(tenantId);
+        List<Position> positions = positionRepository.findByTenantId(tenantId);
         List<RoleInfo> roleInfos = roleInfoRepository.findByTenantId(tenantId);
         result.add(departs);
         result.add(positions);
@@ -129,6 +129,8 @@ public class UserserviceImpl implements UserinfoService {
         Tenant tenant = tenantService.findById(tenantId);
         userinfo.setUsername(tenant.getNum() + userinfo.getWorknum());
         userinfo.setTenantId(tenantId);
+        MD5 md5=new MD5();
+        userinfo.setPassword(md5.MD5("123456"));
         userinfo.setStatus(1);
         if (userinfo.getDepartId()==null){
             userinfo.setDepartId(0);
