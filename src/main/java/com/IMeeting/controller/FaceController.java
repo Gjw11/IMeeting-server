@@ -30,9 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by gjw on 2019/1/18.
- */
+
 @RestController
 @RequestMapping("/face")
 public class FaceController {
@@ -224,5 +222,6 @@ public class FaceController {
         }
         return serverResult;
     }
+    
 
 }

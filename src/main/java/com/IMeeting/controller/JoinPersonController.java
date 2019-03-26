@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-/**
- * Created by gjw on 2019/2/13.
- */
+
 @RestController
 @RequestMapping("/joinPerson")
 public class JoinPersonController {

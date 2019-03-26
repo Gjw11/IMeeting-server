@@ -21,11 +21,7 @@ public class FaceRecognition {
     final String APP_ID = "2q5Ymv1QbkBqp5L46toQ8cquVbU1CbiV32ApSsiwJYY5";
     final String SDK_KEY = "CKhPAJE8NjvqzyLVsmwtZqdjDHaSJbZnAtt92BuGmAp6";
 
-//    public static void main(String[] args) {
-//        byte[] sourceFeature = null;
-//        //new FaceRecognition().faceCompare(new File("1.jpg"), sourceFeature);
-//        new FaceRecognition().faceCompare(new File("1.jpg"));
-//    }
+
 
     /*
      * @param 图片

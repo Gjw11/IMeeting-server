@@ -15,9 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by gjw on 2018/11/24.
- */
+
 @RestController
 //@CrossOrigin(allowCredentials = "true")
 @RequestMapping("/group")

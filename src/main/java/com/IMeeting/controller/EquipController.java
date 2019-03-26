@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * Created by gjw on 2019/2/2.
- */
+
 @RestController
 @RequestMapping("/equip")
 public class EquipController {
