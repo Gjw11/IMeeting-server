@@ -1,5 +1,6 @@
 package com.IMeeting.resposirity;
 
+import com.IMeeting.entity.Meetroom;
 import com.IMeeting.entity.MeetroomEquip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -24,4 +25,5 @@ public interface MeetroomEquipRepository extends JpaRepository<MeetroomEquip,Int
     @Modifying(clearAutomatically = true)
     @Query(value = "delete from MeetroomEquip m where m.meetroomId=?1")
     int deleteByMeetRoomId(Integer meetRoomId);
+    MeetroomEquip findByEquipIdAndMeetroomId(Integer equipId,Integer meetRoomId);
 }

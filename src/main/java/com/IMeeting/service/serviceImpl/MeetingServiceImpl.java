@@ -65,8 +65,9 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public List<Meetroom> getEffectiveMeetroom(Integer tenantId, HttpServletRequest request) {
+    public List<Meetroom> getEffectiveMeetroom(HttpServletRequest request) {
 //        Integer roleId = (Integer) request.getSession().getAttribute("roleId");
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
         Integer departId = (Integer) request.getSession().getAttribute("departId");
         List<Meetroom> meetrooms = new ArrayList<>();
         List<Meetroom> lists = meetroomRepository.findByTenantIdAndAvailStatus(tenantId, 1);
@@ -124,7 +125,7 @@ public class MeetingServiceImpl implements MeetingService {
         //获取预定会议参数，需要前端存储
         MeetroomParameter meetroomParameter = selectParameter(tenantId);
         //获取可预定的会议室集合
-        List<Meetroom> meetrooms = getEffectiveMeetroom(tenantId, request);
+        List<Meetroom> meetrooms = getEffectiveMeetroom(request);
 //        request.getSession().setAttribute("effectiveMeetroom",meetrooms);
         //获取每个会议室对应的设备功能集合，需要前端存储
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -1114,6 +1115,26 @@ public class MeetingServiceImpl implements MeetingService {
             return leaveInformation.get();
         return null;
     }
+
+    @Override
+    public double countSimilar(double[] source, double[] target, double[] weight) {
+        int room_property_num = source.length;//会议室属性的数量
+        double sum_vec = 0;//两个想向量的点积
+        double sum_source = 0;//源会议室向量的模长
+        double sum_target = 0;//目标会议室向量的模长
+        for(int i = 0; i < room_property_num; i++) {
+            source[i] *= weight[i];
+            target[i] *= weight[i];
+        }
+        //计算点积与模长
+        for(int i = 0; i < room_property_num; i++) {
+            sum_vec += source[i] * target[i];
+            sum_source += source[i] * source[i];
+            sum_target += target[i] * target[i];
+        }
+        return sum_vec/(Math.sqrt(sum_source*sum_target));
+    }
+
 
     /*-------------华丽分割线-------------*/
     @Override

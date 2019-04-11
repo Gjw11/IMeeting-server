@@ -17,6 +17,33 @@ public class EquipRepairInfo {
     private String reportTime;
     private String repairTime;
     private String repairName;
+    private int tenantId;
+    private int EquipId;
+    private String damageInfo;
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public int getEquipId() {
+        return EquipId;
+    }
+
+    public void setEquipId(int equipId) {
+        EquipId = equipId;
+    }
+
+    public String getDamageInfo() {
+        return damageInfo;
+    }
+
+    public void setDamageInfo(String damageInfo) {
+        this.damageInfo = damageInfo;
+    }
 
     public int getId() {
         return id;

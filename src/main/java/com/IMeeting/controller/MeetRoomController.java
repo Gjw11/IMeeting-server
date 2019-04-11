@@ -1,5 +1,6 @@
 package com.IMeeting.controller;
 
+import com.IMeeting.entity.Meetroom;
 import com.IMeeting.entity.MeetroomPara;
 import com.IMeeting.entity.ServerResult;
 import com.IMeeting.resposirity.MeetroomRepository;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created by gjw on 2019/2/4.
@@ -26,7 +28,12 @@ public class MeetRoomController {
     //查询该租户的设备集合equips和部门集合departs需存储 insert方法插入一个部门时需要使用
     @RequestMapping("/selectAll")
     public ServerResult selectAll(HttpServletRequest request){
-        ServerResult serverResult=meetRoomService.selectAll(request);
+        ServerResult serverResult=new ServerResult();
+        List<List> list= (List<List>) meetRoomService.selectAll(request);
+        if (list!=null) {
+            serverResult.setData(list);
+            serverResult.setStatus(true);
+        }
         return  serverResult;
     }
     //禁用某个会议室

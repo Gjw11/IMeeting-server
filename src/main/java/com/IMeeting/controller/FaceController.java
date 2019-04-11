@@ -157,6 +157,47 @@ public class FaceController {
         return serverResult;
     }
 
+//    //比较某一员工的人脸数据
+//    @RequestMapping("/BaseCompare")
+//    public ServerResult BaseCompare(@RequestParam("faceDetail") String faceDetail, @RequestParam("meetingId") Integer meetingId, HttpServletRequest request) throws IOException {
+////        File f=FileUtil.multoFile(fileupload);
+//        ServerResult serverResult = new ServerResult();
+//        FaceRecognition faceRecognition = new FaceRecognition();
+//        byte[] source = BinaryConversion.parseHexStr2Byte(faceDetail);
+////        byte[]=faceRecognition.getFeatureData(f);
+//        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+//        List<JoinPerson> joinPersons = joinPersonRepository.findByMeetingId(meetingId);
+////        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
+//        FaceInfo faceInfo;
+//        JoinPerson joinPerson;
+//        double similarResult = 0;
+//        int bol = 0;
+//        for (int i = 0; i < joinPersons.size(); i++) {
+//            joinPerson = joinPersons.get(i);
+//            faceInfo = faceInfoRepository.findByUserIdAndStatus(joinPerson.getUserId(), 1);
+//            if (faceInfo != null) {
+//                byte[] target = faceInfo.getFaceDetail();
+//                similarResult = faceRecognition.faceCompare(source, target);
+//            }
+//            if (similarResult > 0.8) {
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                String nowTime = sdf.format(new java.util.Date());
+//                joinPersonRepository.updateStatusAndTime(joinPerson.getId(), 1, nowTime);
+//                bol = 1;
+//                Userinfo userinfo=userinfoService.getUserinfo(joinPerson.getUserId());
+//                serverResult.setMessage(userinfo.getName()+",欢迎您参加会议");
+//                break;
+//            }
+////            System.out.println(similarResult);
+//        }
+////        File del = new File(f.toURI());
+////        del.delete();
+//        if (bol == 0) {
+//            serverResult.setMessage("对不起，您非本场参会人员");
+//        }
+//        serverResult.setStatus(true);
+//        return serverResult;
+//    }
     /*-------------华丽分割线-------------*/
     //查询该租户所有员工的面部信息
     @RequestMapping("/selectAll")

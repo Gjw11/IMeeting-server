@@ -2,8 +2,11 @@ package com.IMeeting.controller;
 
 import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.*;
+import com.IMeeting.service.EquipService;
 import com.IMeeting.service.GroupService;
+import com.IMeeting.service.MeetRoomService;
 import com.IMeeting.service.MeetingService;
+import com.IMeeting.util.MeetUtil;
 import com.IMeeting.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,10 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by gjw on 2018/12/10.
@@ -30,15 +32,25 @@ public class MeetingController {
     @Autowired
     private GroupService groupService;
     @Autowired
+    private EquipService equipService;
+    @Autowired
+    private MeetRoomService meetRoomService;
+    @Autowired
+    private MeetingRepository meetingRepository;
+    @Autowired
     private LeaveInformationRepository leaveInformationRepository;
     @Autowired
     private MeetroomRepository meetroomRepository;
+    @Autowired
+    private MeetroomParameterRepository meetroomParameterRepository;
     @Autowired
     private DepartRepository departRepository;
     @Autowired
     private JoinPersonRepository joinPersonRepository;
     @Autowired
     private PushMessageRepository pushMessageRepository;
+    @Autowired
+    private MeetroomEquipRepository meetroomEquipRepository;
 
     //预定会议首页
     @RequestMapping("/reserveIndex")
@@ -266,6 +278,97 @@ public class MeetingController {
     @RequestMapping("/pushMessage")
     public ServerResult pushMessage(HttpServletRequest request) {
         ServerResult serverResult = meetingService.findPushMessage(request);
+        return serverResult;
+    }
+
+    //智能推荐会议室
+    @RequestMapping("/recommandMeetRoom")
+    public ServerResult recommandMeetRoom(HttpServletRequest request,@RequestBody RecommandPara recommandPara) {
+        int[]equips=recommandPara.getEquips();
+        double[]weight=recommandPara.getWeight();
+        List<Meetroom>meetrooms=meetingService.getEffectiveMeetroom(request);
+        int equipLength=equips.length;
+        double target[]=new double[equipLength];//需求
+        for (int j=0;j<equipLength;j++){
+            target[j]=1;
+        }
+        double source[]=new double[equipLength];
+        List<RecommandResult>recommandResults=new ArrayList<>();
+        RecommandResult recommandResult;
+        NumberFormat nf = NumberFormat.getPercentInstance();
+        for (Meetroom meetroom:meetrooms){
+            int meetRoomId=meetroom.getId();
+            for (int i=0;i<equipLength;i++) {
+                MeetroomEquip meetroomEquip = meetroomEquipRepository.findByEquipIdAndMeetroomId(equips[i],meetRoomId);
+                if (meetroomEquip==null)
+                    source[i]=0;
+                else
+                    source[i]=1;
+            }
+            double similar=meetingService.countSimilar(source,target,weight);
+            if (nf.format(similar).equals("\ufffd")) {
+            }else{
+                recommandResult = new RecommandResult();
+                recommandResult.setMeetRoomId(meetRoomId);
+                Meetroom meetroom1=meetRoomService.getMeetRoom(meetRoomId);
+                recommandResult.setMeetRoomName(meetroom1.getName());
+                recommandResult.setContain(meetroom1.getContain());
+                recommandResult.setNum(meetroom1.getNum());
+                List<MeetroomEquip>meetroomEquips=meetroomEquipRepository.findByMeetroomId(meetRoomId);
+                List<String>equips1=new ArrayList<>();
+                for (int j=0;j<meetroomEquips.size();j++){
+                    Equip equip=equipService.getOne(meetroomEquips.get(j).getEquipId());
+                    equips1.add(equip.getName());
+                }
+                recommandResult.setEquips(equips1);
+                recommandResult.setCalSimilar(similar);
+                recommandResult.setSimilar(nf.format(similar));
+                recommandResults.add(recommandResult);
+            }
+        }
+        Collections.sort(recommandResults, new Comparator<RecommandResult>(){
+            /*
+             * int compare(Person p1, Person p2) 返回一个基本类型的整型，
+             * 返回负数表示：p1 大于p2，
+             * 返回0 表示：p1和p2相等，
+             * 返回正数表示：p1小于p2
+             */
+            public int compare(RecommandResult p1, RecommandResult p2) {
+                //按照相似度进行升序排列
+                if(p1.getCalSimilar() > p2.getCalSimilar()){
+                    return -1;
+                }
+                if(p1.getCalSimilar() == p2.getCalSimilar()){
+                    return 0;
+                }
+                return 1;
+            }
+        });
+        ServerResult serverResult = new ServerResult();
+        serverResult.setData(recommandResults);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //查找智能推荐会议室空闲时间段
+    @RequestMapping("/findFreeTime")
+    public ServerResult findFreeTime(@RequestParam("meetDate")String meetDate,@RequestParam("meetRoomId")Integer meetRoomId,HttpServletRequest request){
+        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
+        MeetroomParameter meetroomParameter=meetroomParameterRepository.findByTenantId(tenantId);
+        String beginTime=meetroomParameter.getBegin();
+        String overTime=meetroomParameter.getOver();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String yearMonth = sdf.format(new java.util.Date()).substring(0, 10);
+        List<String>result=new ArrayList<>();
+        if (yearMonth.equals(meetDate)){
+            String nowTime = sdf.format(new java.util.Date()).substring(11, 16);
+            List<Meeting>meetings=meetingRepository.selectByMeetDateAndStatusEQLOneAndThree(meetDate,meetRoomId);
+            result=MeetUtil.returnFreeTime(nowTime,overTime,meetings);
+        }else{
+            List<Meeting>meetings=meetingRepository.selectByMeetDateAndStatus(meetDate,1,meetRoomId);
+            result=MeetUtil.returnFreeTime(beginTime,overTime,meetings);
+        }
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(result);
         return serverResult;
     }
 

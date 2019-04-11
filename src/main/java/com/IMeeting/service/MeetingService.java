@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface MeetingService {
     MeetroomParameter selectParameter(Integer tenantId);
-    List<Meetroom> getEffectiveMeetroom(Integer tenantId,HttpServletRequest request);
+    List<Meetroom> getEffectiveMeetroom(HttpServletRequest request);
     List<Equip> selectEquips(Integer tenantId);
     List<MeetroomEquip>selectOneMeetroomEquip(Integer meetroomId);
     ServerResult toReserveIndex(HttpServletRequest request);
@@ -48,6 +48,7 @@ public interface MeetingService {
     ServerResult showOneMeetingLeaveInfo(Integer meetingId);
     ServerResult findPushMessage(HttpServletRequest request);
     LeaveInformation findById(Integer id);
+    double countSimilar(double source[],double target[],double[]weight);
     /*-------------华丽分割线-------------*/
     List findBySpecification(SelectMeetingParameter selectMeetingParameter,HttpServletRequest request);
     void exportMeetingRecord(List<Meeting> meetings,HttpServletResponse response) throws IOException;

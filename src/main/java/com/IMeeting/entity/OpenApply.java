@@ -18,6 +18,15 @@ public class OpenApply {
     private String overTime;
     private int status;
     private String createTime;
+    private int tenantId;
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public int getId() {
         return id;

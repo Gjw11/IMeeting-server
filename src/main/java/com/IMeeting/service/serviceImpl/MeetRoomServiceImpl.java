@@ -27,7 +27,7 @@ public class MeetRoomServiceImpl implements MeetRoomService{
     @Autowired
     private MeetroomDepartRepository meetroomDepartRepository;
     @Override
-    public ServerResult selectAll(HttpServletRequest request) {
+    public List<List> selectAll(HttpServletRequest request) {
         Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
         List<Meetroom> meetrooms=meetroomRepository.selectByTenantId(tenantId);
         List<Equip>equips=equipRepositpry.findByTenantId(tenantId);
@@ -37,9 +37,7 @@ public class MeetRoomServiceImpl implements MeetRoomService{
         lists.add(meetrooms);
         lists.add(equips);
         lists.add(departs);
-        serverResult.setData(lists);
-        serverResult.setStatus(true);
-        return serverResult;
+        return lists;
     }
 
     @Override
