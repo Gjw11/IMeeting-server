@@ -1,5 +1,7 @@
 package com.IMeeting.controller;
 
+
+import com.IMeeting.dao.MeetingDao;
 import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.*;
 import com.IMeeting.service.EquipService;
@@ -9,6 +11,8 @@ import com.IMeeting.service.MeetingService;
 import com.IMeeting.util.MeetUtil;
 import com.IMeeting.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,6 +55,8 @@ public class MeetingController {
     private PushMessageRepository pushMessageRepository;
     @Autowired
     private MeetroomEquipRepository meetroomEquipRepository;
+    @Autowired
+    private MeetingDao meetingDao;
 
     //预定会议首页
     @RequestMapping("/reserveIndex")
@@ -528,5 +534,15 @@ public class MeetingController {
         }
         return serverResult;
     }
+//    @Modifying
+//    @Transactional
+//    @RequestMapping("/test")
+//    public ServerResult test(){
+//        Meeting meeting=meetingDao.findOne(21);
+//        meetingDao.executeSql("update m_meeting m set m.content=? where m.id=?","123",21);
+//        ServerResult serverResult=new ServerResult();
+//        serverResult.setData(meeting);
+//        return serverResult;
+//    }
 
 }

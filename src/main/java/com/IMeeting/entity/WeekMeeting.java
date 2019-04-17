@@ -20,6 +20,33 @@ public class WeekMeeting {
     private int meetRoomId;
     private String meetBegin;
     private String meetOver;
+    private int tenantId;
+    private int departId;
+    private String note;
+
+    public int getDepartId() {
+        return departId;
+    }
+
+    public void setDepartId(int departId) {
+        this.departId = departId;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public int getMeetRoomId() {
         return meetRoomId;
