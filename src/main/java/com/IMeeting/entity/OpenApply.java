@@ -11,7 +11,11 @@ public class OpenApply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private String beginDate;
+    private String overDate;
+    @Column(name = "meet_room_id")
     private int meetRoomId;
+    @Column(name = "user_id")
     private int userId;
     private String note;
     private String beginTime;
@@ -19,6 +23,45 @@ public class OpenApply {
     private int status;
     private String createTime;
     private int tenantId;
+
+    @OneToOne
+    @JoinColumn(name = "user_id",insertable = false,updatable = false,nullable = false)
+    private Userinfo userinfo;
+    @OneToOne
+    @JoinColumn(name = "meet_room_id",insertable = false,updatable = false,nullable = false)
+    private Meetroom meetroom;
+
+    public String getBeginDate() {
+        return beginDate;
+    }
+
+    public void setBeginDate(String beginDate) {
+        this.beginDate = beginDate;
+    }
+
+    public String getOverDate() {
+        return overDate;
+    }
+
+    public void setOverDate(String overDate) {
+        this.overDate = overDate;
+    }
+
+    public Userinfo getUserinfo() {
+        return userinfo;
+    }
+
+    public void setUserinfo(Userinfo userinfo) {
+        this.userinfo = userinfo;
+    }
+
+    public Meetroom getMeetroom() {
+        return meetroom;
+    }
+
+    public void setMeetroom(Meetroom meetroom) {
+        this.meetroom = meetroom;
+    }
 
     public int getTenantId() {
         return tenantId;

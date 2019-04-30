@@ -5,6 +5,7 @@ import com.IMeeting.entity.MeetroomPara;
 import com.IMeeting.entity.ServerResult;
 import com.IMeeting.resposirity.MeetroomRepository;
 import com.IMeeting.service.MeetRoomService;
+import com.IMeeting.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,8 @@ import java.util.List;
 public class MeetRoomController {
     @Autowired
     private MeetRoomService meetRoomService;
+    @Autowired
+    private MeetingService meetingService;
     @Autowired
     private MeetroomRepository meetroomRepository;
     //查询该租户所有的会议室,前端根据数字显示会议室状态，nowStatus使用状态0表示未使用，1表示使用中,availstatus表示是否可用1表示可用0表示禁用
@@ -77,5 +80,14 @@ public class MeetRoomController {
     public ServerResult insertOne(@RequestBody MeetroomPara meetroomPara, HttpServletRequest request){
         ServerResult serverResult=meetRoomService.insertOne(meetroomPara,request);
         return  serverResult;
+    }
+    //用户端获取用户有权限可预定的会议室
+    @RequestMapping("/getEffectiveMeetroom")
+    public ServerResult getEffectiveMeetroom(HttpServletRequest request){
+        List<Meetroom>meetrooms=meetingService.getEffectiveMeetroom(request);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(meetrooms);
+        serverResult.setStatus(true);
+        return serverResult;
     }
 }

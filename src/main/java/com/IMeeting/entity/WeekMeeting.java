@@ -14,15 +14,52 @@ public class WeekMeeting {
     private String beginTime;
     private String overTime;
     private int week;
+    @Column(name = "user_id")
     private int userId;
     private String createTime;
     private int status;
+    @Column(name = "meet_room_id")
     private int meetRoomId;
     private String meetBegin;
     private String meetOver;
     private int tenantId;
+    @Column(name = "depart_id")
     private int departId;
     private String note;
+
+    @OneToOne
+    @JoinColumn(name = "user_id",insertable = false,updatable = false,nullable = false)
+    private Userinfo userinfo;
+    @OneToOne
+    @JoinColumn(name = "depart_id",insertable = false,updatable = false,nullable = false)
+    private Depart depart;
+    @OneToOne
+    @JoinColumn(name = "meet_room_id",insertable = false,updatable = false,nullable = false)
+    private Meetroom meetroom;
+
+    public Userinfo getUserinfo() {
+        return userinfo;
+    }
+
+    public void setUserinfo(Userinfo userinfo) {
+        this.userinfo = userinfo;
+    }
+
+    public Depart getDepart() {
+        return depart;
+    }
+
+    public void setDepart(Depart depart) {
+        this.depart = depart;
+    }
+
+    public Meetroom getMeetroom() {
+        return meetroom;
+    }
+
+    public void setMeetroom(Meetroom meetroom) {
+        this.meetroom = meetroom;
+    }
 
     public int getDepartId() {
         return departId;

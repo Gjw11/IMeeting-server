@@ -88,4 +88,14 @@ public class EquipController {
         serverResult.setStatus(true);
         return  serverResult;
     }
+    //用户端查看自己提交的设备报修
+    @RequestMapping("/userGetEquipRequairInfos")
+    public ServerResult userGetEquipRequairInfos(HttpServletRequest request){
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        List<EquipRepairInfo> list=equipRepairInfoRepository.findByUserId(userId);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(list);
+        serverResult.setStatus(true);
+        return  serverResult;
+    }
 }
