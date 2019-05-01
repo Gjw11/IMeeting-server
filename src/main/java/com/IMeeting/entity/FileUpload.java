@@ -16,6 +16,15 @@ public class FileUpload {
     private String fileName;
     private String fileUrl;
     private int status;
+    private int tenantId;
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public String getFileName() {
         return fileName;

@@ -1,17 +1,17 @@
 package com.IMeeting.controller;
 
-import com.IMeeting.entity.FaceInfo;
-import com.IMeeting.entity.JoinPerson;
-import com.IMeeting.entity.ServerResult;
-import com.IMeeting.entity.Userinfo;
+import com.IMeeting.dao.OpenApplyDao;
+import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.FaceInfoRepository;
 import com.IMeeting.resposirity.JoinPersonRepository;
+import com.IMeeting.resposirity.OpenApplyRepository;
 import com.IMeeting.resposirity.UserinfoRepository;
 import com.IMeeting.service.FaceService;
 import com.IMeeting.service.UserinfoService;
 import com.IMeeting.util.BinaryConversion;
 import com.IMeeting.util.FaceRecognition;
 import com.IMeeting.util.FileUtil;
+import com.IMeeting.util.TimeUtil;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
@@ -44,6 +44,10 @@ public class FaceController {
     private JoinPersonRepository joinPersonRepository;
     @Autowired
     private UserinfoService userinfoService;
+    @Autowired
+    private OpenApplyDao openApplyDao;
+    @Autowired
+    private OpenApplyRepository openApplyRepository;
 
     public String getUrl(MultipartFile fileupload) throws OSSException, ClientException, IOException {
         String endpoint = "oss-cn-beijing.aliyuncs.com";
@@ -157,47 +161,47 @@ public class FaceController {
         return serverResult;
     }
 
-//    //比较某一员工的人脸数据
-//    @RequestMapping("/BaseCompare")
-//    public ServerResult BaseCompare(@RequestParam("faceDetail") String faceDetail, @RequestParam("meetingId") Integer meetingId, HttpServletRequest request) throws IOException {
-////        File f=FileUtil.multoFile(fileupload);
-//        ServerResult serverResult = new ServerResult();
+    //比较某一员工的人脸数据
+    @RequestMapping("/BaseCompare")
+    public ServerResult BaseCompare(@RequestParam("faceDetail") String faceDetail,@RequestParam("meetRoomId") Integer meetRoomId, HttpServletRequest request) throws IOException {
+        ServerResult serverResult = new ServerResult();
 //        FaceRecognition faceRecognition = new FaceRecognition();
 //        byte[] source = BinaryConversion.parseHexStr2Byte(faceDetail);
-////        byte[]=faceRecognition.getFeatureData(f);
 //        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
-//        List<JoinPerson> joinPersons = joinPersonRepository.findByMeetingId(meetingId);
-////        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
+//        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
 //        FaceInfo faceInfo;
-//        JoinPerson joinPerson;
 //        double similarResult = 0;
-//        int bol = 0;
-//        for (int i = 0; i < joinPersons.size(); i++) {
-//            joinPerson = joinPersons.get(i);
-//            faceInfo = faceInfoRepository.findByUserIdAndStatus(joinPerson.getUserId(), 1);
-//            if (faceInfo != null) {
+//        int userId=0;
+//        for (int i = 0; i < faceInfoList.size(); i++) {
+//                faceInfo=faceInfoList.get(i);
 //                byte[] target = faceInfo.getFaceDetail();
 //                similarResult = faceRecognition.faceCompare(source, target);
-//            }
 //            if (similarResult > 0.8) {
-//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                String nowTime = sdf.format(new java.util.Date());
-//                joinPersonRepository.updateStatusAndTime(joinPerson.getId(), 1, nowTime);
-//                bol = 1;
-//                Userinfo userinfo=userinfoService.getUserinfo(joinPerson.getUserId());
-//                serverResult.setMessage(userinfo.getName()+",欢迎您参加会议");
+//                userId=faceInfo.getUserId();
 //                break;
 //            }
-////            System.out.println(similarResult);
 //        }
-////        File del = new File(f.toURI());
-////        del.delete();
-//        if (bol == 0) {
-//            serverResult.setMessage("对不起，您非本场参会人员");
-//        }
-//        serverResult.setStatus(true);
-//        return serverResult;
-//    }
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        String today=simpleDateFormat.format(new Date());
+        System.out.println(today);
+        SimpleDateFormat simpleDateFormat1=new SimpleDateFormat("HH:mm");
+        String nowTime=simpleDateFormat1.format(new Date());
+        System.out.println(nowTime);
+        List<OpenApply> openApplies=openApplyRepository.findByUserIdAndStatusAndMeetRoomId(1,1,meetRoomId,today,nowTime);
+        int size=openApplies.size();
+        if (size!=0){
+            serverResult.setMessage("欢迎进入");
+            serverResult.setCode(1);
+        }else{
+            serverResult.setMessage("对不起，您没有权限进入");
+            serverResult.setCode(0);
+        }
+
+//        File del = new File(f.toURI());
+//        del.delete();
+        serverResult.setStatus(true);
+        return serverResult;
+    }
     /*-------------华丽分割线-------------*/
     //查询该租户所有员工的面部信息
     @RequestMapping("/selectAll")
