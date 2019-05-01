@@ -118,6 +118,8 @@ public class EquipServiceImpl implements EquipService {
             Userinfo userinfo=userinfoService.getUserinfo(equipRepairInfo.getUserId());
             equipRepairInfoResult.setUserName(userinfo.getName());
             Meetroom meetroom=meetRoomService.getMeetRoom(equipRepairInfo.getMeetRoomId());
+            System.out.println(meetroom);
+            System.out.println(meetroom.getName());
             equipRepairInfoResult.setMeetRoomName(meetroom.getName());
             Equip equip=getOne(equipRepairInfo.getEquipId());
             equipRepairInfoResult.setEquipName(equip.getName());
