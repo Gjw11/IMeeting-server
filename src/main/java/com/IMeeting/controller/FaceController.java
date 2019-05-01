@@ -1,5 +1,6 @@
 package com.IMeeting.controller;
 
+import com.IMeeting.dao.FaceDao;
 import com.IMeeting.dao.OpenApplyDao;
 import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.FaceInfoRepository;
@@ -46,6 +47,8 @@ public class FaceController {
     private UserinfoService userinfoService;
     @Autowired
     private OpenApplyDao openApplyDao;
+    @Autowired
+    private FaceDao faceDao;
     @Autowired
     private OpenApplyRepository openApplyRepository;
 
@@ -161,26 +164,26 @@ public class FaceController {
         return serverResult;
     }
 
-    //比较某一员工的人脸数据
+    //会议室非签到身份验证
     @RequestMapping("/BaseCompare")
     public ServerResult BaseCompare(@RequestParam("faceDetail") String faceDetail,@RequestParam("meetRoomId") Integer meetRoomId, HttpServletRequest request) throws IOException {
         ServerResult serverResult = new ServerResult();
-//        FaceRecognition faceRecognition = new FaceRecognition();
-//        byte[] source = BinaryConversion.parseHexStr2Byte(faceDetail);
-//        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
-//        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
-//        FaceInfo faceInfo;
-//        double similarResult = 0;
-//        int userId=0;
-//        for (int i = 0; i < faceInfoList.size(); i++) {
-//                faceInfo=faceInfoList.get(i);
-//                byte[] target = faceInfo.getFaceDetail();
-//                similarResult = faceRecognition.faceCompare(source, target);
-//            if (similarResult > 0.8) {
-//                userId=faceInfo.getUserId();
-//                break;
-//            }
-//        }
+        FaceRecognition faceRecognition = new FaceRecognition();
+        byte[] source = BinaryConversion.parseHexStr2Byte(faceDetail);
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        List<FaceInfo> faceInfoList=faceInfoRepository.findByTenantIdAndStatus(tenantId,1);
+        FaceInfo faceInfo;
+        double similarResult = 0;
+        int userId=0;
+        for (int i = 0; i < faceInfoList.size(); i++) {
+                faceInfo=faceInfoList.get(i);
+                byte[] target = faceInfo.getFaceDetail();
+                similarResult = faceRecognition.faceCompare(source, target);
+            if (similarResult > 0.8) {
+                userId=faceInfo.getUserId();
+                break;
+            }
+        }
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
         String today=simpleDateFormat.format(new Date());
         System.out.println(today);
@@ -197,11 +200,43 @@ public class FaceController {
             serverResult.setCode(0);
         }
 
+
 //        File del = new File(f.toURI());
 //        del.delete();
         serverResult.setStatus(true);
         return serverResult;
     }
+
+    //文件提取身份验证
+    @RequestMapping("/FileCompare")
+    public ServerResult FileCompare(@RequestParam("faceDetail") String faceDetail, HttpServletRequest request) throws IOException {
+        ServerResult serverResult = new ServerResult();
+        FaceRecognition faceRecognition = new FaceRecognition();
+        byte[] source = BinaryConversion.parseHexStr2Byte(faceDetail);
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        FaceInfo faceInfo=faceInfoRepository.findByUserIdAndStatus(userId,1);
+        double similarResult = 0;
+        if (faceInfo==null){
+            serverResult.setCode(-1);
+            serverResult.setMessage("对不起，您还没有有效的面部信息");
+        }
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String nowTime=simpleDateFormat.format(new Date());
+        byte[] target = faceInfo.getFaceDetail();
+        similarResult = faceRecognition.faceCompare(source, target);
+        if (similarResult > 0.8) {
+            serverResult.setMessage("验证通过");
+            serverResult.setCode(1);
+            faceDao.executeSql("update u_face m set m.last_time =? where m.id=?",nowTime,faceInfo.getId());
+        }else{
+            serverResult.setMessage("验证失败");
+            serverResult.setCode(2);
+        }
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
+
     /*-------------华丽分割线-------------*/
     //查询该租户所有员工的面部信息
     @RequestMapping("/selectAll")

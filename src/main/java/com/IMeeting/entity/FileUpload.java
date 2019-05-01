@@ -11,12 +11,36 @@ public class FileUpload {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(name = "meet_room_id")
     private int meetRoomId;
+    @Column(name = "meeting_id")
     private int meetingId;
     private String fileName;
     private String fileUrl;
     private int status;
     private int tenantId;
+    @OneToOne
+    @JoinColumn(name = "meet_room_id",insertable = false,updatable = false,nullable = false)
+    private Meetroom meetroom;
+    @OneToOne
+    @JoinColumn(name = "meeting_id",insertable = false,updatable = false,nullable = false)
+    private Meeting meeting;
+
+    public Meetroom getMeetroom() {
+        return meetroom;
+    }
+
+    public void setMeetroom(Meetroom meetroom) {
+        this.meetroom = meetroom;
+    }
+
+    public Meeting getMeeting() {
+        return meeting;
+    }
+
+    public void setMeeting(Meeting meeting) {
+        this.meeting = meeting;
+    }
 
     public int getTenantId() {
         return tenantId;

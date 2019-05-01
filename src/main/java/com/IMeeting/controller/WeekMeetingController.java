@@ -148,7 +148,7 @@ public class WeekMeetingController {
     @RequestMapping("/userFindAll")
     public ServerResult userFindAll(HttpServletRequest request) {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
-        List<WeekMeeting> weekMeetings = weekMeetingDao.findEqualField("user_id", userId);
+        List<WeekMeeting> weekMeetings = weekMeetingDao.findEqualField("userId", userId);
         ServerResult serverResult = new ServerResult();
         serverResult.setData(weekMeetings);
         return serverResult;

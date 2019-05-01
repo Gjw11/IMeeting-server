@@ -16,6 +16,15 @@ public class FaceInfo {
     private byte[] faceDetail;
     private Integer status;
     private Integer tenantId;
+    private String lastTime;
+
+    public String getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(String lastTime) {
+        this.lastTime = lastTime;
+    }
 
     public Integer getId() {
         return id;
