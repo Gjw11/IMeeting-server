@@ -8,6 +8,7 @@ import com.IMeeting.resposirity.MeetingRepository;
 import com.IMeeting.util.TimeUtil;
 import com.IMeeting.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ import java.util.List;
  * Created by gjw on 2019/4/15.
  */
 @RestController
+@Transactional
 @RequestMapping("/weekMeeting")
 public class WeekMeetingController {
     @Autowired
