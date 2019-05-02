@@ -298,8 +298,10 @@ public class FaceController {
                 faceInfo.setFaceAddress(getUrl(fileupload));
                 faceInfoRepository.saveAndFlush(faceInfo);
                 serverResult.setStatus(true);
+                f.delete();
             }
         }
+
         return serverResult;
     }
     
