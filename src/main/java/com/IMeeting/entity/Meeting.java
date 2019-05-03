@@ -19,6 +19,7 @@ public class Meeting {
     private String over;
     @Column(name = "user_id")
     private Integer userId;
+    @Column(name = "meetroom_id")
     private Integer meetroomId;
     private Integer status;
     private Integer tenantId;
@@ -33,8 +34,19 @@ public class Meeting {
     @JoinColumn(name = "user_id",insertable = false,updatable = false,nullable = false)
     private Userinfo userinfo;
     @OneToOne
+    @JoinColumn(name = "meetroom_id",insertable = false,updatable = false,nullable = false)
+    private Meetroom meetroom;
+    @OneToOne
     @JoinColumn(name = "depart_id",insertable = false,updatable = false,nullable = false)
     private Depart depart;
+
+    public Meetroom getMeetroom() {
+        return meetroom;
+    }
+
+    public void setMeetroom(Meetroom meetroom) {
+        this.meetroom = meetroom;
+    }
 
     public Userinfo getUserinfo() {
         return userinfo;

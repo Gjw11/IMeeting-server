@@ -135,7 +135,7 @@ public class FileController {
                 FileUpload fileUpload=fileUploadDao.findOne(fileId);
                 SFTPUtil sftp = new SFTPUtil("root", "Jgn990206", "39.106.56.132", 22);
                 sftp.login();
-                File file=sftp.downloadFile(fileUpload.getFileUrl(),fileUpload.getFileName(),"/src/main/java");
+                File file=sftp.downloadFile(fileUpload.getFileUrl(),fileUpload.getFileName(),"/src/main/java/com.i");
                 file.delete();
                 sftp.logout();
             }

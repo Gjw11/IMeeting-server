@@ -5,6 +5,7 @@ import com.IMeeting.entity.Outline;
 import com.IMeeting.entity.ServerResult;
 import com.IMeeting.resposirity.OutlineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/outline")
+@Transactional
 public class OutlineController {
     @Autowired
     private OutlineDao outlineDao;
@@ -41,8 +43,8 @@ public class OutlineController {
     }
     //会议预定者删除某条会议大纲
     @RequestMapping("/deleteOne")
-    public ServerResult insertOne(@RequestParam("outLineId")Integer outLineId){
-        outlineDao.delete(outLineId);
+    public ServerResult insertOne(@RequestParam("outlineId")Integer outlineId){
+        outlineDao.delete(outlineId);
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         return serverResult;

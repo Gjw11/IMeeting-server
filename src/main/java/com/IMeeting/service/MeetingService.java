@@ -49,6 +49,7 @@ public interface MeetingService {
     ServerResult findPushMessage(HttpServletRequest request);
     LeaveInformation findById(Integer id);
     double countSimilar(double source[],double target[],double[]weight);
+    List<String>findFreeTime(Integer meetRoomId,HttpServletRequest request);
     /*-------------华丽分割线-------------*/
     List findBySpecification(SelectMeetingParameter selectMeetingParameter,HttpServletRequest request);
     void exportMeetingRecord(List<Meeting> meetings,HttpServletResponse response) throws IOException;

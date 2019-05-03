@@ -1,6 +1,7 @@
 package com.IMeeting.resposirity;
 
 import com.IMeeting.entity.Meeting;
+import com.IMeeting.entity.Meetroom;
 import com.IMeeting.entity.MyReserveCount;
 import com.IMeeting.entity.ServerResult;
 import org.springframework.data.domain.Page;
@@ -77,6 +78,18 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     List<Meeting> selectByMeetDateAndStatus(String meetDate,Integer status,int meetRoomId);
     @Query(value = "select m from Meeting m where m.meetDate=?1 and (m.status=1 or m.status=3) and meetroomId=?2  order by m.begin asc")
     List<Meeting> selectByMeetDateAndStatusEQLOneAndThree(String meetDate,int meetRoomId);
+    @Query(value = "select  m from Meeting m , JoinPerson n where  m.meetDate>=?2 and m.meetDate<=?3 and (m.status=1 or m.status=3) and n.userId=?1 and n.meetingId=m.id order by m.begin")
+    List<Meeting> findMyRecentMeeting(Integer userId,String beginDate,String overDate);
+    @Query(value="select  m from Meeting m where m.userId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 order by m.meetDate")
+    List<Meeting> findMyLastTwoWeekMeeting(Integer userId, String beginDate, String overDate);
+    @Query(value="select  m from Meeting m where m.userId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by  m.meetroomId")
+    List<Meeting> GroupMyLastTwoWeekMeetingByMeetRoom(Integer userId, String beginDate, String overDate);
+    @Query(value="select  count (m) from Meeting m where m.userId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 and m.meetroomId=?4 ")
+    int countMyLastTwoWeekMeetingByRoomId(Integer userId, String beginDate, String overDate,Integer roomId);
+    @Query(value="select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by  m.meetroomId")
+    List<Meeting> GroupLastTwoWeekMeetingByTenant(Integer tenantId, String beginDate, String overDate);
+    @Query(value="select  count (m) from Meeting m where m.meetDate>=?1 and m.meetDate<=?2 and m.status=4 and m.meetroomId=?3 ")
+    int countLastTwoWeekMeetingByRoomId(String beginDate, String overDate,Integer roomId);
     /*-------------华丽分割线-------------*/
     @Query(value = "select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by m.departId")
     List<Meeting>selectGroupByDepart(Integer tenantId,String begin,String over);

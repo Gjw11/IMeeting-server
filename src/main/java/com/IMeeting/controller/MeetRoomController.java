@@ -1,5 +1,6 @@
 package com.IMeeting.controller;
 
+import com.IMeeting.entity.Meeting;
 import com.IMeeting.entity.Meetroom;
 import com.IMeeting.entity.MeetroomPara;
 import com.IMeeting.entity.ServerResult;
@@ -90,4 +91,31 @@ public class MeetRoomController {
         serverResult.setStatus(true);
         return serverResult;
     }
+    //扫描二维码验证该用户是否有权限预定该会议室
+    @RequestMapping("/swapCode")
+    public ServerResult swepCode(@RequestParam("meetRoomId")Integer meetRoomId,HttpServletRequest request){
+        ServerResult serverResult=new ServerResult();
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        List<Meetroom>meetrooms=meetingService.getEffectiveMeetroom(request);
+        int bol=0;
+        if (meetrooms.size()!=0){
+            for (Meetroom meetroom:meetrooms){
+                if (meetroom.getId()==meetRoomId){
+                    bol=1;
+                    break;
+                }
+            }
+        }
+        if (bol==0){
+            serverResult.setMessage("对不起，您没有权限预定该会议室");
+            serverResult.setCode(-1);
+        }else{
+            List<String>result=meetingService.findFreeTime(meetRoomId,request);
+            serverResult.setCode(1);
+            serverResult.setData(result);
+        }
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
 }

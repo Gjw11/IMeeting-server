@@ -5,6 +5,7 @@ import com.IMeeting.resposirity.*;
 import com.IMeeting.service.DepartService;
 import com.IMeeting.service.MeetingService;
 import com.IMeeting.service.UserinfoService;
+import com.IMeeting.util.MeetUtil;
 import com.IMeeting.util.NumUtil;
 import com.IMeeting.util.TimeUtil;
 import org.apache.poi.hssf.usermodel.*;
@@ -549,7 +550,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public Meeting findByMeetingId(Integer meetingId) {
-       Optional<Meeting> meeting = meetingRepository.findById(meetingId);
+        Optional<Meeting> meeting = meetingRepository.findById(meetingId);
         if (meeting.isPresent())
             return meeting.get();
         return null;
@@ -1122,17 +1123,32 @@ public class MeetingServiceImpl implements MeetingService {
         double sum_vec = 0;//两个想向量的点积
         double sum_source = 0;//源会议室向量的模长
         double sum_target = 0;//目标会议室向量的模长
-        for(int i = 0; i < room_property_num; i++) {
+        for (int i = 0; i < room_property_num; i++) {
             source[i] *= weight[i];
             target[i] *= weight[i];
         }
         //计算点积与模长
-        for(int i = 0; i < room_property_num; i++) {
+        for (int i = 0; i < room_property_num; i++) {
             sum_vec += source[i] * target[i];
             sum_source += source[i] * source[i];
             sum_target += target[i] * target[i];
         }
-        return sum_vec/(Math.sqrt(sum_source*sum_target));
+        return sum_vec / (Math.sqrt(sum_source * sum_target));
+    }
+
+    @Override
+    public List<String> findFreeTime(Integer meetRoomId, HttpServletRequest request) {
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        MeetroomParameter meetroomParameter = meetroomParameterRepository.findByTenantId(tenantId);
+        String beginTime = meetroomParameter.getBegin();
+        String overTime = meetroomParameter.getOver();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String today = sdf.format(new Date()).substring(0, 10);
+        List<String> result;
+        String nowTime = sdf.format(new java.util.Date()).substring(11, 16);
+        List<Meeting> meetings = meetingRepository.selectByMeetDateAndStatusEQLOneAndThree(today, meetRoomId);
+        result = MeetUtil.returnFreeTime(nowTime, overTime, meetings);
+        return result;
     }
 
 
@@ -1270,9 +1286,9 @@ public class MeetingServiceImpl implements MeetingService {
         Depart depart;
         Meeting meeting;
         DepartTime departTime;
-        int place=0;
-        int num=0;
-        List<Object>result=new ArrayList<>();
+        int place = 0;
+        int num = 0;
+        List<Object> result = new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByDepart(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1281,11 +1297,11 @@ public class MeetingServiceImpl implements MeetingService {
             departTime = new DepartTime();
             departTime.setDepartName(depart.getName());
             int time = meetingRepository.countTimeByDepart(departId, begin, over);
-            departTime.setId(i+1);
+            departTime.setId(i + 1);
             departTime.setTime(time);
-            if (time>num){
-                num=time;
-                place=i;
+            if (time > num) {
+                num = time;
+                place = i;
             }
             departTimes.add(departTime);
         }
@@ -1300,9 +1316,9 @@ public class MeetingServiceImpl implements MeetingService {
         Userinfo userinfo;
         Meeting meeting;
         UserTime userTime;
-        int place=0;
-        int num=0;
-        List<Object>result=new ArrayList<>();
+        int place = 0;
+        int num = 0;
+        List<Object> result = new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByUser(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1312,10 +1328,10 @@ public class MeetingServiceImpl implements MeetingService {
             userTime.setUserName(userinfo.getName());
             int time = meetingRepository.countTimeByUser(userId, begin, over);
             userTime.setTime(time);
-            userTime.setId(i+1);
-            if (time>num){
-                num=time;
-                place=i;
+            userTime.setId(i + 1);
+            if (time > num) {
+                num = time;
+                place = i;
             }
             userTimes.add(userTime);
         }
@@ -1330,9 +1346,9 @@ public class MeetingServiceImpl implements MeetingService {
         Meetroom meetroom;
         Meeting meeting;
         MeetRoomTime meetRoomTime;
-        int place=0;
-        int num=0;
-        List<Object>result=new ArrayList<>();
+        int place = 0;
+        int num = 0;
+        List<Object> result = new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByMeetRoom(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1341,11 +1357,11 @@ public class MeetingServiceImpl implements MeetingService {
             meetRoomTime = new MeetRoomTime();
             meetRoomTime.setMeetRoomName(meetroom.getName());
             int time = meetingRepository.countTimeByMeetRoom(meetroomId, begin, over);
-            meetRoomTime.setId(i+1);
+            meetRoomTime.setId(i + 1);
             meetRoomTime.setTime(time);
-            if (time>num){
-                num=time;
-                place=i;
+            if (time > num) {
+                num = time;
+                place = i;
             }
             meetRoomTimes.add(meetRoomTime);
         }
@@ -1360,9 +1376,9 @@ public class MeetingServiceImpl implements MeetingService {
         Depart depart;
         Meeting meeting;
         DepartHour departHour;
-        int place=0;
-        double num=0;
-        List<Object>result=new ArrayList<>();
+        int place = 0;
+        double num = 0;
+        List<Object> result = new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByDepart(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1372,10 +1388,10 @@ public class MeetingServiceImpl implements MeetingService {
             departHour.setDepartName(depart.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByDepart(departId, begin, over)) * 0.0166667);
             departHour.setHour(hour);
-            departHour.setId(i+1);
-            if (hour>num){
-                num=hour;
-                place=i;
+            departHour.setId(i + 1);
+            if (hour > num) {
+                num = hour;
+                place = i;
             }
             departHours.add(departHour);
         }
@@ -1391,9 +1407,9 @@ public class MeetingServiceImpl implements MeetingService {
         Userinfo userinfo;
         Meeting meeting;
         UserHour userHour;
-        int place=0;
-        double num=0;
-        List<Object>result=new ArrayList<>();
+        int place = 0;
+        double num = 0;
+        List<Object> result = new ArrayList<>();
         List<Meeting> meetings = meetingRepository.selectGroupByUser(tenantId, begin, over);
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
@@ -1403,10 +1419,10 @@ public class MeetingServiceImpl implements MeetingService {
             userHour.setUserName(userinfo.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByUser(userId, begin, over)) * 0.0166667);
             userHour.setHour(hour);
-            userHour.setId(i+1);
-            if (hour>num){
-                num=hour;
-                place=i;
+            userHour.setId(i + 1);
+            if (hour > num) {
+                num = hour;
+                place = i;
             }
             userHours.add(userHour);
         }
@@ -1422,8 +1438,8 @@ public class MeetingServiceImpl implements MeetingService {
         Meeting meeting;
         MeetRoomHour meetRoomHour;
         List<Meeting> meetings = meetingRepository.selectGroupByMeetRoom(tenantId, begin, over);
-        int place=0;
-        double num=0;
+        int place = 0;
+        double num = 0;
         for (int i = 0; i < meetings.size(); i++) {
             meeting = meetings.get(i);
             Integer meetroomId = meeting.getMeetroomId();
@@ -1431,15 +1447,15 @@ public class MeetingServiceImpl implements MeetingService {
             meetRoomHour = new MeetRoomHour();
             meetRoomHour.setMeetRoomName(meetroom.getName());
             double hour = NumUtil.hold2((meetingRepository.countHourByMeetRoom(meetroomId, begin, over)) * 0.0166667);
-            if (hour>num){
-                num=hour;
-                place=i;
+            if (hour > num) {
+                num = hour;
+                place = i;
             }
             meetRoomHour.setHour(hour);
-            meetRoomHour.setId(i+1);
+            meetRoomHour.setId(i + 1);
             meetRoomHours.add(meetRoomHour);
         }
-        List<Object>list=new ArrayList<>();
+        List<Object> list = new ArrayList<>();
         list.add(meetRoomHours);
         list.add(place);
         return list;
