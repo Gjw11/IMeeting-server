@@ -4,10 +4,7 @@ package com.IMeeting.controller;
 import com.IMeeting.dao.MeetingDao;
 import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.*;
-import com.IMeeting.service.EquipService;
-import com.IMeeting.service.GroupService;
-import com.IMeeting.service.MeetRoomService;
-import com.IMeeting.service.MeetingService;
+import com.IMeeting.service.*;
 import com.IMeeting.util.DateUtil;
 import com.IMeeting.util.MeetUtil;
 import com.IMeeting.util.TimeUtil;
@@ -57,6 +54,11 @@ public class MeetingController {
     private MeetroomEquipRepository meetroomEquipRepository;
     @Autowired
     private MeetingDao meetingDao;
+    @Autowired
+    private OutsideJoinPersonRepository outsideJoinPersonRepository;
+    @Autowired
+    private UserinfoService userinfoService;
+
 
     //预定会议首页
     @RequestMapping("/reserveIndex")
@@ -535,7 +537,8 @@ public class MeetingController {
         }
         return serverResult;
     }
-//    @Modifying
+
+    //    @Modifying
 //    @Transactional
 //    @RequestMapping("/test")
 //    public ServerResult test(){
@@ -546,57 +549,166 @@ public class MeetingController {
 //        return serverResult;
 //    }
     @RequestMapping("/indexData")
-    public ServerResult indexData(HttpServletRequest request){
-        Integer userId= (Integer) request.getSession().getAttribute("userId");
-        Integer tenantId= (Integer) request.getSession().getAttribute("tenantId");
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
-        String today=simpleDateFormat.format(new Date());
-        Date addDay= DateUtil.addDay(new Date(),14);
-        List<Meeting>meetings=meetingRepository.findMyRecentMeeting(userId,today,simpleDateFormat.format(addDay));
-        DecimalFormat df=new DecimalFormat("0.00");
-        String free=Double.parseDouble(df.format((float)meetroomRepository.countFree(tenantId)/meetroomRepository.countAll(tenantId)))*100+"%";
-        Date reduceDay= DateUtil.addDay(new Date(),-14);
-        List<Meeting>meetingList=meetingRepository.findMyLastTwoWeekMeeting(userId,simpleDateFormat.format(reduceDay),today);
-        List<Integer>meetingCount=new ArrayList<>();
+    public ServerResult indexData(HttpServletRequest request) {
+        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String today = simpleDateFormat.format(new Date());
+        Date addDay = DateUtil.addDay(new Date(), 14);
+        List<Meeting> meetings = meetingRepository.findMyRecentMeeting(userId, today, simpleDateFormat.format(addDay));
+        DecimalFormat df = new DecimalFormat("0.00");
+        String free = Double.parseDouble(df.format((float) meetroomRepository.countFree(tenantId) / meetroomRepository.countAll(tenantId))) * 100 + "%";
+        Date reduceDay = DateUtil.addDay(new Date(), -14);
+        List<Meeting> meetingList = meetingRepository.findMyLastTwoWeekMeeting(userId, simpleDateFormat.format(reduceDay), today);
+        List<Integer> meetingCount = new ArrayList<>();
         int countSum;
-        for (int i=1;i<=14;i++){
-            String date=simpleDateFormat.format(DateUtil.addDay(reduceDay,i));
-            countSum=0;
-            for (Meeting meeting:meetingList){
+        for (int i = 1; i <= 14; i++) {
+            String date = simpleDateFormat.format(DateUtil.addDay(reduceDay, i));
+            countSum = 0;
+            for (Meeting meeting : meetingList) {
                 if (meeting.getMeetDate().equals(date))
                     countSum++;
             }
             meetingCount.add(countSum);
         }
-        List<Object>meetRoomCount=new ArrayList<>();
-        List<Meeting>groupMeeting=meetingRepository.GroupMyLastTwoWeekMeetingByMeetRoom(userId,simpleDateFormat.format(reduceDay),today);
-        for (Meeting meeting:groupMeeting){
-            List<Object>list=new ArrayList<>();
-            int count=meetingRepository.countMyLastTwoWeekMeetingByRoomId(userId,simpleDateFormat.format(reduceDay),today,meeting.getMeetroomId());
+        List<Object> meetRoomCount = new ArrayList<>();
+        List<Meeting> groupMeeting = meetingRepository.GroupMyLastTwoWeekMeetingByMeetRoom(userId, simpleDateFormat.format(reduceDay), today);
+        for (Meeting meeting : groupMeeting) {
+            List<Object> list = new ArrayList<>();
+            int count = meetingRepository.countMyLastTwoWeekMeetingByRoomId(userId, simpleDateFormat.format(reduceDay), today, meeting.getMeetroomId());
             list.add(meeting.getMeetroom().getName());
             list.add(count);
             meetRoomCount.add(list);
         }
-        List<Meeting>m=meetingRepository.GroupLastTwoWeekMeetingByTenant(tenantId,simpleDateFormat.format(reduceDay),today);
-        List<Object>tenantMeetRoomCount=new ArrayList<>();
-        for (Meeting meeting:m){
-            List<Object>list=new ArrayList<>();
-            int count=meetingRepository.countLastTwoWeekMeetingByRoomId(simpleDateFormat.format(reduceDay),today,meeting.getMeetroomId());
+        List<Meeting> m = meetingRepository.GroupLastTwoWeekMeetingByTenant(tenantId, simpleDateFormat.format(reduceDay), today);
+        List<Object> tenantMeetRoomCount = new ArrayList<>();
+        for (Meeting meeting : m) {
+            List<Object> list = new ArrayList<>();
+            int count = meetingRepository.countLastTwoWeekMeetingByRoomId(simpleDateFormat.format(reduceDay), today, meeting.getMeetroomId());
             list.add(meeting.getMeetroom().getName());
             list.add(count);
             tenantMeetRoomCount.add(list);
         }
-        ServerResult serverResult=new ServerResult();
-        List<Object>result=new ArrayList<>();
+        ServerResult serverResult = new ServerResult();
+        List<Object> result = new ArrayList<>();
         result.add(meetings);//用户近两周将要参加的会议
         result.add(free);//当前时间段空余会议室
         result.add(meetingList.size());//用户前两周召开的会议次数
         result.add(meetingCount);//用户前两周每天召开的会议次数
-        result.add(meetingList.get(meetingList.size()-1));//用户最后一次召开的会议信息
+        result.add(meetingList.get(meetingList.size() - 1));//用户最后一次召开的会议信息
         result.add(meetRoomCount);//用户前两周每个会议室的使用次数统计
         result.add(tenantMeetRoomCount);//租户的每个会议室前两周使用次数统计
         serverResult.setData(result);
         serverResult.setStatus(true);
         return serverResult;
     }
+
+    //管理端进行预定会议
+    @RequestMapping("/reserveByManage")
+    public ServerResult reserveByManage(@RequestParam ReserveParameter reserveParameter, HttpServletRequest request) throws Exception {
+        ServerResult serverResult = new ServerResult();
+        Integer userId = reserveParameter.getUserId();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Integer tenantId = (Integer) request.getSession().getAttribute("tenantId");
+        MeetroomParameter meetroomParameter = meetroomParameterRepository.findByTenantId(tenantId);
+        String beginTime = meetroomParameter.getBegin();
+        String overTime = meetroomParameter.getOver();
+        int lastTime = reserveParameter.getLastTime();
+        int prepareTime = reserveParameter.getPrepareTime();
+        String reserveBeginTime = reserveParameter.getBeginTime();
+        String reserveDate = reserveParameter.getReserveDate();
+        String afterBeginTime = reserveDate + " " + reserveParameter.getBeginTime();
+        String afterOverTime = TimeUtil.addMinute(afterBeginTime, lastTime);
+        String nowTime = sdf.format(new java.util.Date());
+        TimeUtil timeUtil = new TimeUtil();
+        int bol1 = 2, bol2 = 2, bol3 = 2, bol4 = 2;
+        bol1 = timeUtil.DateCompare(reserveBeginTime, beginTime, "HH:mm");
+        bol2 = timeUtil.DateCompare(afterOverTime.substring(11, 16), overTime, "HH:mm");
+        bol3 = timeUtil.DateCompare(reserveBeginTime, afterOverTime.substring(11, 16), "HH:mm");
+        bol4 = timeUtil.DateCompare(afterBeginTime, nowTime, "yyyy-MM-dd HH:mm");
+        if (prepareTime > lastTime) {
+            serverResult.setMessage("准备时间不能大于持续时间");
+        } else if (bol3 == 0) {
+            serverResult.setMessage("预定时间不能为0分钟");
+        } else if (bol1 == -1) {
+            serverResult.setMessage("预定时间不能早于" + beginTime);
+        } else if (bol2 == 1) {
+            serverResult.setMessage("结束时间不能晚于" + overTime);
+        } else if (bol4 == -1) {
+            serverResult.setMessage("预定会议时间不能在当前时间之前");
+        } else {
+            Integer meetroomId = reserveParameter.getMeetRoomId();
+            List<Meeting> meetings = meetingRepository.findIntersectMeeting(afterBeginTime, afterOverTime, meetroomId);
+            if (meetings.size() == 0) {
+                Meeting meeting = new Meeting();
+                meeting.setMeetDate(reserveParameter.getReserveDate());
+                meeting.setBegin(afterBeginTime);
+                meeting.setContent(reserveParameter.getContent());
+                meeting.setMeetroomId(meetroomId);
+                meeting.setOver(afterOverTime);
+                meeting.setStatus(1);
+                meeting.setLastTime(lastTime);
+                meeting.setTopic(reserveParameter.getTopic());
+                meeting.setTenantId(tenantId);
+                meeting.setUserId(userId);
+                meeting.setMeetDate(reserveDate);
+                meeting.setPrepareTime(prepareTime);
+                Userinfo userinfo = userinfoService.getUserinfo(userId);
+                meeting.setDepartId(userinfo.getDepartId());
+                meeting.setCreateTime(nowTime);
+                Meeting meeting1 = meetingRepository.saveAndFlush(meeting);
+                Integer meetingId = meeting1.getId();
+                JoinPerson joinPerson;
+                PushMessage pushMessage;
+//                Meetroom meetroom=findByMeetRoomId(meetroomId);
+                String message = "您有一个新的会议，点击查看详情";
+                int b = 0;
+                List<Integer> list = reserveParameter.getJoinPeopleId();
+                for (int i = 0; i < list.size(); i++) {
+                    Integer id = list.get(i);
+                    if (id.equals(userId))
+                        b = 1;
+                    joinPerson = new JoinPerson();
+                    joinPerson.setMeetingId(meetingId);
+                    joinPerson.setUserId(id);
+                    joinPerson.setStatus(0);
+                    joinPersonRepository.saveAndFlush(joinPerson);
+                    pushMessage = new PushMessage();
+                    pushMessage.setReceiveId(id);
+                    pushMessage.setStatus(0);
+                    pushMessage.setMessage(message);
+                    pushMessage.setMeetingId(meetingId);
+                    pushMessage.setTime(nowTime);
+                    pushMessageRepository.saveAndFlush(pushMessage);
+                }
+                if (b == 0) {
+                    joinPerson = new JoinPerson();
+                    joinPerson.setMeetingId(meetingId);
+                    joinPerson.setUserId(userId);
+                    joinPerson.setStatus(0);
+                    joinPersonRepository.saveAndFlush(joinPerson);
+                    pushMessage = new PushMessage();
+                    pushMessage.setReceiveId(userId);
+                    pushMessage.setStatus(0);
+                    pushMessage.setMessage(message);
+                    pushMessageRepository.saveAndFlush(pushMessage);
+                }
+                List<OutsideJoinPerson> outsideJoinPersons = reserveParameter.getOutsideJoinPersons();
+                for (int i = 0; i < outsideJoinPersons.size(); i++) {
+                    OutsideJoinPerson outsideJoinPerson = new OutsideJoinPerson();
+                    outsideJoinPerson.setName(outsideJoinPersons.get(i).getName());
+                    outsideJoinPerson.setPhone(outsideJoinPersons.get(i).getPhone());
+                    outsideJoinPerson.setMeetingId(meetingId);
+                    outsideJoinPersonRepository.saveAndFlush(outsideJoinPerson);
+                }
+                serverResult.setMessage("会议预定成功");
+                serverResult.setStatus(true);
+            } else {
+                serverResult.setMessage("预定时间段有冲突");
+            }
+        }
+        return serverResult;
+    }
+
+
 }

@@ -90,6 +90,7 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     List<Meeting> GroupLastTwoWeekMeetingByTenant(Integer tenantId, String beginDate, String overDate);
     @Query(value="select  count (m) from Meeting m where m.meetDate>=?1 and m.meetDate<=?2 and m.status=4 and m.meetroomId=?3 ")
     int countLastTwoWeekMeetingByRoomId(String beginDate, String overDate,Integer roomId);
+    List<Meeting>findByMeetroomIdAndMeetDateOrderByBegin(Integer meetRoomId,String meetDate);
     /*-------------华丽分割线-------------*/
     @Query(value = "select  m from Meeting m where m.tenantId=?1 and m.meetDate>=?2 and m.meetDate<=?3 and m.status=4 group by m.departId")
     List<Meeting>selectGroupByDepart(Integer tenantId,String begin,String over);
