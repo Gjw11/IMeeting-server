@@ -18,54 +18,54 @@ import java.util.List;
  */
 @Component
 public class TimerTask {
-    public final static long oneTime = 60 * 1000;
-    @Autowired
-    private MeetingService meetingService;
-    @Autowired
-    private MeetroomRepository meetroomRepository;
-    @Scheduled(fixedRate = oneTime)
-    public void startMeeting() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String nowTime=sdf.format(new Date());
-        meetingService.updateMeetingStatus(nowTime,1,3);
-    }
-    @Scheduled(fixedRate = oneTime)
-    public void startMeeting1() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String nowTime=sdf.format(new Date());
-        meetingService.updateMeetingStatus(nowTime,2,6);
-    }
-    @Scheduled(fixedRate = oneTime)
-    public void startMeeting2() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String nowTime=sdf.format(new Date());
-        meetingService.updateMeetingStatus(nowTime,8,7);
-    }
-    @Scheduled(fixedRate = oneTime)
-    public void overMeeting() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String nowTime=sdf.format(new Date());
-        meetingService.updateMeetingOverStatus(nowTime,3,4);
-
-    }
-
-    @Scheduled(fixedRate = oneTime)
-    public void updateMeetRoomBegin() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String nowTime=sdf.format(new Date());
-        List<Meetroom> meetroomList=meetroomRepository.findMeetRoomRun(nowTime);
-        for (Meetroom meetroom:meetroomList){
-            meetroomRepository.updateMeetRoomRun(meetroom.getId());
-        }
-    }
-    @Scheduled(fixedRate = oneTime)
-    public void updateMeetRoomOver() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String nowTime=sdf.format(new Date());
-        List<Meetroom> meetrooms=meetroomRepository.findMeetRoomOver(nowTime);
-        for (Meetroom meetroom:meetrooms){
-            meetroomRepository.updateMeetRoomOver(meetroom.getId());
-        }
-    }
+//    public final static long oneTime = 60 * 1000;
+//    @Autowired
+//    private MeetingService meetingService;
+//    @Autowired
+//    private MeetroomRepository meetroomRepository;
+//    @Scheduled(fixedRate = oneTime)
+//    public void startMeeting() throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String nowTime=sdf.format(new Date());
+//        meetingService.updateMeetingStatus(nowTime,1,3);
+//    }
+//    @Scheduled(fixedRate = oneTime)
+//    public void startMeeting1() throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String nowTime=sdf.format(new Date());
+//        meetingService.updateMeetingStatus(nowTime,2,6);
+//    }
+//    @Scheduled(fixedRate = oneTime)
+//    public void startMeeting2() throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String nowTime=sdf.format(new Date());
+//        meetingService.updateMeetingStatus(nowTime,8,7);
+//    }
+//    @Scheduled(fixedRate = oneTime)
+//    public void overMeeting() throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String nowTime=sdf.format(new Date());
+//        meetingService.updateMeetingOverStatus(nowTime,3,4);
+//
+//    }
+//
+//    @Scheduled(fixedRate = oneTime)
+//    public void updateMeetRoomBegin() throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String nowTime=sdf.format(new Date());
+//        List<Meetroom> meetroomList=meetroomRepository.findMeetRoomRun(nowTime);
+//        for (Meetroom meetroom:meetroomList){
+//            meetroomRepository.updateMeetRoomRun(meetroom.getId());
+//        }
+//    }
+//    @Scheduled(fixedRate = oneTime)
+//    public void updateMeetRoomOver() throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String nowTime=sdf.format(new Date());
+//        List<Meetroom> meetrooms=meetroomRepository.findMeetRoomOver(nowTime);
+//        for (Meetroom meetroom:meetrooms){
+//            meetroomRepository.updateMeetRoomOver(meetroom.getId());
+//        }
+//    }
 
 }

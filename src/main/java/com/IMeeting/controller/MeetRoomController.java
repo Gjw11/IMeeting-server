@@ -1,10 +1,8 @@
 package com.IMeeting.controller;
 
-import com.IMeeting.entity.Meeting;
-import com.IMeeting.entity.Meetroom;
-import com.IMeeting.entity.MeetroomPara;
-import com.IMeeting.entity.ServerResult;
+import com.IMeeting.entity.*;
 import com.IMeeting.resposirity.MeetingRepository;
+import com.IMeeting.resposirity.MeetroomEquipRepository;
 import com.IMeeting.resposirity.MeetroomRepository;
 import com.IMeeting.service.MeetRoomService;
 import com.IMeeting.service.MeetingService;
@@ -31,6 +29,8 @@ public class MeetRoomController {
     private MeetroomRepository meetroomRepository;
     @Autowired
     private MeetingRepository meetingRepository;
+    @Autowired
+    private MeetroomEquipRepository meetroomEquipRepository;
     //查询该租户所有的会议室,前端根据数字显示会议室状态，nowStatus使用状态0表示未使用，1表示使用中,availstatus表示是否可用1表示可用0表示禁用
     //查询该租户的设备集合equips和部门集合departs需存储 insert方法插入一个部门时需要使用
     @RequestMapping("/selectAll")
@@ -127,6 +127,15 @@ public class MeetRoomController {
         ServerResult serverResult=new ServerResult();
         List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateOrderByBegin(meetRoomId,selectDate);
         serverResult.setData(meetings);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //获取某个会议室的设备
+    @RequestMapping("/getOneRoomEquip")
+    public ServerResult getOneRoomEquip(@RequestParam("meetRoomId") Integer meetRoomId){
+        List<MeetroomEquip>meetroomEquips=meetroomEquipRepository.findByMeetroomId(meetRoomId);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(meetroomEquips);
         serverResult.setStatus(true);
         return serverResult;
     }

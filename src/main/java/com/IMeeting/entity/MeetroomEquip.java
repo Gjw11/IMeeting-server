@@ -12,7 +12,20 @@ public class MeetroomEquip {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer meetroomId;
+    @Column(name = "equip_id")
     private Integer equipId;
+    @OneToOne
+    @JoinColumn(name = "equip_id",insertable = false,updatable = false,nullable = false)
+    private Equip equip;
+
+
+    public Equip getEquip() {
+        return equip;
+    }
+
+    public void setEquip(Equip equip) {
+        this.equip = equip;
+    }
 
     public Integer getId() {
         return id;
