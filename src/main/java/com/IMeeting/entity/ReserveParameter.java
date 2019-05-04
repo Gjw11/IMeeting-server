@@ -14,6 +14,7 @@ public class ReserveParameter {
     private String reserveDate;
     private String beginTime;
     private int prepareTime;
+    private int userId;
     private List<Integer>joinPeopleId;
     private String status;
     private String meetroom;
@@ -44,6 +45,14 @@ public class ReserveParameter {
 
     public void setOutsideJoinPersons(List<OutsideJoinPerson> outsideJoinPersons) {
         this.outsideJoinPersons = outsideJoinPersons;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getMeetroomPlace() {

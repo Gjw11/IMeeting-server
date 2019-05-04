@@ -1,8 +1,8 @@
 package com.IMeeting.controller;
 
-import com.IMeeting.entity.Meetroom;
-import com.IMeeting.entity.MeetroomPara;
-import com.IMeeting.entity.ServerResult;
+import com.IMeeting.entity.*;
+import com.IMeeting.resposirity.MeetingRepository;
+import com.IMeeting.resposirity.MeetroomEquipRepository;
 import com.IMeeting.resposirity.MeetroomRepository;
 import com.IMeeting.service.MeetRoomService;
 import com.IMeeting.service.MeetingService;
@@ -27,6 +27,10 @@ public class MeetRoomController {
     private MeetingService meetingService;
     @Autowired
     private MeetroomRepository meetroomRepository;
+    @Autowired
+    private MeetingRepository meetingRepository;
+    @Autowired
+    private MeetroomEquipRepository meetroomEquipRepository;
     //查询该租户所有的会议室,前端根据数字显示会议室状态，nowStatus使用状态0表示未使用，1表示使用中,availstatus表示是否可用1表示可用0表示禁用
     //查询该租户的设备集合equips和部门集合departs需存储 insert方法插入一个部门时需要使用
     @RequestMapping("/selectAll")
@@ -90,4 +94,50 @@ public class MeetRoomController {
         serverResult.setStatus(true);
         return serverResult;
     }
+    //扫描二维码验证该用户是否有权限预定该会议室
+    @RequestMapping("/swapCode")
+    public ServerResult swepCode(@RequestParam("meetRoomId")Integer meetRoomId,HttpServletRequest request){
+        ServerResult serverResult=new ServerResult();
+        Integer userId= (Integer) request.getSession().getAttribute("userId");
+        List<Meetroom>meetrooms=meetingService.getEffectiveMeetroom(request);
+        int bol=0;
+        if (meetrooms.size()!=0){
+            for (Meetroom meetroom:meetrooms){
+                if (meetroom.getId()==meetRoomId){
+                    bol=1;
+                    break;
+                }
+            }
+        }
+        if (bol==0){
+            serverResult.setMessage("对不起，您没有权限预定该会议室");
+            serverResult.setCode(-1);
+        }else{
+            List<String>result=meetingService.findFreeTime(meetRoomId,request);
+            serverResult.setCode(1);
+            serverResult.setData(result);
+        }
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
+    //会议室会议管理
+    @RequestMapping("/slectByDateAndMeetRoom")
+    public ServerResult slectByDateAndMeetRoom(@RequestParam("meetRoomId")Integer meetRoomId,@RequestParam("selectDate")String selectDate){
+        ServerResult serverResult=new ServerResult();
+        List<Meeting>meetings=meetingRepository.findByMeetroomIdAndMeetDateOrderByBegin(meetRoomId,selectDate);
+        serverResult.setData(meetings);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+    //获取某个会议室的设备
+    @RequestMapping("/getOneRoomEquip")
+    public ServerResult getOneRoomEquip(@RequestParam("meetRoomId") Integer meetRoomId){
+        List<MeetroomEquip>meetroomEquips=meetroomEquipRepository.findByMeetroomId(meetRoomId);
+        ServerResult serverResult=new ServerResult();
+        serverResult.setData(meetroomEquips);
+        serverResult.setStatus(true);
+        return serverResult;
+    }
+
 }
