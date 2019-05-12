@@ -555,10 +555,10 @@ public class MeetingController {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String today = simpleDateFormat.format(new Date());
         Date addDay = DateUtil.addDay(new Date(), 14);
-        List<Meeting> meetings = meetingRepository.findMyRecentMeeting(userId, today, simpleDateFormat.format(addDay));
-        DecimalFormat df = new DecimalFormat("0.00");
-        String free = Double.parseDouble(df.format((float) meetroomRepository.countFree(tenantId) / meetroomRepository.countAll(tenantId))) * 100 + "%";
         Date reduceDay = DateUtil.addDay(new Date(), -14);
+        List<Meeting> meetings = meetingRepository.findMyRecentMeeting(userId, simpleDateFormat.format(reduceDay), simpleDateFormat.format(addDay));
+        DecimalFormat df = new DecimalFormat("0.00");
+        double free = Double.parseDouble(df.format((float) meetroomRepository.countFree(tenantId) / meetroomRepository.countAll(tenantId))) * 100 ;
         List<Meeting> meetingList = meetingRepository.findMyLastTwoWeekMeeting(userId, simpleDateFormat.format(reduceDay), today);
         List<Integer> meetingCount = new ArrayList<>();
         int countSum;
@@ -591,11 +591,11 @@ public class MeetingController {
         }
         ServerResult serverResult = new ServerResult();
         List<Object> result = new ArrayList<>();
-        result.add(meetings);//用户近两周将要参加的会议
+        result.add(meetings);//用户近两周和过去两周将要参加的会议
         result.add(free);//当前时间段空余会议室
         result.add(meetingList.size());//用户前两周召开的会议次数
         result.add(meetingCount);//用户前两周每天召开的会议次数
-        result.add(meetingList.get(meetingList.size() - 1));//用户最后一次召开的会议信息
+        result.add(meetingList);//用户近两周参加的会议信息
         result.add(meetRoomCount);//用户前两周每个会议室的使用次数统计
         result.add(tenantMeetRoomCount);//租户的每个会议室前两周使用次数统计
         serverResult.setData(result);
