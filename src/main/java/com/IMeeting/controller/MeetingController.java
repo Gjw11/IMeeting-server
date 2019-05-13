@@ -295,16 +295,20 @@ public class MeetingController {
         int[] equips = recommandPara.getEquips();
         double[] weight = recommandPara.getWeight();
         List<Meetroom> meetrooms = meetingService.getEffectiveMeetroom(request);
+//        List<Meetroom>meetrooms=meetroomRepository.findByTenantId((Integer) request.getSession().getAttribute("tenantId"));
         int equipLength = equips.length;
-        double target[] = new double[equipLength];//需求
+        double target[] = new double[equipLength+1];//需求
         for (int j = 0; j < equipLength; j++) {
             target[j] = 1;
         }
-        double source[] = new double[equipLength];
+//        System.out.println("out target:"+target[]);
+
         List<RecommandResult> recommandResults = new ArrayList<>();
         RecommandResult recommandResult;
         NumberFormat nf = NumberFormat.getPercentInstance();
         for (Meetroom meetroom : meetrooms) {
+            double source[] = new double[equipLength+1];
+            target[equipLength]=recommandPara.getContain();
             int meetRoomId = meetroom.getId();
             for (int i = 0; i < equipLength; i++) {
                 MeetroomEquip meetroomEquip = meetroomEquipRepository.findByEquipIdAndMeetroomId(equips[i], meetRoomId);
@@ -313,6 +317,7 @@ public class MeetingController {
                 else
                     source[i] = 1;
             }
+            source[equipLength]=meetroom.getContain();
             double similar = meetingService.countSimilar(source, target, weight);
             if (nf.format(similar).equals("\ufffd")) {
             } else {
@@ -323,12 +328,13 @@ public class MeetingController {
                 recommandResult.setContain(meetroom1.getContain());
                 recommandResult.setNum(meetroom1.getNum());
                 List<MeetroomEquip> meetroomEquips = meetroomEquipRepository.findByMeetroomId(meetRoomId);
-                List<String> equips1 = new ArrayList<>();
-                for (int j = 0; j < meetroomEquips.size(); j++) {
-                    Equip equip = equipService.getOne(meetroomEquips.get(j).getEquipId());
-                    equips1.add(equip.getName());
-                }
-                recommandResult.setEquips(equips1);
+//                List<String> equips1 = new ArrayList<>();
+//                for (int j = 0; j < meetroomEquips.size(); j++) {
+//                    Equip equip = equipService.getOne(meetroomEquips.get(j).getEquipId());
+//                    equips1.add(equip.getName());
+//                }
+                recommandResult.setMeetroomEquips(meetroomEquips);
+//                recommandResult.setEquips(equips1);
                 recommandResult.setCalSimilar(similar);
                 recommandResult.setSimilar(nf.format(similar));
                 recommandResults.add(recommandResult);

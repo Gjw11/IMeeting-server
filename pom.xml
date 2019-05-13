@@ -139,8 +139,17 @@
 			<artifactId>qrgen</artifactId>
 			<version>1.4</version>
 		</dependency>
+		<!-- 腾讯生成签名 -->
+		<dependency>
+			<groupId>com.github.tencentyun</groupId>
+			<artifactId>tls-sig-api</artifactId>
+			<version>1.2</version>
+		</dependency>
 
 	</dependencies>
+
+
+
 
 	<build>
 		<plugins>

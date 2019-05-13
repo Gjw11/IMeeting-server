@@ -27,5 +27,22 @@ public class test {
 //            list1 s=(Student)iterator_reverse.next();
 //            System.out.println(s.getName()+" "+s.getAge());
 //        }
+
+        String privStr = "-----BEGIN PRIVATE KEY-----\n" +
+                "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgD5PeS6Qtywn8mo0Q\n" +
+                "UHdvweAnZbqP8WbQVSnFJmGpm+yhRANCAAQdjpZQaB1JNU/GGIk0zLKulhNviqHC\n" +
+                "/wMDdiPhUCyeP1PvXPdyCNwrIiFUMZYWBRHf0LJ/PRlMSH8Y2siE0iFy\n" +
+                "-----END PRIVATE KEY-----\n";
+
+        //change public pem string to public string
+        String pubStr = "-----BEGIN PUBLIC KEY-----\n" +
+                "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEHY6WUGgdSTVPxhiJNMyyrpYTb4qh\n" +
+                "wv8DA3Yj4VAsnj9T71z3cgjcKyIhVDGWFgUR39Cyfz0ZTEh/GNrIhNIhcg==\n" +
+                "-----END PUBLIC KEY-----\n";
+        tls_sigature.GenTLSSignatureResult result = tls_sigature.GenTLSSignatureEx(1400208454, "xiaojun", privStr);
+//        Assert.assertNotEquals(null, result);
+//        Assert.assertNotEquals(null, result.urlSig);
+//        Assert.assertNotEquals(0, result.urlSig.length());
+        System.out.println(result.urlSig);
     }
 }
