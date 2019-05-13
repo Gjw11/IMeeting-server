@@ -1120,6 +1120,8 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public double countSimilar(double[] source, double[] target, double[] weight) {
         int room_property_num = source.length;//会议室属性的数量
+        System.out.println(source[room_property_num-1]+"   aaa  " + target[room_property_num-1]);
+
         double sum_vec = 0;//两个想向量的点积
         double sum_source = 0;//源会议室向量的模长
         double sum_target = 0;//目标会议室向量的模长
@@ -1127,6 +1129,10 @@ public class MeetingServiceImpl implements MeetingService {
             source[i] *= weight[i];
             target[i] *= weight[i];
         }
+        System.out.println(source[room_property_num-1]+"   xxx  " + target[room_property_num-1]);
+        source[room_property_num-1] = source[room_property_num-1] / target[room_property_num-1];
+        target[room_property_num-1] = 1;
+        System.out.println(source[room_property_num-1]+"   zzz  " + target[room_property_num-1]);
         //计算点积与模长
         for (int i = 0; i < room_property_num; i++) {
             sum_vec += source[i] * target[i];

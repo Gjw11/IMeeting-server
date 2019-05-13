@@ -12,7 +12,16 @@ public class RecommandResult {
     private double calSimilar;
     private int contain;
     private String num;
-    private List<String> equips;
+//    private List<String> equips;
+    private List<MeetroomEquip>meetroomEquips;
+
+    public List<MeetroomEquip> getMeetroomEquips() {
+        return meetroomEquips;
+    }
+
+    public void setMeetroomEquips(List<MeetroomEquip> meetroomEquips) {
+        this.meetroomEquips = meetroomEquips;
+    }
 
     public int getMeetRoomId() {
         return meetRoomId;
@@ -63,11 +72,11 @@ public class RecommandResult {
         this.num = num;
     }
 
-    public List<String> getEquips() {
-        return equips;
-    }
-
-    public void setEquips(List<String> equips) {
-        this.equips = equips;
-    }
+//    public List<String> getEquips() {
+//        return equips;
+//    }
+//
+//    public void setEquips(List<String> equips) {
+//        this.equips = equips;
+//    }
 }
