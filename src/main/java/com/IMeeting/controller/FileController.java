@@ -13,14 +13,19 @@ import com.IMeeting.util.FileUtil;
 import com.IMeeting.util.SFTPUtil;
 import com.IMeeting.util.TimeUtil;
 import com.jcraft.jsch.SftpException;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,7 +56,7 @@ public class FileController {
         sftp.login();
         InputStream is = new FileInputStream(FileUtil.multoFile(file));
         String fileName=file.getOriginalFilename();
-        sftp.upload("/root", "MeetFile", fileName, is);
+        sftp.upload("/usr/share/nginx/image/", "Files", fileName, is);
         sftp.logout();
         FileUpload fileUpload=new FileUpload();
         fileUpload.setTenantId((Integer) request.getSession().getAttribute("tenantId"));
@@ -60,11 +65,16 @@ public class FileController {
         fileUpload.setStatus(status);
         Meeting meeting=meetingService.findByMeetingId(meetingId);
         fileUpload.setMeetRoomId(meeting.getMeetroomId());
-        fileUpload.setFileUrl("/root/MeetFile");
+        fileUpload.setFileUrl("http://www.jglo.top:8091/Files");
         fileUploadDao.save(fileUpload);
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         serverResult.setMessage("会议文件上传成功");
+
+        //删除文件
+        File targetFile = new File(fileName);
+        targetFile.delete();
+
         return serverResult;
     }
     //会议预定界面查看会议文件
