@@ -18,7 +18,7 @@ public interface EquipRepairInfoRepository extends JpaRepository<EquipRepairInfo
     List<EquipRepairInfo>findByTenantId(int tenantId);
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query(value = "update EquipRepairInfo m set m.repairName=?1 ,m.repairTime=?2 where m.id=?3")
+    @Query(value = "update EquipRepairInfo m set m.repairName=?1 ,m.repairTime=?2,m.status=1 where m.id=?3")
     int updateRepairInfo(String repairName,String repairTime,Integer id);
     List<EquipRepairInfo>findByUserId(Integer userId);
 }
