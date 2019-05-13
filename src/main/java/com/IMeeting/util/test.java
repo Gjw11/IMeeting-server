@@ -1,5 +1,7 @@
 package com.IMeeting.util;
 
+import java.util.Date;
+
 /**
  * Created by gjw on 2019/5/2.
  */
@@ -39,10 +41,11 @@ public class test {
                 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEHY6WUGgdSTVPxhiJNMyyrpYTb4qh\n" +
                 "wv8DA3Yj4VAsnj9T71z3cgjcKyIhVDGWFgUR39Cyfz0ZTEh/GNrIhNIhcg==\n" +
                 "-----END PUBLIC KEY-----\n";
-        tls_sigature.GenTLSSignatureResult result = tls_sigature.GenTLSSignatureEx(1400208454, "xiaojun", privStr);
+        tls_sigature.GenTLSSignatureResult result = tls_sigature.GenTLSSignatureEx(1400208454, "12321", privStr);
 //        Assert.assertNotEquals(null, result);
 //        Assert.assertNotEquals(null, result.urlSig);
 //        Assert.assertNotEquals(0, result.urlSig.length());
         System.out.println(result.urlSig);
+        System.out.println(new Date().getTime());
     }
 }
