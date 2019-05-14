@@ -64,7 +64,7 @@ public class FileController {
         fileUpload.setStatus(status);
         Meeting meeting=meetingService.findByMeetingId(meetingId);
         fileUpload.setMeetRoomId(meeting.getMeetroomId());
-        fileUpload.setFileUrl("http://www.jglo.top:8091/Files");
+        fileUpload.setFileUrl("https://www.jglo.top:8091/Files");
         fileUploadDao.save(fileUpload);
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
