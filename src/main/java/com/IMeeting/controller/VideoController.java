@@ -66,17 +66,22 @@ public class VideoController {
         meetingVideo.setCreateTime(simpleDateFormat.format(new Date()));
         MeetingVideo meetingVideo1=meetingVideoRepository.save(meetingVideo);
         List<Integer> list=meetingVideoPara.getUserId();
+        int bol=0;
         VideoRight videoRight;
         for (int i=0;i<list.size();i++){
             videoRight =new VideoRight();
             videoRight.setVideoId(meetingVideo1.getId());
             videoRight.setUserId(list.get(i));
             videoRightDao.save(videoRight);
+            if (list.get(i)==userId)
+                bol=1;
         }
-        videoRight =new VideoRight();
-        videoRight.setVideoId(meetingVideo1.getId());
-        videoRight.setUserId(userId);
-        videoRightDao.save(videoRight);
+        if (bol==0) {
+            videoRight = new VideoRight();
+            videoRight.setVideoId(meetingVideo1.getId());
+            videoRight.setUserId(userId);
+            videoRightDao.save(videoRight);
+        }
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         return serverResult;
@@ -109,8 +114,9 @@ public class VideoController {
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
         List<Object>list=new ArrayList<>();
-        list.add(result.urlSig);
+        list.add(userId);
         list.add(request.getSession().getAttribute("name"));
+        list.add(result.urlSig);
         serverResult.setData(list);
         return serverResult;
     }
