@@ -43,6 +43,7 @@ public class UserinfoController {
             serverResult.setStatus(true);
             HttpSession session = request.getSession();
             session.setAttribute("userId", u.getId());
+            session.setAttribute("name", u.getName());
             session.setAttribute("tenantId", u.getTenantId());
             session.setAttribute("departId", u.getDepartId());
             session.setAttribute("positionId", u.getPositionId());

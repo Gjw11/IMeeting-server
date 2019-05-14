@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -107,7 +108,10 @@ public class VideoController {
         tls_sigature.GenTLSSignatureResult result = tls_sigature.GenTLSSignatureEx(1400208454, userId.toString(), privStr);
         ServerResult serverResult=new ServerResult();
         serverResult.setStatus(true);
-        serverResult.setData(result.urlSig);
+        List<Object>list=new ArrayList<>();
+        list.add(result.urlSig);
+        list.add(request.getSession().getAttribute("name"));
+        serverResult.setData(list);
         return serverResult;
     }
 }
