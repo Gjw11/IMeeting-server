@@ -73,6 +73,8 @@ public class VideoController {
             videoRight.setVideoId(meetingVideo1.getId());
             videoRight.setUserId(list.get(i));
             videoRightDao.save(videoRight);
+            System.out.println(list.get(i));
+            System.out.println(userId);
             if (list.get(i).equals(userId))
                 bol=1;
         }
