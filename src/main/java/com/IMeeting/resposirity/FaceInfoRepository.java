@@ -30,4 +30,6 @@ public interface FaceInfoRepository extends JpaRepository<FaceInfo,Integer>{
     int deleteOne(Integer faceId);
     List<FaceInfo>findByTenantIdAndStatus(Integer tenantId,Integer status);
     FaceInfo findByUserIdAndStatus(Integer userId,Integer status);
+    @Query(value = "select m from FaceInfo m,JoinPerson n,Meeting l where l.meetroomId=?1 and l.status=?2 and l.id=n.meetingId and m.userId=n.userId and m.status=1")
+    List<FaceInfo>selectJoinPersonFaceInfo(int meetroomId,int Status);
 }

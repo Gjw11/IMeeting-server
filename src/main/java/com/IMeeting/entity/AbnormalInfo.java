@@ -14,7 +14,24 @@ public class AbnormalInfo{
     private int meetingId;
     private String imgUrl;
     private String time;
-    private String isInside;
+    private int status;
+    private int userId;
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     public int getId() {
         return id;
@@ -48,11 +65,4 @@ public class AbnormalInfo{
         this.time = time;
     }
 
-    public String getIsInside() {
-        return isInside;
-    }
-
-    public void setIsInside(String isInside) {
-        this.isInside = isInside;
-    }
 }

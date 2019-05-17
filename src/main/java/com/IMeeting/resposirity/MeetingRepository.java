@@ -39,6 +39,7 @@ public interface MeetingRepository extends JpaRepository<Meeting,Integer>,JpaSpe
     @Query(value = "select m from Meeting m where m.userId=?1 and m.meetDate=?2 order by m.status ,m.begin")
     List<Meeting>findMyReserve(Integer userId,String meetDate);
 
+    List<Meeting>findByMeetroomIdAndStatus(int meetroomId,int status);
     @Override
     void flush();
 
