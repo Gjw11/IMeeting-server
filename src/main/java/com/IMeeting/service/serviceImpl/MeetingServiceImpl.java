@@ -137,6 +137,10 @@ public class MeetingServiceImpl implements MeetingService {
             Integer meetroomId = meetrooms.get(i).getId();
             List<MeetroomEquip> meetroomEquips = selectOneMeetroomEquip(meetroomId);
             List<Meeting> meetings = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(meetrooms.get(i).getId(), now, 1);
+            List<Meeting> meetings2 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(meetrooms.get(i).getId(), now, 3);
+            List<Meeting> meetings3 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(meetrooms.get(i).getId(), now, 4);
+            meetings.addAll(meetings2);
+            meetings.addAll(meetings3);
             todayMeeting.add(meetings);
             meetroomEquipResult.add(meetroomEquips);
         }
@@ -233,8 +237,11 @@ public class MeetingServiceImpl implements MeetingService {
         ServerResult serverResult = new ServerResult();
         List<List> Meetings = new ArrayList<>();
         for (int i = 0; i < oneDayReservation.getMeetRooms().size(); i++) {
-            List<Meeting> meetings = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(oneDayReservation.getMeetRooms().get(i),
-                    oneDayReservation.getDayReservation(), 1);
+            List<Meeting> meetings = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(oneDayReservation.getMeetRooms().get(i), oneDayReservation.getDayReservation(), 1);
+            List<Meeting> meetings2 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(oneDayReservation.getMeetRooms().get(i), oneDayReservation.getDayReservation(), 3);
+            List<Meeting> meetings3 = meetingRepository.findByMeetroomIdAndMeetDateAndStatusOrderByBegin(oneDayReservation.getMeetRooms().get(i), oneDayReservation.getDayReservation(), 4);
+            meetings.addAll(meetings2);
+            meetings.addAll(meetings3);
             Meetings.add(meetings);
         }
         serverResult.setData(Meetings);
