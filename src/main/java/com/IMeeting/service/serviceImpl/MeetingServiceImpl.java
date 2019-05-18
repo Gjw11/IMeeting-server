@@ -1137,8 +1137,13 @@ public class MeetingServiceImpl implements MeetingService {
             target[i] *= weight[i];
         }
         System.out.println(source[room_property_num-1]+"   xxx  " + target[room_property_num-1]);
-        source[room_property_num-1] = source[room_property_num-1] / target[room_property_num-1];
-        target[room_property_num-1] = 1;
+        double mid=source[room_property_num-1]+target[room_property_num-1];
+        source[room_property_num-1] = (target[room_property_num-1]+mid)/(source[room_property_num-1]+mid);
+        if(source[room_property_num-1]>1){
+            target[room_property_num-1] = 0;
+        }else {
+            target[room_property_num-1] = 1;
+        }
         System.out.println(source[room_property_num-1]+"   zzz  " + target[room_property_num-1]);
         //计算点积与模长
         for (int i = 0; i < room_property_num; i++) {
