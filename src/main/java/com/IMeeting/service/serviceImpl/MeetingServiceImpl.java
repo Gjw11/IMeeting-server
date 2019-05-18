@@ -1108,7 +1108,7 @@ public class MeetingServiceImpl implements MeetingService {
         Integer userId = (Integer) request.getSession().getAttribute("userId");
         List<PushMessage> list = pushMessageRepository.findByReceiveIdAndStatus(userId, 0);
         for (int i = 0; i < list.size(); i++) {
-            pushMessageRepository.updateStatus(list.get(i).getId());
+            pushMessageRepository.updateStatus(list.get(i).getId(),userId);
         }
         ServerResult serverResult = new ServerResult();
         serverResult.setData(list);

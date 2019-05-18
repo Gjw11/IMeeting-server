@@ -49,6 +49,7 @@ public class TimerTask {
         if (meetings.size() != 0) {
             Meeting meeting = meetings.get(0);
             int meetingId = meeting.getId();
+            String meetingName=meeting.getTopic();
             int userId = meeting.getUserId();
             String meetingName=meeting.getTopic();
             if (faceInfos.size() != 0) {

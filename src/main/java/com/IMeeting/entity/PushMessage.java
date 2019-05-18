@@ -1,13 +1,14 @@
 package com.IMeeting.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * Created by gjw on 2019/2/11.
  */
 @Entity
 @Table(name = "u_push_message")
-public class PushMessage {
+public class PushMessage implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
