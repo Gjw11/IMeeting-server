@@ -17,6 +17,15 @@ public class AbnormalInfo{
     private int status;
     private int userId;
     private int isRead;
+    private String meetingName;
+
+    public String getMeetingName() {
+        return meetingName;
+    }
+
+    public void setMeetingName(String meetingName) {
+        this.meetingName = meetingName;
+    }
 
     public int getIsRead() {
         return isRead;
