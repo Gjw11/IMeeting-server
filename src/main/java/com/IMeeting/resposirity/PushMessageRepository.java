@@ -16,7 +16,7 @@ import java.util.List;
  * Created by gjw on 2019/2/11.
  */
 @Repository
-@CacheConfig(cacheNames = "pushMassage")
+@CacheConfig(cacheNames = "pushMessage")
 public interface PushMessageRepository extends JpaRepository<PushMessage, Integer> {
     @Cacheable(key = "#p0")
     List<PushMessage> findByReceiveIdAndStatus(Integer receiveId, Integer status);
@@ -26,4 +26,10 @@ public interface PushMessageRepository extends JpaRepository<PushMessage, Intege
     @Modifying(clearAutomatically = true)
     @Query(value = "update  PushMessage m set m.status=1 where m.id=?1")
     int updateStatus(Integer id, Integer userId);
+
+    @CacheEvict(key= "#p0.receiveId")
+    PushMessage save(PushMessage pushMessage);
+
+    @CacheEvict(key= "#p0.receiveId")
+    PushMessage saveAndFlush(PushMessage pushMessage);
 }

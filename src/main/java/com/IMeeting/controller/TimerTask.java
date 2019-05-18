@@ -51,7 +51,6 @@ public class TimerTask {
             int meetingId = meeting.getId();
             String meetingName=meeting.getTopic();
             int userId = meeting.getUserId();
-            String meetingName=meeting.getTopic();
             if (faceInfos.size() != 0) {
                 SFTPUtil sftp = new SFTPUtil("root", "Jgn990206", "39.106.56.132", 22);
                 sftp.login();
