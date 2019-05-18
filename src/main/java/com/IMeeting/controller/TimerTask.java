@@ -50,6 +50,7 @@ public class TimerTask {
             Meeting meeting = meetings.get(0);
             int meetingId = meeting.getId();
             int userId = meeting.getUserId();
+            String meetingName=meeting.getTopic();
             if (faceInfos.size() != 0) {
                 SFTPUtil sftp = new SFTPUtil("root", "Jgn990206", "39.106.56.132", 22);
                 sftp.login();
@@ -83,6 +84,7 @@ public class TimerTask {
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             abnormalInfo.setTime(simpleDateFormat.format(new Date()));
                             abnormalInfo.setMeetingId(meetingId);
+                            abnormalInfo.setMeetingName(meetingName);
                             abnormalInfo.setStatus(0);
                             abnormalInfo.setIsRead(0);
                             abnormalInfo.setUserId(userId);
