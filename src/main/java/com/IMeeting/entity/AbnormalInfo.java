@@ -16,6 +16,15 @@ public class AbnormalInfo{
     private String time;
     private int status;
     private int userId;
+    private int isRead;
+
+    public int getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(int isRead) {
+        this.isRead = isRead;
+    }
 
     public int getUserId() {
         return userId;

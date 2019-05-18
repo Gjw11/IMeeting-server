@@ -84,6 +84,7 @@ public class TimerTask {
                             abnormalInfo.setTime(simpleDateFormat.format(new Date()));
                             abnormalInfo.setMeetingId(meetingId);
                             abnormalInfo.setStatus(0);
+                            abnormalInfo.setIsRead(0);
                             abnormalInfo.setUserId(userId);
                             abnormalInfoDao.save(abnormalInfo);
                         }
@@ -102,7 +103,7 @@ public class TimerTask {
             pushMessage = new PushMessage();
             pushMessage.setTime(abnormalInfo.getTime());
             pushMessage.setMeetingId(abnormalInfo.getMeetingId());
-            pushMessage.setMessage(abnormalInfo.getImgUrl());
+            pushMessage.setMessage("您的会议有异常人员进入，请注意");
             pushMessage.setReceiveId(abnormalInfo.getUserId());
             pushMessage.setStatus(0);
             abnormalRepository.changeStatus(abnormalInfo.getId());

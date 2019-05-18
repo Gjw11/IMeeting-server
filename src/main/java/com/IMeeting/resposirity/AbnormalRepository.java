@@ -19,7 +19,12 @@ public interface AbnormalRepository extends JpaRepository<AbnormalInfo,Integer> 
     List<AbnormalInfo>findByMeetingIdAndImgUrl(int meetingId,String imgUrl);
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query(value = "update AbnormalInfo m set status=1 where m.id=?1")
+    @Query(value = "update AbnormalInfo m set m.status=1 where m.id=?1")
     int changeStatus(int id);
-
+    @Query(value = "select m from AbnormalInfo m where m.userId=?1 order by m.isRead ,m.time")
+    List<AbnormalInfo>selectMyAbnormal(int userId);
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query(value = "update AbnormalInfo m set m.isRead=1 where m.id=?1")
+    int isRead(int id);
 }
