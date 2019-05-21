@@ -47,62 +47,89 @@ public class TimerTask {
 
     @Scheduled(fixedRate = oneTime)
     public void startMeeting() throws ParseException, SftpException, FileNotFoundException {
-        try{
-            List<FaceInfo> faceInfos = faceInfoRepository.selectJoinPersonFaceInfo(1, 3);
-            List<Meeting> meetings = meetingRepository.findByMeetroomIdAndStatus(1, 3);
-            if (meetings.size() != 0) {
-                Meeting meeting = meetings.get(0);
-                int meetingId = meeting.getId();
-                String meetingName=meeting.getTopic();
-                int userId = meeting.getUserId();
-                if (faceInfos.size() != 0) {
-                    SFTPUtil sftp = new SFTPUtil("root", "Jgn990206", "39.106.56.132", 22);
-                    sftp.login();
-                    Vector<?> sftpList = sftp.listFiles("/usr/share/nginx/image/Face");
-                    List<String> files = new ArrayList<>();
-                    for (int i = 0; i < sftpList.size(); i++) {
-                        int idx = sftpList.get(i).toString().indexOf("test");
-                        String str = null;
-                        if (idx != -1) {
-                            str = sftpList.get(i).toString().substring(idx);
-                            files.add(str);
-                        }
+        List<FaceInfo> faceInfos = faceInfoRepository.selectJoinPersonFaceInfo(1, 3);
+        List<Meeting> meetings = meetingRepository.findByMeetroomIdAndStatus(1, 3);
+        if (meetings.size() != 0) {
+            Meeting meeting = meetings.get(0);
+            int meetingId = meeting.getId();
+            String meetingName=meeting.getTopic();
+            int userId = meeting.getUserId();
+            if (faceInfos.size() != 0) {
+                SFTPUtil sftp = new SFTPUtil("root", "Jgnzxcvbnm,666!", "39.106.56.132", 22);
+                sftp.login();
+                Vector<?> sftpList = sftp.listFiles("/usr/share/nginx/image/Face");
+                System.out.println("获取到图片名字列表");
+                List<String> files = new ArrayList<>();
+                for (int i = 0; i < sftpList.size(); i++) {
+                    int idx = sftpList.get(i).toString().indexOf("test");
+                    String str = null;
+                    if (idx != -1) {
+                        str = sftpList.get(i).toString().substring(idx);
+                        files.add(str);
+                        System.out.println(str);
                     }
-                    for (int j = 0; j < files.size(); j++) {
-                        List<AbnormalInfo>abnormalInfos=abnormalRepository.findByMeetingIdAndImgUrl(meetingId,"https://www.jglo.top:8091/Face/"+meetingId+"/"+files.get(j));
-                        if (abnormalInfos.size()==0) {
-                            FaceRecognition faceRecognition = new FaceRecognition();
-                            File file = sftp.downloadFile("/usr/share/nginx/image/Face", files.get(j), "com");
-                            byte[] faceDetail = faceRecognition.getFeatureData(file);
-                            boolean flag=true;
-                            for (FaceInfo faceInfo : faceInfos) {
-                                double similar = faceRecognition.faceCompare(faceDetail, faceInfo.getFaceDetail());
-                                if (similar > 0.8) {
-                                    flag=false;
-                                    break;
-                                }
-                            }
-                            if (flag) {
-                                AbnormalInfo abnormalInfo = new AbnormalInfo();
-                                abnormalInfo.setImgUrl("https://www.jglo.top:8091/Face/" + meetingId+"/"+files.get(j));
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                abnormalInfo.setTime(simpleDateFormat.format(new Date()));
-                                abnormalInfo.setMeetingId(meetingId);
-                                abnormalInfo.setMeetingName(meetingName);
-                                abnormalInfo.setStatus(0);
-                                abnormalInfo.setIsRead(0);
-                                abnormalInfo.setUserId(userId);
-                                abnormalInfoDao.save(abnormalInfo);
-                            }
-                        }
-                    }
-                    sftp.logout();
                 }
+                System.out.println("循环图片列表");
+                for (int j = 0; j < files.size(); j++) {
+//                    System.out.println("查找图片是否已经被录入");
+//                    List<AbnormalInfo>abnormalInfos=abnormalRepository.findByMeetingIdAndImgUrl(meetingId,"https://www.jglo.top:8091/Face/"+files.get(j));
+
+//                    if (abnormalInfos.size()==0) {
+//                        System.out.println("未被录入");
+                    String fileName=files.get(j);
+                    FaceRecognition faceRecognition = new FaceRecognition();
+                    File file = sftp.downloadFile("/usr/share/nginx/image/Face", fileName, "com");
+                    byte[] faceDetail = faceRecognition.getFeatureData(file);
+                    boolean flag=true;
+                    System.out.println("循环已有的特征值列表");
+                    for (FaceInfo faceInfo : faceInfos) {
+                        System.out.println("进行人脸图像相似度比较");
+                        double similar = faceRecognition.faceCompare(faceDetail, faceInfo.getFaceDetail());
+                        System.out.println("相似度="+similar);
+                        if (similar > 0.8) {
+                            flag=false;
+                            System.out.println("相似度>0.8是参会人员，退出循环");
+                            break;
+                        }
+                    }
+                    if (flag==true) {
+                        System.out.println("遍历结束还没有找到参会人员，鉴定为异常人员");
+                        AbnormalInfo abnormalInfo = new AbnormalInfo();
+                        abnormalInfo.setImgUrl("https://www.jglo.top:8091/FaceAbnormal/" + meetingId + "/" + fileName);
+                        InputStream is = new FileInputStream(file);
+                        sftp.upload("/usr/share/nginx/image/FaceAbnormal/", ""+meetingId, fileName, is);
+                        sftp.delete("/usr/share/nginx/image/Face/",fileName);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        abnormalInfo.setTime(simpleDateFormat.format(new Date()));
+                        abnormalInfo.setMeetingId(meetingId);
+                        abnormalInfo.setMeetingName(meetingName);
+                        abnormalInfo.setStatus(0);
+                        abnormalInfo.setIsRead(0);
+                        abnormalInfo.setUserId(userId);
+                        System.out.println("存入数据库");
+                        abnormalInfoDao.save(abnormalInfo);
+                    }
+                    else{
+                        System.out.println("鉴定为参会人员");
+//                            sftp.upload("/usr/share/nginx/image/FaceAbnormal/", ""+meetingId, fileName, is);
+                        sftp.delete("/usr/share/nginx/image/Face/",fileName);
+//                            AbnormalInfo abnormalInfo = new AbnormalInfo();
+//                            abnormalInfo.setImgUrl("https://www.jglo.top:8091/Face/" + fileName);
+//                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                            abnormalInfo.setTime(simpleDateFormat.format(new Date()));
+//                            abnormalInfo.setMeetingId(meetingId);
+//                            abnormalInfo.setMeetingName(meetingName);
+//                            abnormalInfo.setStatus(2);
+//                            abnormalInfo.setIsRead(0);
+//                            abnormalInfo.setUserId(userId);
+//                            System.out.println("存入数据库");
+//                            abnormalInfoDao.save(abnormalInfo);
+                    }
+                }
+//                }
+                sftp.logout();
             }
-        }catch (Exception e){
-
         }
-
     }
 
     @Scheduled(fixedRate = oneTime)
